@@ -21,7 +21,7 @@ public class CreateFloor : MonoBehaviour
         Bounds bounds = mesh.bounds;
         this.startPosition = this.transform.position;
         this.boundExtend = bounds.extents;
-        Debug.Log(boundExtend.ToString("F4"));
+        
 
 
 
@@ -77,14 +77,17 @@ public class CreateFloor : MonoBehaviour
         GameObject combinedTile = new GameObject("Floor");
         combinedTile.AddComponent(typeof(MeshFilter));
         combinedTile.AddComponent(typeof(MeshRenderer));
-       
+        
+
         combinedTile.GetComponent<MeshFilter>().mesh = new Mesh();
         combinedTile.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
         combinedTile.GetComponent<MeshRenderer>().material = this.material;
+        combinedTile.AddComponent(typeof(BlockScript));
 
-        container.transform.SetParent(combinedTile.transform);
-        combinedTile.transform.SetParent(this.transform);
+        Destroy(container);
+        //combinedTile.transform.SetParent(this.transform);
         transform.gameObject.SetActive(true);
+        
     }
 
     // Update is called once per frame

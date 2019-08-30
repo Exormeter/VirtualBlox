@@ -4,36 +4,36 @@ using UnityEngine;
 
 public class SnappingCollider : MonoBehaviour
 {
-    private LinkedList<Collider> colliderList = new LinkedList<Collider>();
+    public bool hasSnaped = false;
+    private GrooveHandler grooveHandler;
     void Start()
     {
-        
+        grooveHandler = GetComponentInParent<GrooveHandler>();
     }
 
-    private void OnTriggerEnter(Collider grooveCollider)
+    private void OnTriggerEnter(Collider tapCollider)
     {
-        if (grooveCollider.gameObject.tag == "Groove")
+        if (tapCollider.gameObject.tag == "Groove")
         {
             Debug.Log("HitGroove");
             //colliderList.AddLast(grooveCollider);
         }
     }
 
-    private void OnTriggerExit(Collider grooveCollider)
+    private void OnTriggerExit(Collider tapCollider)
     {
         
     }
 
-    private void OnTriggerStay(Collider grooveCollider)
-    { 
-        BlockScript blockScriptTapBlock = grooveCollider.gameObject.gameObject.GetComponent<BlockScript>();
-        Vector3 centerGrooveCollider = grooveCollider.bounds.center;
-        Vector3 centerTapCollider = gameObject.GetComponent<BoxCollider>().bounds.center;
-        Vector3 snapPath = centerGrooveCollider - centerTapCollider;
-        GameObject snapedBlock = blockScriptTapBlock.gameObject;
-        snapedBlock.transform.position = snapedBlock.transform.position - snapPath;
+    private void OnTriggerStay(Collider tapCollider)
+    {
 
+        if(!(tapCollider.gameObject.tag == "Tap"))
+        {
+            return;
+        }
 
+        grooveHandler.registerCollision(this, tapCollider);
     }
     // Update is called once per frame
     void Update()

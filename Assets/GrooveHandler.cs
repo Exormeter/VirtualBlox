@@ -4,11 +4,19 @@ using UnityEngine;
 
 public class GrooveHandler : MonoBehaviour
 {
-    private Dictionary<SnappingCollider, DistanceVector> colliderDictionary = new Dictionary<SnappingCollider, DistanceVector>();
+
+    private const float ZERO = 0f;
+    private const float NINETY = 90f;
+    private const float ONE_EIGHTY = 180f;
+    private const float TWO_SEVENTY = 270f;
+
+    private Dictionary<SnappingCollider, CollisionObject> colliderDictionary = new Dictionary<SnappingCollider, CollisionObject>();
     private float lastResetTime;
     private float timeDifference = 2.0f;
+    public bool hasRotated = false;
     public bool hasSnapped = false;
     private GameObject block;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -21,91 +29,194 @@ public class GrooveHandler : MonoBehaviour
                 snaps.gameObject.SetActive(false);
             }
             i++;
-            colliderDictionary.Add(snaps, new DistanceVector(new Vector3()));
+            colliderDictionary.Add(snaps, new CollisionObject(snaps.GetComponent<BoxCollider>()));
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    
+    void LateUpdate()
     {
-        
+        if (hasSnapped)
+        {
+            Rigidbody body = block.GetComponent<Rigidbody>();
+            body.isKinematic = false;
+        }
+
+        if (hasRotated && !hasSnapped)
+        {
+            SnappingCollider snappingCollider = null;
+            foreach(SnappingCollider snap in colliderDictionary.Keys)
+            {
+                snappingCollider = snap;
+                break;
+            }
+            CollisionObject collisionObject = colliderDictionary[snappingCollider];
+            //Vector3 centerDistance = getCenterOffset(snappingCollider.GetComponent<BoxCollider>().bounds.center, tapCollider.bounds.center);
+            Vector3 centerDistance = collisionObject.getDistanceInWorldSpace(transform);
+            Vector3 currentBlockPosition = block.transform.position;
+            centerDistance.y = 0;
+            switch (Mathf.Floor(block.transform.rotation.eulerAngles.y))
+            {
+                case ZERO:
+
+                    currentBlockPosition = currentBlockPosition - centerDistance;
+
+                    //centerDistance = getCenterOffset(snappingCollider.GetComponent<BoxCollider>().bounds.center, tapCollider.bounds.center);
+                    centerDistance = collisionObject.getDistanceInWorldSpace(transform);
+                    Debug.Log("Distance after snap 0" + centerDistance.ToString("F4"));
+                    break;
+
+                case NINETY:
+                    
+                    currentBlockPosition.x = currentBlockPosition.x + centerDistance.z;
+                    currentBlockPosition.z = currentBlockPosition.z - centerDistance.x;
+
+                    //centerDistance = getCenterOffset(snappingCollider.GetComponent<BoxCollider>().bounds.center, tapCollider.bounds.center);
+                    centerDistance = collisionObject.getDistanceInWorldSpace(transform);
+                    Debug.Log("Distance after snap 90" + centerDistance.ToString("F4"));
+                    break;
+
+                case ONE_EIGHTY:
+
+                    currentBlockPosition = currentBlockPosition + centerDistance;
+
+
+                    //centerDistance = getCenterOffset(snappingCollider.GetComponent<BoxCollider>().bounds.center, tapCollider.bounds.center);
+                    centerDistance = collisionObject.getDistanceInWorldSpace(transform);
+                    Debug.Log("Distance after snap 180" + centerDistance.ToString("F4"));
+                    break;
+
+                case TWO_SEVENTY:
+                    currentBlockPosition.x = currentBlockPosition.x - centerDistance.z;
+                    currentBlockPosition.z = currentBlockPosition.z + centerDistance.x;
+                    break;
+
+            }
+            block.transform.localPosition = currentBlockPosition;
+            if(centerDistance.x == 0 && centerDistance.z == 0)
+            {
+                hasSnapped = true;
+            }
+            
+        }
+
+       
+
     }
 
     public void registerCollision(SnappingCollider snappingCollider, Collider tapCollider)
     {
-        if (hasSnapped)
-        {
-            Vector3 snapColliderCenter2 = transform.TransformDirection(snappingCollider.GetComponent<BoxCollider>().bounds.center);
-            Vector3 tapColliderCenter2 = transform.TransformDirection(tapCollider.bounds.center);
-            Vector3 centerDistance2 = snapColliderCenter2 - tapColliderCenter2;
-            Debug.Log("Distance after snap" + centerDistance2.ToString("F4"));
+        if (hasRotated)
             return;
-        }
-        //Debug.Log(snappingCollider.GetComponent<BoxCollider>().bounds.center.ToString("F5"));
-        Vector3 snapColliderCenter = transform.TransformDirection(snappingCollider.GetComponent<BoxCollider>().bounds.center);
-        Vector3 tapColliderCenter = transform.TransformDirection(tapCollider.bounds.center);
-        Vector3 centerDistance = snapColliderCenter - tapColliderCenter;
-        DistanceVector distanceVector = colliderDictionary[snappingCollider];
-        distanceVector.hasDistance = true;
 
-        if (centerDistance != distanceVector.Distance)
+
+        CollisionObject collisionObject = colliderDictionary[snappingCollider];
+        Vector3 newCenterDistance = getCenterOffset(collisionObject.GrooveCollider.bounds.center, tapCollider.bounds.center);
+        Vector3 oldCenterDistance = collisionObject.getDistanceInWorldSpace(transform);
+        collisionObject.TapCollider = tapCollider;
+
+        if (newCenterDistance != oldCenterDistance)
         { 
-            colliderDictionary[snappingCollider] = new DistanceVector(centerDistance);
             lastResetTime = Time.time;
             
         }
         if (Time.time - timeDifference >= lastResetTime)
         {
-            hasSnapped = true;
-            //snapBlockToRaster();
-            Vector3 path = distanceVector.Distance;
-            path.y = 0;
-            Debug.Log(centerDistance.ToString("F4"));
-            block.transform.position = block.transform.position - path;
-            //DeDebug.Log(transform.TransformDirection(block.GetComponent<SnappingCollider>().transform.position));
-            //Vector3 newDistance = transform.TransformDirection(snappingCollider.GetComponent<BoxCollider>().bounds.center) - transform.TransformDirection(tapCollider.bounds.center);
-            //Debug.Log(newDistance.ToString("F7"));
+            hasRotated = true;
+            Vector3 correctedRotation = correctRotation(block.transform.rotation.eulerAngles);
+            Rigidbody body = block.GetComponent<Rigidbody>();
+            body.isKinematic = true;
+            block.transform.rotation = Quaternion.Euler(correctedRotation);
         }
-
-
     }
 
-    public void snapBlockToRaster()
+    public void unregisterCollision(SnappingCollider snappingCollider, Collider tapCollider)
     {
-        Debug.Log("Snapped");
-        
-        foreach (DistanceVector centerDistance in colliderDictionary.Values)
-        {
-            if(centerDistance.hasDistance)
-            {
-                Vector3 path = centerDistance.Distance;
-                path.y = 0;
-                block.transform.position = block.transform.position - path;
+        CollisionObject collisionObject = colliderDictionary[snappingCollider];
+        collisionObject.TapCollider = null;
+    }
 
-                break;
-            }
+    private Vector3 correctRotation(Vector3 rotation)
+    {
+        Vector3 correctedRotation = new Vector3(0f, 0f, 0f);
+        if(rotation.y <= 45 || rotation.y > 315)
+        {
+            correctedRotation.y = ZERO;
         }
+
+        else if(rotation.y > 45 && rotation.y <= 135)
+        {
+            correctedRotation.y = NINETY;
+        }
+        else if(rotation.y > 135 && rotation.y < 225)
+        {
+            correctedRotation.y = ONE_EIGHTY;
+        }
+        else
+        {
+            correctedRotation.y = TWO_SEVENTY;
+        }
+        return correctedRotation;
+    }
+
+    private Vector3 getCenterOffset(Vector3 center, Vector3 otherCenter)
+    {
+        Vector3 centerWorld = transform.TransformDirection(center);
+        Vector3 otherCenterWorld = transform.TransformDirection(otherCenter);
+        return centerWorld - otherCenterWorld; 
     }
     
 }
 
-public class DistanceVector
+public class CollisionObject
 {
-    private Vector3 distance;
-    public bool hasDistance = false;
-
-    public Vector3 Distance
+    
+    private Collider tapCollider;
+    public Collider TapCollider
     {
         get
         {
-            return distance;
+            return tapCollider;
         }
-
         set
         {
-            distance = value;
+            if(value == null)
+            {
+                hasDistance = false;
+            }
+            else
+            {
+                tapCollider = value;
+                hasDistance = true;
+            }
+            
         }
+            
     }
 
-    public DistanceVector(Vector3 distance) => this.distance = distance;
+    private BoxCollider grooveCollider;
+    public BoxCollider GrooveCollider
+    {
+        get
+        {
+            return grooveCollider;
+        }
+    }
+    public bool hasDistance = false;
+
+    public CollisionObject(BoxCollider grooveCollider)
+    {
+        this.grooveCollider = grooveCollider;
+    }
+
+    public Vector3 getDistanceInWorldSpace(Transform transform)
+    {
+        if(tapCollider == null)
+        {
+            return new Vector3();
+        }
+        Vector3 centerWorld = transform.TransformDirection(grooveCollider.bounds.center);
+        Vector3 otherCenterWorld = transform.TransformDirection(tapCollider.bounds.center);
+        return centerWorld - otherCenterWorld;
+    }
 }

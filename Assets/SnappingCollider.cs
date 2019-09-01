@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SnappingCollider : MonoBehaviour
 {
-    public bool hasSnaped = false;
+    public bool debug = false;
     private GrooveHandler grooveHandler;
     void Start()
     {
@@ -22,7 +22,12 @@ public class SnappingCollider : MonoBehaviour
 
     private void OnTriggerExit(Collider tapCollider)
     {
-        
+        if (!(tapCollider.gameObject.tag == "Tap"))
+        {
+            return;
+        }
+
+        grooveHandler.unregisterCollision(this, tapCollider);
     }
 
     private void OnTriggerStay(Collider tapCollider)

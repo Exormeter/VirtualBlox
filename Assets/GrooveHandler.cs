@@ -45,11 +45,15 @@ public class GrooveHandler : MonoBehaviour
         if (hasRotated && !hasSnapped)
         {
             SnappingCollider snappingCollider = null;
+
+            //TODO 
             foreach(SnappingCollider snap in colliderDictionary.Keys)
             {
                 snappingCollider = snap;
                 break;
             }
+            //TODO
+
             CollisionObject collisionObject = colliderDictionary[snappingCollider];
             //Vector3 centerDistance = getCenterOffset(snappingCollider.GetComponent<BoxCollider>().bounds.center, tapCollider.bounds.center);
             Vector3 centerDistance = collisionObject.getDistanceInWorldSpace(transform);

@@ -2,7 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SnappingCollider : MonoBehaviour
+namespace Valve.VR.InteractionSystem
+{
+
+
+    public class SnappingCollider : MonoBehaviour
 {
     public bool debug = false;
     private GrooveHandler grooveHandler;
@@ -45,4 +49,5 @@ public class SnappingCollider : MonoBehaviour
     {
         
     }
+}
 }

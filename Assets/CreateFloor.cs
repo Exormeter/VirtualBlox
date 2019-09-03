@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class CreateFloor : MonoBehaviour
+namespace Valve.VR.InteractionSystem
+{
+
+
+    public class CreateFloor : MonoBehaviour
 {
     public GameObject floorTile;
     public Material material;
@@ -95,4 +99,5 @@ public class CreateFloor : MonoBehaviour
     {
         
     }
+}
 }

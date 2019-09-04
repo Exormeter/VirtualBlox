@@ -104,6 +104,9 @@ namespace Valve.VR.InteractionSystem
                 if (IsAlmostEqual(centerDistance.x, 0, PRECISION) && IsAlmostEqual(centerDistance.z, 0, PRECISION))
                 {
                     hasSnapped = true;
+                    block.AddComponent<FixedJoint>();
+                    block.GetComponent<FixedJoint>().connectedBody = collisionObject.TapCollider.GetComponentInParent<Rigidbody>();
+                    block.GetComponent<FixedJoint>().breakForce = 2000;
                 }
 
             }
@@ -191,6 +194,7 @@ namespace Valve.VR.InteractionSystem
             }
             hasSnapped = false;
             hasRotated = false;
+            Destroy(block.GetComponent<FixedJoint>());
         }
 
     }

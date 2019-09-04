@@ -42,7 +42,7 @@ namespace Valve.VR.InteractionSystem
             taps.transform.SetParent(this.transform);
             grooves.transform.localPosition = new Vector3(0f, 0f, 0f);
             taps.transform.localPosition = new Vector3(0f, 0f, 0f);
-            AddPinTriggerCollider(BRICK_PIN_HEIGHT, taps, "Tap");
+            AddPinTriggerCollider(BRICK_PIN_HEIGHT_HALF, taps, "Tap");
             AddPinTriggerCollider(-(BRICK_HEIGHT / 1.3f), grooves, "Groove");
         }
 
@@ -96,7 +96,12 @@ namespace Valve.VR.InteractionSystem
 
                 while (mesh.bounds.Contains(currentPinCenterPoint))
                 {
-                    AddGameObjectCollider(currentPinCenterPoint, tag, containerObject);
+                    bool isTrigger = true;
+                    if (tag.Equals("Tap"))
+                    {
+                        isTrigger = false;
+                    }
+                    AddGameObjectCollider(currentPinCenterPoint, tag, containerObject, isTrigger);
                     currentPinCenterPoint.z = currentPinCenterPoint.z - BRICK_PIN_DISTANCE;
                 }
                 currentPinCenterPoint.x = currentPinCenterPoint.x - BRICK_PIN_DISTANCE;
@@ -105,7 +110,7 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
-        private void AddGameObjectCollider(Vector3 position, String tag, GameObject container)
+        private void AddGameObjectCollider(Vector3 position, String tag, GameObject container, bool isTrigger)
         {
             GameObject colliderObject = new GameObject("Collider");
             colliderObject.tag = tag;
@@ -115,7 +120,7 @@ namespace Valve.VR.InteractionSystem
             {
                 colliderObject.AddComponent<SnappingCollider>();
             }
-            AddBoxCollider(new Vector3(BRICK_PIN_DIAMETER / 2, BRICK_PIN_HEIGHT, BRICK_PIN_DIAMETER / 2), position, true, colliderObject);
+            AddBoxCollider(new Vector3(BRICK_PIN_DIAMETER /2, BRICK_PIN_HEIGHT, BRICK_PIN_DIAMETER / 2), position, isTrigger, colliderObject);
         }
 
         private Collider AddBoxCollider(Vector3 size, Vector3 center, bool isTrigger, GameObject otherGameObject)

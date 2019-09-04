@@ -81,6 +81,8 @@ namespace Valve.VR.InteractionSystem
         GameObject combinedTile = new GameObject("Floor");
         combinedTile.AddComponent(typeof(MeshFilter));
         combinedTile.AddComponent(typeof(MeshRenderer));
+        combinedTile.AddComponent(typeof(Rigidbody));
+        combinedTile.GetComponent<Rigidbody>().isKinematic = true;
         
 
         combinedTile.GetComponent<MeshFilter>().mesh = new Mesh();

@@ -185,6 +185,11 @@ namespace Valve.VR.InteractionSystem
             attachedHand = null;
         }
 
+        public bool IsSnapped()
+        {
+            return hasSnapped;
+        }
+
         public void blockWasAttachedToHand(Hand hand)
         {
             attachedHand = hand;

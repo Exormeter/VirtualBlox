@@ -20,6 +20,8 @@ namespace Valve.VR.InteractionSystem
     //-------------------------------------------------------------------------
     public class Hand : MonoBehaviour
     {
+        public bool notTriggered = true;
+
         // The flags used to determine how an object is attached to the hand.
         [Flags]
         public enum AttachmentFlags
@@ -778,6 +780,7 @@ namespace Valve.VR.InteractionSystem
                 if (trackedObject != null)
                     trackedObject.onTransformUpdatedEvent += OnTransformUpdated;
             }
+            
         }
 
         protected virtual void OnDestroy()
@@ -793,6 +796,7 @@ namespace Valve.VR.InteractionSystem
             HandFollowUpdate();
         }
 
+       
         //-------------------------------------------------
         protected virtual IEnumerator Start()
         {
@@ -826,6 +830,7 @@ namespace Valve.VR.InteractionSystem
 
                 yield return null;
             }
+            
         }
 
 
@@ -1055,7 +1060,7 @@ namespace Valve.VR.InteractionSystem
         protected virtual void OnEnable()
         {
             inputFocusAction.enabled = true;
-
+            
             // Stagger updates between hands
             float hoverUpdateBegin = ((otherHand != null) && (otherHand.GetInstanceID() < GetInstanceID())) ? (0.5f * hoverUpdateInterval) : (0.0f);
             InvokeRepeating("UpdateHovering", hoverUpdateBegin, hoverUpdateInterval);
@@ -1077,6 +1082,8 @@ namespace Valve.VR.InteractionSystem
         {
             UpdateNoSteamVRFallback();
 
+            
+    
             GameObject attachedObject = currentAttachedObject;
             if (attachedObject != null)
             {
@@ -1158,6 +1165,7 @@ namespace Valve.VR.InteractionSystem
 
         protected virtual void FixedUpdate()
         {
+            
             if (currentAttachedObject != null)
             {
                 AttachedObject attachedInfo = currentAttachedObjectInfo.Value;
@@ -1406,6 +1414,11 @@ namespace Valve.VR.InteractionSystem
         public void TriggerHapticPulse(float duration, float frequency, float amplitude)
         {
             hapticAction.Execute(0, duration, frequency, amplitude, handType);
+        }
+
+        public float GetTimeLastChanged()
+        {
+            return hapticAction.GetTimeLastChanged(handType);
         }
 
         public void ShowGrabHint()

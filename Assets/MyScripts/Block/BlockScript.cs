@@ -5,7 +5,6 @@ using UnityEngine;
 
 namespace Valve.VR.InteractionSystem
 {
-    [RequireComponent(typeof(Interactable))]
     public class BlockScript : MonoBehaviour
     {
         private float BRICK_HEIGHT;
@@ -19,7 +18,7 @@ namespace Valve.VR.InteractionSystem
 
         private Mesh mesh;
 
-        void Start()
+        void Awake()
         {
             this.mesh = GetComponent<MeshFilter>().mesh;
 
@@ -153,6 +152,7 @@ namespace Valve.VR.InteractionSystem
         {
             return gameObject;
         }
+
 
         private void OnAttachedToHand(Hand hand)
         {

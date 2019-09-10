@@ -101,7 +101,7 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
-        private void blockPullUpdate()
+        private void BlockPullUpdate()
         {
 
             //No Hand is pulling
@@ -110,45 +110,50 @@ namespace Valve.VR.InteractionSystem
                 return;
             }
 
-            
-
-            if (pullingStart)
+            GetComponent<LineRenderer>().enabled = true;
+            //hand is pulling but has let gone of the grab button
+            if (!pullingHand.IsGrabbingWithType(pullingGrabType))
             {
+                Debug.Log("Pulling Ended");
+                ResetPullingState();
+                return;
+            }
 
-                //hand is pulling but has let gone of the grab button
-                if (!pullingHand.IsGrabbingWithType(pullingGrabType))
-                {
-                    Debug.Log("Pulling Ended");
-                    pullingStart = false;
-                    pullingHand = null;
-                    pullingGrabType = GrabTypes.None;
-                    return;
-                }
+            float distanceHandToBlock = Vector3.Distance(pullingHand.transform.position, rigidBodies[0].worldCenterOfMass);
+            RenderForceLine(pullingHand.transform.position, GetComponent<BlockScript>().GetCenterTopWorld());
 
-                float distanceHandToBlock = Vector3.Distance(pullingHand.transform.position, rigidBodies[0].worldCenterOfMass);
-                LineRenderer lineRenderer = GetComponent<LineRenderer>();
-                lineRenderer.SetPosition(0, pullingHand.transform.position);
-                lineRenderer.SetPosition(1, pullingHand.transform.position - rigidBodies[0].worldCenterOfMass);
-                lineRenderer.SetPosition(2, rigidBodies[0].worldCenterOfMass);
-
-                if (Time.time > nextPulseTime)
-                {
-                    Debug.Log("Distance: " + distanceHandToBlock);
-                    pullingHand.TriggerHapticPulse(0.1f, 20, distanceHandToBlock * 3);
-                    nextPulseTime = Time.time + 0.1f;
-                }
+            if (Time.time > nextPulseTime)
+            {
+                pullingHand.TriggerHapticPulse(0.1f, 20, distanceHandToBlock * 3);
+                nextPulseTime = Time.time + 0.1f;
+            }
                 
-                if(distanceHandToBlock >= pullDistanceMaximum)
+            if(distanceHandToBlock >= pullDistanceMaximum)
+            {
+                
+                this.BroadcastMessage("OnBlockPulled", pullingHand, SendMessageOptions.DontRequireReceiver);
+
+                
+                rigidBodies[0].MovePosition(pullingHand.transform.position);
+                Debug.Log(Vector3.Distance(pullingHand.transform.position, gameObject.transform.position).ToString("F5"));
+                if(Vector3.Distance(pullingHand.transform.position, gameObject.transform.position) <= 0.75f)
                 {
                     Debug.Log("Attached to hand");
-                    lineRenderer.SetPosition(0, Vector3.zero);
-                    lineRenderer.SetPosition(1, Vector3.zero);
                     PhysicsAttach(pullingHand, pullingGrabType);
-                    pullingStart = false;
-                    pullingHand = null;
-                    pullingGrabType = GrabTypes.None;
+                    ResetPullingState();
                 }
+                
+                
             }
+           
+        }
+
+        private void ResetPullingState()
+        {
+            pullingStart = false;
+            pullingHand = null;
+            pullingGrabType = GrabTypes.None;
+            GetComponent<LineRenderer>().enabled = false;
         }
 
 
@@ -236,7 +241,7 @@ namespace Valve.VR.InteractionSystem
         //-------------------------------------------------
         void FixedUpdate()
         {
-            blockPullUpdate();
+            BlockPullUpdate();
             if (attachMode == AttachMode.Force)
             {
                 for (int i = 0; i < holdingHands.Count; i++)
@@ -248,6 +253,22 @@ namespace Valve.VR.InteractionSystem
                     holdingBodies[i].AddForceAtPosition(-attachForceDamper * holdingBodies[i].GetPointVelocity(targetPoint), targetPoint, ForceMode.Acceleration);
                 }
             }
+        }
+
+        void RenderForceLine(Vector3 start, Vector3 end)
+        {
+            LineRenderer lineRenderer = GetComponent<LineRenderer>();
+            AnimationCurve curve = new AnimationCurve();
+            float distance = Vector3.Distance(start, end);
+            float width = 1 / (distance * 10);
+            curve.AddKey(0, 1f);
+            curve.AddKey(0.5f, width);
+            curve.AddKey(1, 1f);
+
+            lineRenderer.widthCurve = curve;
+            lineRenderer.SetPosition(0, start);
+            lineRenderer.SetPosition(1, (start + end) / 2);
+            lineRenderer.SetPosition(2, end);
         }
     }
 }

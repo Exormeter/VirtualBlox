@@ -140,6 +140,15 @@ namespace Valve.VR.InteractionSystem
 
         }
 
+        public Vector3 GetCenterTopWorld()
+        {
+            Vector3 center = mesh.bounds.center;
+            Vector3 extends = mesh.bounds.extents;
+            center.y = center.y + extends.y - BRICK_PIN_HEIGHT;
+            return transform.TransformPoint(center);
+
+        }
+
         public Vector3 GetCenterBottom()
         {
             Vector3 center = mesh.bounds.center;
@@ -154,10 +163,10 @@ namespace Valve.VR.InteractionSystem
         }
 
 
-        private void OnAttachedToHand(Hand hand)
-        {
-            this.grooves.GetComponent<GrooveHandler>().blockWasAttachedToHand(hand);
-        }
+        //private void OnBlockPulled()
+        //{
+        //    this.grooves.GetComponent<GrooveHandler>().OnBlockPulled();
+        //}
 
 
 

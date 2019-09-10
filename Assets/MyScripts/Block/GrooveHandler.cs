@@ -33,7 +33,7 @@ namespace Valve.VR.InteractionSystem
         }
 
 
-        void LateUpdate()
+        void FixedUpdate()
         {
             if (hasSnapped)
             {
@@ -190,9 +190,10 @@ namespace Valve.VR.InteractionSystem
             return hasSnapped;
         }
 
-        public void blockWasAttachedToHand(Hand hand)
+        public void OnBlockPulled()
         {
-            attachedHand = hand;
+            Debug.Log("Block was pulled");
+            //attachedHand = hand;
             foreach (SnappingCollider snaps in GetComponentsInChildren<SnappingCollider>())
             {
                 colliderDictionary[snaps].TapCollider = null;

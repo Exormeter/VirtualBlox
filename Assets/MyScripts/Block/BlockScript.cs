@@ -162,20 +162,5 @@ namespace Valve.VR.InteractionSystem
             return gameObject;
         }
 
-
-        //private void OnBlockPulled()
-        //{
-        //    this.grooves.GetComponent<GrooveHandler>().OnBlockPulled();
-        //}
-
-
-
-        //-------------------------------------------------
-        // Called when this GameObject is detached from the hand
-        //-------------------------------------------------
-        private void OnDetachedFromHand(Hand hand)
-        {
-            this.grooves.GetComponent<GrooveHandler>().blockWasDetachedFromHand(hand);
-        }
     }
 }

@@ -25,7 +25,7 @@ namespace Valve.VR.InteractionSystem
         [EnumFlags]
         public Hand.AttachmentFlags attachmentFlags = 0;
 
-        private bool pullingStart = false;
+        private bool wasPulled = false;
         private Hand pullingHand = null;
         private GrabTypes pullingGrabType;
         private GrooveHandler grooveHandler;
@@ -91,7 +91,6 @@ namespace Valve.VR.InteractionSystem
 
             if (startingGrabType != GrabTypes.None  && grooveHandler.IsSnapped())
             {
-                pullingStart = true;
                 pullingHand = hand;
                 pullingGrabType = startingGrabType;
             }
@@ -129,28 +128,28 @@ namespace Valve.VR.InteractionSystem
             }
                 
             if(distanceHandToBlock >= pullDistanceMaximum)
-            {
-                
+            {   
                 this.BroadcastMessage("OnBlockPulled", pullingHand, SendMessageOptions.DontRequireReceiver);
+                wasPulled = true;
+            }
 
-                
-                rigidBodies[0].MovePosition(pullingHand.transform.position);
-                Debug.Log(Vector3.Distance(pullingHand.transform.position, gameObject.transform.position).ToString("F5"));
-                if(Vector3.Distance(pullingHand.transform.position, gameObject.transform.position) <= 0.75f)
+            if (wasPulled)
+            {
+                rigidBodies[0].position = pullingHand.transform.position;
+
+                if(Vector3.Distance(pullingHand.transform.position, gameObject.transform.position) <= 0.1f)
                 {
-                    Debug.Log("Attached to hand");
                     PhysicsAttach(pullingHand, pullingGrabType);
+                    Debug.Log("Attached to hand");
                     ResetPullingState();
                 }
-                
-                
             }
            
         }
 
         private void ResetPullingState()
         {
-            pullingStart = false;
+            wasPulled = false;
             pullingHand = null;
             pullingGrabType = GrabTypes.None;
             GetComponent<LineRenderer>().enabled = false;
@@ -251,6 +250,28 @@ namespace Valve.VR.InteractionSystem
 
                     holdingBodies[i].AddForceAtPosition(attachForce * vdisplacement, targetPoint, ForceMode.Acceleration);
                     holdingBodies[i].AddForceAtPosition(-attachForceDamper * holdingBodies[i].GetPointVelocity(targetPoint), targetPoint, ForceMode.Acceleration);
+
+                    Quaternion rotationDelta = holdingHands[i].transform.rotation * Quaternion.Inverse(holdingBodies[i].transform.rotation);
+
+                    float angle;
+                    Vector3 axis;
+
+                    rotationDelta.ToAngleAxis(out angle, out axis);
+
+                    if (angle > 180)
+                        angle -= 360;
+
+                    if (angle != 0)
+                    {
+                        Vector3 angularTarget = angle * axis;
+                        if (float.IsNaN(angularTarget.x) == false)
+                        {
+                            angularTarget = (angularTarget * 25) * Time.deltaTime;
+                            angularTarget = Vector3.MoveTowards(holdingBodies[i].angularVelocity, angularTarget, 3000);
+                            holdingBodies[i].angularVelocity = angularTarget;
+                        }
+                    }
+
                 }
             }
         }

@@ -17,11 +17,12 @@ namespace Valve.VR.InteractionSystem
 
     private void OnTriggerEnter(Collider tapCollider)
     {
-        if (tapCollider.gameObject.tag == "Groove")
+        if (!(tapCollider.gameObject.tag == "Tap"))
         {
-            Debug.Log("HitGroove");
-            //colliderList.AddLast(grooveCollider);
+            return;
         }
+
+        grooveHandler.RegisterCollision(this, tapCollider);
     }
 
     private void OnTriggerExit(Collider tapCollider)
@@ -31,18 +32,13 @@ namespace Valve.VR.InteractionSystem
             return;
         }
 
-        grooveHandler.unregisterCollision(this, tapCollider);
+        grooveHandler.UnregisterCollision(this, tapCollider);
     }
 
     private void OnTriggerStay(Collider tapCollider)
     {
 
-        if(!(tapCollider.gameObject.tag == "Tap"))
-        {
-            return;
-        }
-
-        grooveHandler.registerCollision(this, tapCollider);
+        
     }
     // Update is called once per frame
     void Update()

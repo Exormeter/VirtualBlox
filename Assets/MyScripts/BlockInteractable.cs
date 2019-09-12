@@ -135,9 +135,10 @@ namespace Valve.VR.InteractionSystem
 
             if (wasPulled)
             {
-                rigidBodies[0].position = pullingHand.transform.position;
+                Vector3 direction = (pullingHand.transform.position - transform.position).normalized;
+                rigidBodies[0].MovePosition(transform.position + direction * 10f * Time.deltaTime);
 
-                if(Vector3.Distance(pullingHand.transform.position, gameObject.transform.position) <= 0.1f)
+                if (Vector3.Distance(pullingHand.transform.position, gameObject.transform.position) <= 0.1f)
                 {
                     PhysicsAttach(pullingHand, pullingGrabType);
                     Debug.Log("Attached to hand");

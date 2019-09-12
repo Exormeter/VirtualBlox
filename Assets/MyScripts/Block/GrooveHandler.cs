@@ -42,7 +42,7 @@ namespace Valve.VR.InteractionSystem
             //    Rigidbody body = block.GetComponent<Rigidbody>();
             //    body.isKinematic = false;
             //}
-            if (wasPlacedOnTap)
+            if (wasPlacedOnTap  && !hasRotated)
             {
                 Debug.Log("Rotating Block");
                 RotateBlock();
@@ -109,7 +109,10 @@ namespace Valve.VR.InteractionSystem
                         break;
 
                 }
+                Rigidbody body = block.GetComponent<Rigidbody>();
+                body.isKinematic = true;
                 block.transform.localPosition = currentBlockPosition;
+                body.isKinematic = false;
                 if (IsAlmostEqual(centerDistance.x, 0, PRECISION) && IsAlmostEqual(centerDistance.z, 0, PRECISION))
                 {
                     hasSnapped = true;
@@ -138,20 +141,12 @@ namespace Valve.VR.InteractionSystem
 
         public void RegisterCollision(SnappingCollider snappingCollider, Collider tapCollider)
         {
-            colliderCount++;
-            Debug.Log("Collision Registered");
-            CollisionObject collisionObject = colliderDictionary[snappingCollider];
-            collisionObject.TapCollider = tapCollider;
-            colliderDictionary[snappingCollider] = collisionObject;
+            colliderDictionary[snappingCollider].TapCollider = tapCollider; 
         }
 
         public void UnregisterCollision(SnappingCollider snappingCollider, Collider tapCollider)
         {
-            colliderCount--;
-            Debug.Log("Collision Unregistered");
-            CollisionObject collisionObject = colliderDictionary[snappingCollider];
-            collisionObject.TapCollider = null;
-            colliderDictionary[snappingCollider] = collisionObject;
+            colliderDictionary[snappingCollider].TapCollider = null;
         }
 
         private Vector3 CorrectRotation(Vector3 rotation)
@@ -200,7 +195,7 @@ namespace Valve.VR.InteractionSystem
             hasRotated = false;
             wasPlacedOnTap = false;
             Destroy(block.GetComponent<FixedJoint>());
-            Debug.Log("Block was pulled");
+            Debug.Log("GrooveHandler: Block was pulled");
         }
 
         public void OnAttachedToHand(Hand hand)
@@ -210,30 +205,16 @@ namespace Valve.VR.InteractionSystem
 
         public void OnDetachedFromHand(Hand hand)
         {
-            Debug.Log("Detached");
+            Debug.Log("GrooveHandler: Detached");
             attachedHand = null;
             foreach (SnappingCollider snap in colliderDictionary.Keys)
             {
-                isObjectNull(colliderDictionary[snap].TapCollider);
                 if(colliderDictionary[snap].TapCollider != null)
                 {
                     wasPlacedOnTap = true;
                 }
             }
         }
-
-        private void isObjectNull(System.Object obje)
-        {
-            if(obje == null)
-            {
-                Debug.Log("Ist Null");
-            }
-            else
-            {
-                Debug.Log("Nicht null");
-            }
-        }
-
     }
 }
 
@@ -257,10 +238,9 @@ public class CollisionObject
             }
             else
             {
-                tapCollider = value;
                 hasOffset = true;
             }
-            
+            tapCollider = value;
         }
             
     }

@@ -15,8 +15,24 @@ namespace Valve.VR.InteractionSystem
         private const float BRICK_PIN_DISTANCE = 0.08f;
         private const float BRICK_PIN_DIAMETER = 0.048f;
         private GameObject grooves;
-
         private Mesh mesh;
+
+        [HideInInspector]
+        public GameObject CornerTopA { get; private set; }
+        [HideInInspector]
+        public GameObject CornerTopB { get; private set; }
+        [HideInInspector]
+        public GameObject CornerTopC { get; private set; }
+        [HideInInspector]
+        public GameObject CornerTopD { get; private set; }
+        [HideInInspector]
+        public GameObject CornerBottomA { get; private set; }
+        [HideInInspector]
+        public GameObject CornerBottomB { get; private set; }
+        [HideInInspector]
+        public GameObject CornerBottomC { get; private set; }
+        [HideInInspector]
+        public GameObject CornerBottomD { get; private set; }
 
         void Awake()
         {
@@ -45,10 +61,76 @@ namespace Valve.VR.InteractionSystem
             AddPinTriggerCollider(-(BRICK_HEIGHT / 1.3f), grooves, "Groove");
         }
 
+        private void Start()
+        {
+            Vector3 size = mesh.bounds.size;
+            Vector3 center = transform.TransformPoint(mesh.bounds.center);
+            Vector3 extends = mesh.bounds.extents;
+
+            Vector3 pointTopA = new Vector3(center.x + extends.x, center.y + extends.y - BRICK_PIN_HEIGHT, center.z + extends.z);
+            Vector3 pointTopB = new Vector3(center.x + extends.x, center.y + extends.y - BRICK_PIN_HEIGHT, center.z - extends.z);
+            Vector3 pointTopC = new Vector3(center.x - extends.x, center.y + extends.y - BRICK_PIN_HEIGHT, center.z - extends.z);
+            Vector3 pointTopD = new Vector3(center.x - extends.x, center.y + extends.y - BRICK_PIN_HEIGHT, center.z + extends.z);
+
+            Vector3 pointBottomA = new Vector3(center.x + extends.x, center.y - extends.y, center.z + extends.z);
+            Vector3 pointBottomB = new Vector3(center.x + extends.x, center.y - extends.y, center.z - extends.z);
+            Vector3 pointBottomC = new Vector3(center.x - extends.x, center.y - extends.y, center.z - extends.z);
+            Vector3 pointBottomD = new Vector3(center.x - extends.x, center.y - extends.y, center.z + extends.z);
+
+            GameObject cornerTopA = new GameObject("CornerTopA");
+            cornerTopA.transform.position = pointTopA;
+            GameObject cornerTopB = new GameObject("CornerTopB");
+            cornerTopB.transform.position = pointTopB;
+            GameObject cornerTopC = new GameObject("CornerTopC");
+            cornerTopC.transform.position = pointTopC;
+            GameObject cornerTopD = new GameObject("CornerTopD");
+            cornerTopD.transform.position = pointTopD;
+            GameObject cornerBottomA = new GameObject("CornerBottomA");
+            cornerBottomA.transform.position = pointBottomA;
+            GameObject cornerBottomB = new GameObject("CornerBottomB");
+            cornerBottomB.transform.position = pointBottomB;
+            GameObject cornerBottomC = new GameObject("CornerBottomC");
+            cornerBottomC.transform.position = pointBottomC;
+            GameObject cornerBottomD = new GameObject("CornerBottomD");
+            cornerBottomD.transform.position = pointBottomD;
+
+            cornerTopA.transform.SetParent(this.transform);
+            cornerTopB.transform.SetParent(this.transform);
+            cornerTopC.transform.SetParent(this.transform);
+            cornerTopD.transform.SetParent(this.transform);
+            cornerBottomA.transform.SetParent(this.transform);
+            cornerBottomB.transform.SetParent(this.transform);
+            cornerBottomC.transform.SetParent(this.transform);
+            cornerBottomD.transform.SetParent(this.transform);
+
+            this.CornerTopA = cornerTopA;
+            this.CornerTopB = cornerTopB;
+            this.CornerTopC = cornerTopC;
+            this.CornerTopD = cornerTopD;
+            this.CornerBottomA = cornerBottomA;
+            this.CornerBottomB = cornerBottomB;
+            this.CornerBottomC = cornerBottomC;
+            this.CornerBottomD = cornerBottomD;
+        }
+
 
         // Update is called once per frame
         void Update()
         {
+            DrawBlockNormalsDebug();
+        }
+
+        private void DrawBlockNormalsDebug()
+        {
+            Debug.DrawLine(CornerTopA.transform.position, CornerTopB.transform.position, Color.cyan);
+            Debug.DrawLine(CornerTopB.transform.position, CornerTopC.transform.position, Color.cyan);
+            Debug.DrawLine(CornerTopC.transform.position, CornerTopD.transform.position, Color.cyan);
+            Debug.DrawLine(CornerTopD.transform.position, CornerTopA.transform.position, Color.cyan);
+            Debug.DrawLine(CornerBottomA.transform.position, CornerBottomB.transform.position, Color.cyan);
+            Debug.DrawLine(CornerBottomB.transform.position, CornerBottomC.transform.position, Color.cyan);
+            Debug.DrawLine(CornerBottomC.transform.position, CornerBottomD.transform.position, Color.cyan);
+            Debug.DrawLine(CornerBottomD.transform.position, CornerBottomA.transform.position, Color.cyan);
+            Debug.DrawRay(CornerTopA.transform.position, GetBlockNormale(), Color.green);
 
         }
 
@@ -162,5 +244,11 @@ namespace Valve.VR.InteractionSystem
             return gameObject;
         }
 
+        public Vector3 GetBlockNormale()
+        {
+            Vector3 AB = CornerTopA.transform.position - CornerTopB.transform.position;
+            Vector3 AC = CornerTopC.transform.position - CornerTopB.transform.position;
+            return Vector3.Cross(AC, AB);
+        }
     }
 }

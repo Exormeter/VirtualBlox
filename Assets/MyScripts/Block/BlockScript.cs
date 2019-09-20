@@ -196,7 +196,7 @@ namespace Valve.VR.InteractionSystem
             GameObject colliderObject = new GameObject("Collider");
             colliderObject.tag = tag;
             colliderObject.transform.SetParent(container.transform);
-            colliderObject.transform.localPosition = new Vector3(0f, 0f, 0f);
+            colliderObject.transform.localPosition = new Vector3(0,0,0);
             if (tag.Equals("Groove"))
             {
                 colliderObject.AddComponent<SnappingCollider>();

@@ -38,7 +38,6 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
-
         private void FixedUpdate()
         {
             if (shouldSnap)
@@ -94,9 +93,11 @@ namespace Valve.VR.InteractionSystem
                 }
                 if (collisionObjects.Count > 1)
                 {
-                    
-                    Vector3 centerOffset = collisionObjects[0].GetOffset();
-                    Debug.DrawRay(collisionObjects[0].GrooveCollider.bounds.center, centerOffset, Color.yellow, 90);
+                    Vector3 tapColliderCenterLocal = block.transform.InverseTransformPoint(collisionObjects[0].TapCollider.bounds.center);
+                    Vector3 grooveColliderCenterLocal = block.transform.InverseTransformPoint(collisionObjects[0].GrooveCollider.bounds.center);
+
+                    Vector3 centerOffset = tapColliderCenterLocal - grooveColliderCenterLocal;
+
                     block.transform.Translate(Vector3.right * centerOffset.x, Space.Self);
                     block.transform.Translate(Vector3.forward * centerOffset.z, Space.Self);
 
@@ -108,39 +109,36 @@ namespace Valve.VR.InteractionSystem
                     float distance = groovePlane.GetDistanceToPoint(transform.TransformPoint(collisionObjects[0].CollidedBlock.GetComponent<BlockScript>().CornerTopA.transform.position));
 
                     Debug.Log("Distance Plane: " + distance.ToString("F6"));
-                    Debug.Break();
-                    //Vector3 intersectionPoint = collisionObjects[0].TapCollider.bounds.center;
-                    //intersectionPoint.y = 0;
-                    //Vector3 tapColliderCenter = collisionObjects[1].TapCollider.bounds.center;
-                    //tapColliderCenter.y = 0;
-                    //Vector3 grooveColliderCenter = collisionObjects[1].GrooveCollider.bounds.center;
-                    //grooveColliderCenter.y = 0;
-                    //grooveColliderCenter = grooveColliderCenter - centerOffset;
+                    Debug.Log("Distance Center: " + collisionObjects[0].GetOffset().ToString("F5"));
+                    
+
+                    Vector3 intersectionPointTap = collisionObjects[0].TapCollider.bounds.center;
+                    Vector3 intersectionPointGroove = collisionObjects[0].GrooveCollider.bounds.center;
+                    Vector3 tapColliderCenter = collisionObjects[1].TapCollider.bounds.center;
+                    Vector3 grooveColliderCenter = collisionObjects[1].GrooveCollider.bounds.center;
+
+    
+                    Vector3 vectorIntersectToTap = tapColliderCenter - intersectionPointTap;
+                    Vector3 vectorIntersectionToGroove = grooveColliderCenter - intersectionPointGroove;
+
+                    Debug.DrawLine(intersectionPointTap, tapColliderCenter, Color.red, 90);
+                    Vector3 debugIntersectionGroove = collisionObjects[0].GrooveCollider.bounds.center;
+                    Debug.DrawLine(debugIntersectionGroove - centerOffset, grooveColliderCenter, Color.blue, 90);
 
 
+                    float angleRotation = Vector3.Angle(vectorIntersectToTap, vectorIntersectionToGroove);
 
-                    //Vector3 vectorIntersectToTap = tapColliderCenter - intersectionPoint;
-                    //Vector3 vectorIntersectionToGroove = grooveColliderCenter - intersectionPoint;
+                    Debug.Log("Angle: " + angleRotation);
 
-                    //Debug.DrawLine(intersectionPoint, tapColliderCenter, Color.red, 90);
-                    //Vector3 debugIntersectionGroove = collisionObjects[0].GrooveCollider.bounds.center;
-                    //debugIntersectionGroove.y = 0;
-                    //Debug.DrawLine(debugIntersectionGroove - centerOffset, grooveColliderCenter, Color.blue, 90);
+                    block.transform.RotateAround(intersectionPointTap, Vector3.up, angleRotation);
+                    block.AddComponent<FixedJoint>();
+                    block.GetComponent<FixedJoint>().connectedBody = collisionObjects[0].TapCollider.GetComponentInParent<Rigidbody>();
+                    block.GetComponent<FixedJoint>().breakForce = 2000;
 
-
-                    //float angleRotation = Vector3.Angle(vectorIntersectToTap, vectorIntersectionToGroove);
-
-                    //Debug.Log("Angle: " + angleRotation);
-
-                    //block.transform.RotateAround(intersectionPoint, Vector3.up, angleRotation);
-                    //block.AddComponent<FixedJoint>();
-                    //block.GetComponent<FixedJoint>().connectedBody = collisionObjects[0].TapCollider.GetComponentInParent<Rigidbody>();
-                    //block.GetComponent<FixedJoint>().breakForce = 2000;
-
-                    //rigidBody.isKinematic = false;
-                    //hasSnapped = true;
-                    //shouldSnap = false;
-                    //hasRotated = false;
+                    rigidBody.isKinematic = false;
+                    hasSnapped = true;
+                    shouldSnap = false;
+                    hasRotated = false;
                 }
             }
 
@@ -161,29 +159,6 @@ namespace Valve.VR.InteractionSystem
         {
             colliderDictionary[snappingCollider].TapCollider = null;
             colliderDictionary[snappingCollider].CollidedBlock = null;
-        }
-
-        private Vector3 CorrectRotation(Vector3 rotation)
-        {
-            Vector3 correctedRotation = new Vector3(0f, 0f, 0f);
-            if (rotation.y <= 45 || rotation.y > 315)
-            {
-                correctedRotation.y = ZERO;
-            }
-
-            else if (rotation.y > 45 && rotation.y <= 135)
-            {
-                correctedRotation.y = NINETY;
-            }
-            else if (rotation.y > 135 && rotation.y < 225)
-            {
-                correctedRotation.y = ONE_EIGHTY;
-            }
-            else
-            {
-                correctedRotation.y = TWO_SEVENTY;
-            }
-            return correctedRotation;
         }
 
         public bool IsSnapped()

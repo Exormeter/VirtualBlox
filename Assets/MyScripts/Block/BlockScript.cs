@@ -196,12 +196,12 @@ namespace Valve.VR.InteractionSystem
             GameObject colliderObject = new GameObject("Collider");
             colliderObject.tag = tag;
             colliderObject.transform.SetParent(container.transform);
-            colliderObject.transform.localPosition = new Vector3(0,0,0);
+            colliderObject.transform.localPosition = position;
             if (tag.Equals("Groove"))
             {
                 colliderObject.AddComponent<SnappingCollider>();
             }
-            AddBoxCollider(new Vector3(BRICK_PIN_DIAMETER /2, BRICK_PIN_HEIGHT, BRICK_PIN_DIAMETER / 2), position, isTrigger, colliderObject);
+            AddBoxCollider(new Vector3(BRICK_PIN_DIAMETER /2, BRICK_PIN_HEIGHT, BRICK_PIN_DIAMETER / 2), new Vector3(0,0,0), isTrigger, colliderObject);
         }
 
         private Collider AddBoxCollider(Vector3 size, Vector3 center, bool isTrigger, GameObject otherGameObject)

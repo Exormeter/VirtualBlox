@@ -27,120 +27,26 @@ namespace Valve.VR.InteractionSystem
         private Vector3 detachPoint;
         private BlockScript blockScript;
 
-        // Start is called before the first frame update
-        void Start()
+
+// Start is called before the first frame update
+void Start()
         {
             block = transform.root.gameObject;
             blockScript = block.GetComponent<BlockScript>();
             foreach (SnappingCollider snaps in GetComponentsInChildren<SnappingCollider>())
             {
-                colliderDictionary.Add(snaps, new CollisionObject(snaps.GetComponent<BoxCollider>()));
+                colliderDictionary.Add(snaps, new CollisionObject(snaps.gameObject));
             }
         }
 
         private void FixedUpdate()
         {
-            if (shouldSnap)
-            {
-                List<CollisionObject> collisionObjects = new List<CollisionObject>();
-                foreach (SnappingCollider snap in colliderDictionary.Keys)
-                {
-                    if (colliderDictionary[snap].TapCollider != null)
-                    {
-                        collisionObjects.Add(colliderDictionary[snap]);
-                    }
-                }
-
-                if (collisionObjects.Count > 1)
-                {
-
-
-                    Rigidbody rigidBody = block.GetComponent<Rigidbody>();
-                    rigidBody.isKinematic = true;
-                    rigidBody.useGravity = false;
-
-                    block.transform.rotation = Quaternion.LookRotation(collisionObjects[0].CollidedBlock.transform.up, transform.forward);
-                    block.transform.Rotate(Vector3.right, 90f);
-
-                    Plane groovePlane = new Plane(transform.TransformPoint(blockScript.CornerBottomA.transform.position),
-                                                  transform.TransformPoint(blockScript.CornerBottomB.transform.position),
-                                                  transform.TransformPoint(blockScript.CornerBottomC.transform.position));
-
-                    float distance = groovePlane.GetDistanceToPoint(transform.TransformPoint(collisionObjects[0].CollidedBlock.GetComponent<BlockScript>().CornerTopA.transform.position));
-                    block.transform.Translate(Vector3.up * distance, Space.Self);
-
-                    Debug.Log(Vector3.Dot(block.GetComponent<BlockScript>().GetBlockNormale(), collisionObjects[0].CollidedBlock.GetComponent<BlockScript>().GetBlockNormale()));
-                    hasRotated = true;
-                    
-                }
-            }
 
         }
 
         private void LateUpdate()
         {
-            if (hasRotated)
-            {
-                Rigidbody rigidBody = block.GetComponent<Rigidbody>();
-                rigidBody.isKinematic = true;
-                List<CollisionObject> collisionObjects = new List<CollisionObject>();
-                foreach (SnappingCollider snap in colliderDictionary.Keys)
-                {
-                    if (colliderDictionary[snap].TapCollider != null)
-                    {
-                        collisionObjects.Add(colliderDictionary[snap]);
-                    }
-                }
-                if (collisionObjects.Count > 1)
-                {
-                    Vector3 tapColliderCenterLocal = block.transform.InverseTransformPoint(collisionObjects[0].TapCollider.bounds.center);
-                    Vector3 grooveColliderCenterLocal = block.transform.InverseTransformPoint(collisionObjects[0].GrooveCollider.bounds.center);
-
-                    Vector3 centerOffset = tapColliderCenterLocal - grooveColliderCenterLocal;
-
-                    block.transform.Translate(Vector3.right * centerOffset.x, Space.Self);
-                    block.transform.Translate(Vector3.forward * centerOffset.z, Space.Self);
-
-
-                    Plane groovePlane = new Plane(transform.TransformPoint(blockScript.CornerBottomA.transform.position),
-                                                  transform.TransformPoint(blockScript.CornerBottomB.transform.position),
-                                                  transform.TransformPoint(blockScript.CornerBottomC.transform.position));
-
-                    float distance = groovePlane.GetDistanceToPoint(transform.TransformPoint(collisionObjects[0].CollidedBlock.GetComponent<BlockScript>().CornerTopA.transform.position));
-
-                    Debug.Log("Distance Plane: " + distance.ToString("F6"));
-                    Debug.Log("Distance Center: " + collisionObjects[0].GetOffset().ToString("F5"));
-                    
-
-                    Vector3 intersectionPointTap = collisionObjects[0].TapCollider.bounds.center;
-                    Vector3 intersectionPointGroove = collisionObjects[0].GrooveCollider.bounds.center;
-                    Vector3 tapColliderCenter = collisionObjects[1].TapCollider.bounds.center;
-                    Vector3 grooveColliderCenter = collisionObjects[1].GrooveCollider.bounds.center;
-
-    
-                    Vector3 vectorIntersectToTap = tapColliderCenter - intersectionPointTap;
-                    Vector3 vectorIntersectionToGroove = grooveColliderCenter - intersectionPointGroove;
-
-                    Debug.DrawLine(intersectionPointTap, tapColliderCenter, Color.red, 90);
-                    Vector3 debugIntersectionGroove = collisionObjects[0].GrooveCollider.bounds.center;
-                    Debug.DrawLine(debugIntersectionGroove - centerOffset, grooveColliderCenter, Color.blue, 90);
-
-
-                    float angleRotation = Vector3.Angle(vectorIntersectToTap, vectorIntersectionToGroove);
-
-                    Debug.Log("Angle: " + angleRotation);
-
-                    block.transform.RotateAround(intersectionPointTap, Vector3.up, angleRotation);
-                    block.AddComponent<FixedJoint>();
-                    block.GetComponent<FixedJoint>().connectedBody = collisionObjects[0].TapCollider.GetComponentInParent<Rigidbody>();
-                    block.GetComponent<FixedJoint>().breakForce = 2000;
-
-                    rigidBody.isKinematic = false;
-                    hasSnapped = true;
-                    shouldSnap = false;
-                    hasRotated = false;
-                }
-            }
+            
 
         }
 
@@ -149,15 +55,15 @@ namespace Valve.VR.InteractionSystem
             return (Math.Abs(float1 - float2) <= precision);
         }
 
-        public void RegisterCollision(SnappingCollider snappingCollider, Collider tapCollider)
+        public void RegisterCollision(SnappingCollider snappingCollider, GameObject tapCollider)
         {
-            colliderDictionary[snappingCollider].TapCollider = tapCollider;
+            colliderDictionary[snappingCollider].TapPosition = tapCollider;
             colliderDictionary[snappingCollider].CollidedBlock = tapCollider.transform.root.gameObject;
         }
 
-        public void UnregisterCollision(SnappingCollider snappingCollider, Collider tapCollider)
-        {
-            colliderDictionary[snappingCollider].TapCollider = null;
+        public void UnregisterCollision(SnappingCollider snappingCollider)
+        {          
+            colliderDictionary[snappingCollider].TapPosition = null;
             colliderDictionary[snappingCollider].CollidedBlock = null;
         }
 
@@ -170,7 +76,7 @@ namespace Valve.VR.InteractionSystem
         {
             foreach (SnappingCollider snaps in GetComponentsInChildren<SnappingCollider>())
             {
-                colliderDictionary[snaps].TapCollider = null;
+                colliderDictionary[snaps].TapPosition = null;
             }
             hasSnapped = false;
             hasRotated = false;
@@ -186,44 +92,125 @@ namespace Valve.VR.InteractionSystem
 
         public void OnDetachedFromHand(Hand hand)
         {
-            Debug.Log("GrooveHandler: Detached from hand");
+            Debug.Log("GrooveHandler OnDetached: Detached from hand");
             attachedHand = null;
-            foreach (SnappingCollider snap in colliderDictionary.Keys)
+            
+            foreach (SnappingCollider snap1 in colliderDictionary.Keys)
             {
-                if (colliderDictionary[snap].TapCollider != null)
+                if (colliderDictionary[snap1].TapPosition != null)
                 {
-                   // SnapBlock();
-                    shouldSnap = true;
-                    break;
+                    Debug.Log("GrooveHandler OnDeatched: Block should snap");
+                    List<CollisionObject> currentCollisionObjects = new List<CollisionObject>();
+                    foreach (SnappingCollider snap in colliderDictionary.Keys)
+                    {
+                        if (colliderDictionary[snap].TapPosition != null)
+                        {
+                            currentCollisionObjects.Add(colliderDictionary[snap]);
+                        }
+                    }
+
+                    if (currentCollisionObjects.Count > 1)
+                    {
+                        Rigidbody rigidBody = block.GetComponent<Rigidbody>();
+                        rigidBody.isKinematic = true;
+                        MatchTargetBlockRotation(currentCollisionObjects[0]);
+                        MatchTargetBlockDistance(currentCollisionObjects[0]);
+                        MatchTargetBlockOffset(currentCollisionObjects[0]);
+                        MatchPinRotation(currentCollisionObjects[0], currentCollisionObjects[1]);
+
+                        if (currentCollisionObjects[0].CollidedBlock.tag != "Floor")
+                        {
+                            Destroy(rigidBody);
+                            block.transform.SetParent(currentCollisionObjects[0].CollidedBlock.transform);
+                        }
+                        else
+                        {
+                            block.AddComponent<FixedJoint>();
+                            block.GetComponent<FixedJoint>().connectedBody = currentCollisionObjects[0].TapPosition.GetComponentInParent<Rigidbody>();
+                            block.GetComponent<FixedJoint>().breakForce = 2000;
+                            rigidBody.isKinematic = false;
+                        }
+
+
+
+                        hasSnapped = true;
+                        shouldSnap = false;
+                        hasRotated = false;
+                        Debug.Break();
+                        break;
+
+
+
+
+                        //groovePlane = new Plane(transform.TransformPoint(blockScript.CornerBottomA.transform.position),
+                        //                                transform.TransformPoint(blockScript.CornerBottomB.transform.position),
+                        //                                transform.TransformPoint(blockScript.CornerBottomC.transform.position));
+
+                        //distance = groovePlane.GetDistanceToPoint(transform.TransformPoint(currentCollisionObjects[0].CollidedBlock.GetComponent<BlockScript>().CornerTopA.transform.position));
+
+                        //Debug.Log("Distance Plane: " + distance.ToString("F6"));
+                        //Debug.Log("Distance Center: " + (currentCollisionObjects[0].GroovePosition.transform.localPosition - block.transform.InverseTransformPoint(currentCollisionObjects[0].TapPosition.transform.position)).ToString("F5"));
+
+
+
+                    }
                 }
             }
         }
 
-        //private void SnapBlock()
-        //{
-        //    List<CollisionObject> collisionObjects = new List<CollisionObject>();
-        //    foreach (SnappingCollider snap in colliderDictionary.Keys)
-        //    {
-        //        if (colliderDictionary[snap].TapCollider != null)
-        //        {
-        //            collisionObjects.Add(colliderDictionary[snap]);
-        //        }
-        //    }
+        private void MatchTargetBlockRotation(CollisionObject collision)
+        {
+            block.transform.rotation = Quaternion.LookRotation(collision.CollidedBlock.transform.up, -transform.forward);
+            block.transform.Rotate(Vector3.right, 90f);
+        }
 
-        //    if (collisionObjects.Count > 1)
-        //    {
+        private void MatchTargetBlockDistance(CollisionObject collision)
+        {
+            Plane groovePlane = new Plane(transform.TransformPoint(blockScript.CornerBottomA.transform.position),
+                                                      transform.TransformPoint(blockScript.CornerBottomB.transform.position),
+                                                      transform.TransformPoint(blockScript.CornerBottomC.transform.position));
+
+            float distance = groovePlane.GetDistanceToPoint(transform.TransformPoint(collision.CollidedBlock.GetComponent<BlockScript>().CornerTopA.transform.position));
+            block.transform.Translate(Vector3.up * distance, Space.Self);
+
+            Debug.Log(Vector3.Dot(block.GetComponent<BlockScript>().GetBlockNormale(), collision.CollidedBlock.GetComponent<BlockScript>().GetBlockNormale()));
+            Debug.Log("Match Rotation complete");
+        }
+
+        private void MatchTargetBlockOffset(CollisionObject collision)
+        {
+            Vector3 tapColliderCenterLocal = block.transform.InverseTransformPoint(collision.TapPosition.transform.position);
+            Vector3 grooveColliderCenterLocal = collision.GroovePosition.transform.localPosition;
+            Vector3 centerOffset = tapColliderCenterLocal - grooveColliderCenterLocal;
+            block.transform.Translate(Vector3.right * centerOffset.x, Space.Self);
+            block.transform.Translate(Vector3.forward * centerOffset.z, Space.Self);
+        }
+
+        private void MatchPinRotation(CollisionObject matchedPin, CollisionObject secoundPin)
+        {
+            Vector3 intersectionPointTap = block.transform.InverseTransformPoint(matchedPin.TapPosition.transform.position);
+            Vector3 tapColliderCenter = block.transform.InverseTransformPoint(secoundPin.TapPosition.transform.position);
+            Vector3 grooveColliderCenter = secoundPin.GroovePosition.transform.localPosition;
+
+            Vector3 vectorIntersectToTap = intersectionPointTap - tapColliderCenter;
+            Vector3 vectorIntersectionToGroove = intersectionPointTap - grooveColliderCenter;
+
+            vectorIntersectToTap = Vector3.ProjectOnPlane(vectorIntersectToTap, Vector3.up);
+            vectorIntersectionToGroove = Vector3.ProjectOnPlane(vectorIntersectionToGroove, Vector3.up);
+
+            Debug.DrawLine(vectorIntersectToTap, vectorIntersectToTap * 3, Color.red, 90);
+            Debug.DrawLine(vectorIntersectionToGroove, vectorIntersectionToGroove * 3, Color.blue, 90);
 
 
-        //        Rigidbody rigidBody = block.GetComponent<Rigidbody>();
-        //        rigidBody.isKinematic = true;
+            float angleRotation = Vector3.Angle(vectorIntersectionToGroove, vectorIntersectToTap);
 
-        //        block.transform.rotation = Quaternion.LookRotation(collisionObjects[0].CollidedBlock.transform.up, transform.forward);
-        //        block.transform.Rotate(Vector3.right, 90f);
+            Debug.Log("Angle: " + angleRotation);
 
-        //        Debug.Log(Vector3.Dot(block.GetComponent<BlockScript>().GetBlockNormale(), collisionObjects[0].CollidedBlock.GetComponent<BlockScript>().GetBlockNormale()));
-        //        hasRotated = true;
-        //        Debug.Break();
-        //    }
+            block.transform.RotateAround(matchedPin.TapPosition.transform.position, block.transform.up, angleRotation);
+        }
+
+
+
     }
 
 
@@ -232,14 +219,14 @@ namespace Valve.VR.InteractionSystem
     public class CollisionObject
     {
 
-        private Collider tapCollider = null;
+        private GameObject tapPosition = null;
         public GameObject CollidedBlock { get; set; }
 
-        public Collider TapCollider
+        public GameObject TapPosition
         {
             get
             {
-                return tapCollider;
+                return tapPosition;
             }
             set
             {
@@ -251,32 +238,32 @@ namespace Valve.VR.InteractionSystem
                 {
                     hasOffset = true;
                 }
-                tapCollider = value;
+                tapPosition = value;
             }
 
         }
-        public BoxCollider GrooveCollider { get; }
+        public GameObject GroovePosition { get; }
         public bool hasOffset = false;
 
-        public CollisionObject(BoxCollider grooveCollider)
+        public CollisionObject(GameObject groovePosition)
         {
-            this.GrooveCollider = grooveCollider;
+            this.GroovePosition = groovePosition;
         }
 
         public Vector3 GetOffsetInWorldSpace(Transform transform)
         {
-            if (tapCollider == null)
+            if (tapPosition == null)
             {
                 return new Vector3();
             }
-            Vector3 centerWorld = transform.TransformDirection(GrooveCollider.bounds.center);
-            Vector3 otherCenterWorld = transform.TransformDirection(tapCollider.bounds.center);
+            Vector3 centerWorld = transform.TransformDirection(GroovePosition.transform.position);
+            Vector3 otherCenterWorld = transform.TransformDirection(tapPosition.transform.position);
             return centerWorld - otherCenterWorld;
         }
 
         public Vector3 GetOffset()
         {
-            return tapCollider.bounds.center - GrooveCollider.bounds.center;
+            return tapPosition.transform.position - GroovePosition.transform.position;
         }
     }
 }

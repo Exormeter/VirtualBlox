@@ -22,7 +22,7 @@ namespace Valve.VR.InteractionSystem
             return;
         }
 
-        grooveHandler.RegisterCollision(this, tapCollider);
+        grooveHandler.RegisterCollision(this, tapCollider.gameObject);
     }
 
     private void OnTriggerExit(Collider tapCollider)
@@ -32,7 +32,7 @@ namespace Valve.VR.InteractionSystem
             return;
         }
 
-        grooveHandler.UnregisterCollision(this, tapCollider);
+        grooveHandler.UnregisterCollision(this);
     }
 
     private void OnTriggerStay(Collider tapCollider)

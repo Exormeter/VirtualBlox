@@ -79,6 +79,7 @@ namespace Valve.VR.InteractionSystem
         }
 
         GameObject combinedTile = new GameObject("Floor");
+        combinedTile.tag = "Floor";
         combinedTile.AddComponent(typeof(MeshFilter));
         combinedTile.AddComponent(typeof(MeshRenderer));
         combinedTile.AddComponent(typeof(Rigidbody));

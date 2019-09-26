@@ -77,10 +77,10 @@ void Start()
             foreach (SnappingCollider snaps in GetComponentsInChildren<SnappingCollider>())
             {
                 colliderDictionary[snaps].TapPosition = null;
+                colliderDictionary[snaps].CollidedBlock = null;
             }
             hasSnapped = false;
-            hasRotated = false;
-            shouldSnap = false;
+            
             Destroy(block.GetComponent<FixedJoint>());
             Debug.Log("GrooveHandler: Block was pulled");
         }
@@ -118,40 +118,15 @@ void Start()
                         MatchTargetBlockOffset(currentCollisionObjects[0]);
                         MatchPinRotation(currentCollisionObjects[0], currentCollisionObjects[1]);
 
-                        if (currentCollisionObjects[0].CollidedBlock.tag != "Floor")
-                        {
-                            Destroy(rigidBody);
-                            block.transform.SetParent(currentCollisionObjects[0].CollidedBlock.transform);
-                        }
-                        else
-                        {
-                            block.AddComponent<FixedJoint>();
-                            block.GetComponent<FixedJoint>().connectedBody = currentCollisionObjects[0].TapPosition.GetComponentInParent<Rigidbody>();
-                            block.GetComponent<FixedJoint>().breakForce = 2000;
-                            rigidBody.isKinematic = false;
-                        }
 
-
+                        block.AddComponent<FixedJoint>();
+                        block.GetComponent<FixedJoint>().connectedBody = currentCollisionObjects[0].TapPosition.GetComponentInParent<Rigidbody>();
+                        block.GetComponent<FixedJoint>().breakForce = 200;
+                        rigidBody.isKinematic = false;
+                        
 
                         hasSnapped = true;
-                        shouldSnap = false;
-                        hasRotated = false;
-                        Debug.Break();
                         break;
-
-
-
-
-                        //groovePlane = new Plane(transform.TransformPoint(blockScript.CornerBottomA.transform.position),
-                        //                                transform.TransformPoint(blockScript.CornerBottomB.transform.position),
-                        //                                transform.TransformPoint(blockScript.CornerBottomC.transform.position));
-
-                        //distance = groovePlane.GetDistanceToPoint(transform.TransformPoint(currentCollisionObjects[0].CollidedBlock.GetComponent<BlockScript>().CornerTopA.transform.position));
-
-                        //Debug.Log("Distance Plane: " + distance.ToString("F6"));
-                        //Debug.Log("Distance Center: " + (currentCollisionObjects[0].GroovePosition.transform.localPosition - block.transform.InverseTransformPoint(currentCollisionObjects[0].TapPosition.transform.position)).ToString("F5"));
-
-
 
                     }
                 }

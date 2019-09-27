@@ -10,12 +10,14 @@ namespace Valve.VR.InteractionSystem
         private float BRICK_HEIGHT;
         private const float BRICK_PIN_HEIGHT = 0.016f;
         private const float BRICK_PIN_HEIGHT_HALF = BRICK_PIN_HEIGHT / 2;
-        private const float BRICK_WALL_WIDTH = 0.01f;
+        private const float BRICK_WALL_WIDTH = 0.016f;
         private const float BRICK_WALL_WIDTH_HALF = BRICK_WALL_WIDTH / 2;
         private const float BRICK_PIN_DISTANCE = 0.08f;
         private const float BRICK_PIN_DIAMETER = 0.048f;
         private GameObject grooves;
         private Mesh mesh;
+
+        public PhysicMaterial material;
 
         [HideInInspector]
         public GameObject CornerTopA { get; private set; }
@@ -200,8 +202,24 @@ namespace Valve.VR.InteractionSystem
             if (tag.Equals("Groove"))
             {
                 colliderObject.AddComponent<SnappingCollider>();
+                AddBoxCollider(new Vector3(BRICK_PIN_DIAMETER, BRICK_PIN_HEIGHT, BRICK_PIN_DIAMETER), new Vector3(0, 0, 0), isTrigger, colliderObject);
             }
-            AddBoxCollider(new Vector3(BRICK_PIN_DIAMETER /2, BRICK_PIN_HEIGHT, BRICK_PIN_DIAMETER / 2), new Vector3(0,0,0), isTrigger, colliderObject);
+            else
+            {
+                AddBoxCollider(new Vector3(BRICK_PIN_DIAMETER, BRICK_PIN_HEIGHT, BRICK_PIN_DIAMETER), new Vector3(0, 0, 0), isTrigger, colliderObject, material);
+            }
+        }
+            
+            
+
+        private Collider AddBoxCollider(Vector3 size, Vector3 center, bool isTrigger, GameObject otherGameObject, PhysicMaterial material)
+        {
+            BoxCollider collider = otherGameObject.AddComponent<BoxCollider>();
+            collider.size = size;
+            collider.center = center;
+            collider.isTrigger = isTrigger;
+            collider.material = material;
+            return collider;
         }
 
         private Collider AddBoxCollider(Vector3 size, Vector3 center, bool isTrigger, GameObject otherGameObject)

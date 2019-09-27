@@ -8,20 +8,12 @@ namespace Valve.VR.InteractionSystem
     public class GrooveHandler : MonoBehaviour
     {
 
-        private const float ZERO = 0f;
-        private const float NINETY = 90f;
-        private const float ONE_EIGHTY = 180f;
-        private const float TWO_SEVENTY = 270f;
+       
         private const float PRECISION = 0.000001f;
-        public int colliderCount = 0;
-
         private Dictionary<SnappingCollider, CollisionObject> colliderDictionary = new Dictionary<SnappingCollider, CollisionObject>();
         private float lastResetTime;
-        public float timeUntilSnap = 2.0f;
-        public bool shouldSnap = false;
         public bool hasSnapped = false;
-        public bool wasPlacedOnTap = false;
-        public bool hasRotated = false;
+        public int breakForcePerPin = 25;
         private Hand attachedHand = null;
         private GameObject block;
         private Vector3 detachPoint;
@@ -118,14 +110,14 @@ void Start()
                         MatchTargetBlockOffset(currentCollisionObjects[0]);
                         MatchPinRotation(currentCollisionObjects[0], currentCollisionObjects[1]);
 
-
-                        block.AddComponent<FixedJoint>();
-                        block.GetComponent<FixedJoint>().connectedBody = currentCollisionObjects[0].TapPosition.GetComponentInParent<Rigidbody>();
-                        block.GetComponent<FixedJoint>().breakForce = 200;
-                        rigidBody.isKinematic = false;
                         
-
+                        //block.AddComponent<FixedJoint>();
+                        //block.GetComponent<FixedJoint>().connectedBody = currentCollisionObjects[0].TapPosition.GetComponentInParent<Rigidbody>(); 
+                        //block.GetComponent<FixedJoint>().breakForce = breakForcePerPin * currentCollisionObjects.Count;
+                        rigidBody.isKinematic = false;
                         hasSnapped = true;
+                        
+                        
                         break;
 
                     }
@@ -173,15 +165,14 @@ void Start()
             vectorIntersectToTap = Vector3.ProjectOnPlane(vectorIntersectToTap, Vector3.up);
             vectorIntersectionToGroove = Vector3.ProjectOnPlane(vectorIntersectionToGroove, Vector3.up);
 
-            Debug.DrawLine(vectorIntersectToTap, vectorIntersectToTap * 3, Color.red, 90);
-            Debug.DrawLine(vectorIntersectionToGroove, vectorIntersectionToGroove * 3, Color.blue, 90);
-
-
             float angleRotation = Vector3.Angle(vectorIntersectionToGroove, vectorIntersectToTap);
 
-            Debug.Log("Angle: " + angleRotation);
-
             block.transform.RotateAround(matchedPin.TapPosition.transform.position, block.transform.up, angleRotation);
+
+            if(block.transform.InverseTransformPoint(secoundPin.TapPosition.transform.position).x - secoundPin.GroovePosition.transform.localPosition.x != 0)
+            {
+                block.transform.RotateAround(matchedPin.TapPosition.transform.position, block.transform.up, angleRotation * -2);
+            }
         }
 
 

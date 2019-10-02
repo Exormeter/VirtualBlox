@@ -89,7 +89,7 @@ namespace Valve.VR.InteractionSystem
         combinedTile.GetComponent<MeshFilter>().mesh = new Mesh();
         combinedTile.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
         combinedTile.GetComponent<MeshRenderer>().material = this.material;
-        combinedTile.AddComponent(typeof(BlockScript));
+        combinedTile.AddComponent(typeof(BlockGeometryScript));
 
         Destroy(container);
         //combinedTile.transform.SetParent(this.transform);

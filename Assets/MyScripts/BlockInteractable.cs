@@ -5,7 +5,7 @@ namespace Valve.VR.InteractionSystem
 {
     //-------------------------------------------------------------------------
     [RequireComponent(typeof(Interactable))]
-    [RequireComponent(typeof(BlockScript))]
+    [RequireComponent(typeof(BlockGeometryScript))]
     public class BlockInteractable : MonoBehaviour
     {
         public enum AttachMode
@@ -119,7 +119,7 @@ namespace Valve.VR.InteractionSystem
             }
 
             float distanceHandToBlock = Vector3.Distance(pullingHand.transform.position, rigidBodies[0].worldCenterOfMass);
-            RenderForceLine(pullingHand.transform.position, GetComponent<BlockScript>().GetCenterTopWorld());
+            RenderForceLine(pullingHand.transform.position, GetComponent<BlockGeometryScript>().GetCenterTopWorld());
 
             if (Time.time > nextPulseTime)
             {

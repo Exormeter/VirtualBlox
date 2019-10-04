@@ -89,7 +89,7 @@ namespace Valve.VR.InteractionSystem
         {
             GrabTypes startingGrabType = hand.GetGrabStarting();
 
-            if (startingGrabType != GrabTypes.None  && grooveHandler.IsSnapped())
+            if (startingGrabType != GrabTypes.None)
             {
                 pullingHand = hand;
                 pullingGrabType = startingGrabType;

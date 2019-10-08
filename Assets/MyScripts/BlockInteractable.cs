@@ -89,7 +89,7 @@ namespace Valve.VR.InteractionSystem
         {
             GrabTypes startingGrabType = hand.GetGrabStarting();
 
-            if (startingGrabType != GrabTypes.None)
+            if (startingGrabType != GrabTypes.None && GetComponent<BlockScript>().IsIndirectlyAttachedToHand())
             {
                 pullingHand = hand;
                 pullingGrabType = startingGrabType;
@@ -111,6 +111,7 @@ namespace Valve.VR.InteractionSystem
 
             GetComponent<LineRenderer>().enabled = true;
             //hand is pulling but has let gone of the grab button
+
             if (!pullingHand.IsGrabbingWithType(pullingGrabType))
             {
                 Debug.Log("Pulling Ended");
@@ -121,14 +122,15 @@ namespace Valve.VR.InteractionSystem
             float distanceHandToBlock = Vector3.Distance(pullingHand.transform.position, rigidBodies[0].worldCenterOfMass);
             RenderForceLine(pullingHand.transform.position, GetComponent<BlockGeometryScript>().GetCenterTopWorld());
 
-            if (Time.time > nextPulseTime)
-            {
-                pullingHand.TriggerHapticPulse(0.1f, 20, distanceHandToBlock * 3);
-                nextPulseTime = Time.time + 0.1f;
-            }
+            //if (Time.time > nextPulseTime)
+            //{
+            //    pullingHand.TriggerHapticPulse(0.1f, 20, distanceHandToBlock * 3);
+            //    nextPulseTime = Time.time + 0.1f;
+            //}
                 
             if(distanceHandToBlock >= pullDistanceMaximum)
-            {   
+            {
+                Debug.Log("Was Pulled");
                 this.BroadcastMessage("OnBlockPulled", pullingHand, SendMessageOptions.DontRequireReceiver);
                 wasPulled = true;
             }

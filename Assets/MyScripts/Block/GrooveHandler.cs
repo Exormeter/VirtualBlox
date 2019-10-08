@@ -45,7 +45,7 @@ namespace Valve.VR.InteractionSystem
         public void RegisterCollision(GrooveCollider snappingCollider, GameObject tapCollider)
         {
             colliderCount++;
-            if (GetComponentInParent<BlockScript>().IsAttachedToHand() && tapCollider.transform.childCount == 0)
+            if (GetComponentInParent<BlockScript>().IsDirectlyAttachedToHand() && tapCollider.transform.childCount == 0)
             {
                 AddPinHighLight(tapCollider);
             }

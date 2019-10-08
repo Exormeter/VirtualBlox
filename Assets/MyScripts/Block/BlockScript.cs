@@ -9,9 +9,9 @@ namespace Valve.VR.InteractionSystem
 
     public class BlockScript : MonoBehaviour
     {
-        public HashSet<BlockContainer> connectedBlocksOnTap = new HashSet<BlockContainer>();
-        public HashSet<BlockContainer> connectedBlocksOnGroove= new HashSet<BlockContainer>();
+        public List<BlockContainer> connectedBlocks = new List<BlockContainer>();
 
+        public int connectedBlocksCount;
         private GrooveHandler grooveHandler;
         private TapHandler tapHandler;
         private Hand attachedHand = null;
@@ -19,7 +19,9 @@ namespace Valve.VR.InteractionSystem
         public int breakForcePerPin = 25;
         public int frameUntilColliderReEvaluation = 2;
         private FixedJoint tempAttach;
-        // Start is called before the first frame update
+        public bool visited = false;
+        
+
         void Start()
         {
             grooveHandler = GetComponentInChildren<GrooveHandler>();
@@ -27,10 +29,11 @@ namespace Valve.VR.InteractionSystem
             blockGeometry = GetComponent<BlockGeometryScript>();
         }
 
-        // Update is called once per frame
+        
         void Update()
         {
-
+            visited = false;
+            connectedBlocksCount = connectedBlocks.Count;
         }
 
         public void OnAttachedToHand(Hand hand)
@@ -43,15 +46,18 @@ namespace Valve.VR.InteractionSystem
         public void OnDetachedFromHand(Hand hand)
         {
             attachedHand = null;
-            List<CollisionObject> currentCollisionObjects;
-            if (grooveHandler.GetCollidingObjects().Count != 0)
-            {
-                currentCollisionObjects = grooveHandler.GetCollidingObjects();
-            }
-            else
-            {
-                currentCollisionObjects = tapHandler.GetCollidingObjects();
-            }
+            SendMessageToConnectedBlocks("OnIndirectDetachedFromHand", false);
+            List<CollisionObject> currentCollisionObjects = grooveHandler.GetCollidingObjects();
+
+            //if (grooveHandler.GetCollidingObjects().Count != 0)
+            //{
+            //    currentCollisionObjects = grooveHandler.GetCollidingObjects();
+            //}
+
+            //else
+            //{
+            //    currentCollisionObjects = tapHandler.GetCollidingObjects();
+            //}
             
 
             if (currentCollisionObjects.Count > 1)
@@ -65,19 +71,19 @@ namespace Valve.VR.InteractionSystem
 
                 tempAttach = gameObject.AddComponent<FixedJoint>();
                 GetComponent<FixedJoint>().connectedBody = currentCollisionObjects[0].TapPosition.GetComponentInParent<Rigidbody>();
-                gameObject.GetComponent<FixedJoint>().breakForce = breakForcePerPin * currentCollisionObjects.Count;
                 rigidBody.isKinematic = false;
-                StartCoroutine("EvaluateColliderAfterMatching");
+                StartCoroutine(EvaluateColliderAfterMatching());
             }
         }
 
-        IEnumerable EvaluateColliderAfterMatching()
+        IEnumerator EvaluateColliderAfterMatching()
         {
-            for(int i = 0; i <= frameUntilColliderReEvaluation; i++)
+            for (int i = 0; i <= frameUntilColliderReEvaluation; i++)
             {
                 if(i == frameUntilColliderReEvaluation)
                 {
-                    EvaluateCollider();
+                    Debug.Log("Evaluating Colliders");
+                    SendMessageToConnectedBlocks("EvaluateCollider");
                 }
                 yield return new WaitForFixedUpdate();
             }
@@ -103,13 +109,14 @@ namespace Valve.VR.InteractionSystem
             }
             foreach(GameObject collidedBlock in blockToTapDict.Keys)
             {
-                FixedJoint fixedJoint= gameObject.AddComponent<FixedJoint>();
-                GetComponent<FixedJoint>().connectedBody = collidedBlock.GetComponent<Rigidbody>();
+                FixedJoint fixedJoint = gameObject.AddComponent<FixedJoint>();
+                fixedJoint.connectedBody = collidedBlock.GetComponent<Rigidbody>();
                 fixedJoint.breakForce = breakForcePerPin * blockToTapDict[collidedBlock].Count;
-                AddConnectedBlockGroove(collidedBlock, fixedJoint);
-                collidedBlock.GetComponent<BlockScript>().AddConectedBlockTap(gameObject, fixedJoint);
+                AddConnectedBlock(collidedBlock, fixedJoint, OtherBlockConnectedOn.GROOVE);
+                collidedBlock.GetComponent<BlockScript>().AddConnectedBlock(gameObject, fixedJoint, OtherBlockConnectedOn.GROOVE);
+                SendMessage("OnBlockAttach");
+                
             }
-
         }
 
         private void MatchTargetBlockRotation(CollisionObject collision)
@@ -128,7 +135,6 @@ namespace Valve.VR.InteractionSystem
             transform.Translate(Vector3.up * distance, Space.Self);
 
             Debug.Log(Vector3.Dot(GetComponent<BlockGeometryScript>().GetBlockNormale(), collision.CollidedBlock.GetComponent<BlockGeometryScript>().GetBlockNormale()));
-            Debug.Log("Match Rotation complete");
         }
 
         private void MatchTargetBlockOffset(CollisionObject collision)
@@ -153,69 +159,132 @@ namespace Valve.VR.InteractionSystem
             vectorIntersectionToGroove = Vector3.ProjectOnPlane(vectorIntersectionToGroove, Vector3.up);
 
             float angleRotation = Vector3.Angle(vectorIntersectionToGroove, vectorIntersectToTap);
+            Debug.Log("Angle Rotation: " + angleRotation);
 
             transform.RotateAround(matchedPin.TapPosition.transform.position, transform.up, angleRotation);
-
-            if (transform.InverseTransformPoint(secoundPin.TapPosition.transform.position).x - secoundPin.GroovePosition.transform.localPosition.x != 0)
-            {
-                transform.RotateAround(matchedPin.TapPosition.transform.position, transform.up, angleRotation * -2);
-            }
         }
 
         private void OnJointBreak(float breakForce)
         {
-            BlockContainer container = SearchDestroyedJoint(connectedBlocksOnTap);
-            if(container != null)
-            {
-                connectedBlocksOnTap.Remove(container);
-            }
-            else
-            {
-                container = SearchDestroyedJoint(connectedBlocksOnGroove);
-            }
-            if(container != null)
-            {
-                connectedBlocksOnGroove.Remove(container);
-            }
+            StartCoroutine(EvaluateJoints());
         }
 
-        private BlockContainer SearchDestroyedJoint(HashSet<BlockContainer> connectedBlocks)
+        IEnumerator EvaluateJoints()
         {
-            foreach (BlockContainer blockContainer in connectedBlocks)
+            for (int i = 0; i <= frameUntilColliderReEvaluation; i++)
             {
-                if (blockContainer.ConnectedJoint == null)
+                if (i == frameUntilColliderReEvaluation)
                 {
-                    return blockContainer;
+                    RemoveBlockConnections();
                 }
+                yield return new WaitForFixedUpdate();
             }
-
-            return null;
+            
         }
 
-        public bool IsAttachedToHand()
+        public void OnBlockPulled()
+        {
+            RemoveBlockConnections();
+        }
+
+        public void RemoveBlockConnections()
+        {
+            List<BlockContainer> containerList = SearchDestroyedJoint(); 
+            foreach(BlockContainer container in containerList)
+            {
+                connectedBlocks.Remove(container);
+                container.BlockScript.RemoveBlockConnections();
+            }
+        }
+
+        public List<BlockContainer> SearchDestroyedJoint()
+        {
+            return connectedBlocks.FindAll(container => container.ConnectedJoint == null);
+        }
+
+        public bool IsDirectlyAttachedToHand()
         {
             return attachedHand != null;
         }
 
-        public void AddConectedBlockTap(GameObject block, Joint connectedJoint)
+        public bool IsIndirectlyAttachedToHand()
         {
-            connectedBlocksOnTap.Add(new BlockContainer(block, connectedJoint));
+            visited = true;
+            if (IsDirectlyAttachedToHand())
+            {
+                return true;
+            }
+            
+            foreach (BlockContainer blockContainer in connectedBlocks)
+            {
+                if (!blockContainer.BlockScript.visited)
+                {
+                    return blockContainer.BlockScript.IsIndirectlyAttachedToHand();
+                }
+            }
+
+            return false;
         }
 
-        public void AddConnectedBlockGroove(GameObject block, Joint connectedJoint)
+        public bool IsDirectlyAttachedToFloor()
         {
-            connectedBlocksOnGroove.Add(new BlockContainer(block, connectedJoint));
+            foreach(BlockContainer blockContainer in connectedBlocks)
+            {
+                if (blockContainer.BlockRootObject.tag.Equals("Floor"))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
-        public void RemoveConnectedBlockGroove(GameObject block, Joint connectedJoint)
+        public bool IsIndirectlyAttachedToFloor()
         {
-            connectedBlocksOnGroove.Remove(new BlockContainer(block, connectedJoint));
+            visited = true;
+            if (IsDirectlyAttachedToFloor())
+            {
+                return true;
+            }
+
+            foreach (BlockContainer blockContainer in connectedBlocks)
+            {
+                if (!blockContainer.BlockScript.visited)
+                {
+                    return blockContainer.BlockScript.IsIndirectlyAttachedToHand();
+                }
+            }
+
+            return false;
         }
 
-        public void RemoveConnectedBlockTap(GameObject block, Joint connectedJoint)
+        public void SendMessageToConnectedBlocks(string message, bool selfNotification = true)
         {
-            connectedBlocksOnTap.Remove(new BlockContainer(block, connectedJoint));
+            visited = true;
+            if (selfNotification)
+            {
+                BroadcastMessage(message);
+            }
+            
+            foreach (BlockContainer blockContainer in connectedBlocks)
+            {
+                if (!blockContainer.BlockScript.visited)
+                {
+                    blockContainer.BlockScript.SendMessageToConnectedBlocks(message);
+                }
+            }
         }
+
+        public void AddConnectedBlock(GameObject block, Joint connectedJoint, OtherBlockConnectedOn connectedOn)
+        {
+            connectedBlocks.Add(new BlockContainer(block, connectedJoint, connectedOn));
+        }
+
+        public void RemoveConnectedBlock(BlockContainer container)
+        {
+            connectedBlocks.Remove(container);
+        }
+
+        
     }
 
     public class BlockContainer
@@ -225,32 +294,42 @@ namespace Valve.VR.InteractionSystem
         public TapHandler TapHandler { get; }
         public BlockGeometryScript BlockGeometry { get; }
         public Joint ConnectedJoint { get; }
+        public OtherBlockConnectedOn ConnectedOn { get; }
+        public BlockScript BlockScript { get; }
 
-        public BlockContainer(GameObject block, Joint connectedJoint)
+        public BlockContainer(GameObject block, Joint connectedJoint, OtherBlockConnectedOn connectedOn)
         {
             BlockRootObject = block;
             GrooveHandler = block.GetComponentInChildren<GrooveHandler>();
             TapHandler = block.GetComponentInChildren<TapHandler>();
             BlockGeometry = block.GetComponent<BlockGeometryScript>();
+            BlockScript = block.GetComponent<BlockScript>();
             ConnectedJoint = connectedJoint;
+            ConnectedOn = connectedOn;
         }
 
-        public override bool Equals(object obj)
-        {
-            if ((obj == null) || !this.GetType().Equals(obj.GetType()))
-            {
-                return false;
-            }
-            else
-            {
-                GameObject gameObject = (GameObject) obj;
-                return gameObject.GetInstanceID() == BlockRootObject.GetInstanceID();
-            }
-        }
+        //public override bool Equals(object obj)
+        //{
+        //    if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+        //    {
+        //        return false;
+        //    }
+        //    else
+        //    {
+        //        GameObject gameObject = (GameObject) obj;
+        //        return gameObject.GetInstanceID() == BlockRootObject.GetInstanceID();
+        //    }
+        //}
 
-        public override int GetHashCode()
-        {
-            return BlockRootObject.GetHashCode();
-        }
+        //public override int GetHashCode()
+        //{
+        //    return BlockRootObject.GetHashCode();
+        //}
+    }
+
+    public enum OtherBlockConnectedOn
+    {
+        TAP,
+        GROOVE
     }
 }

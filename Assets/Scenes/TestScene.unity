@@ -265,6 +265,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06a6be3f450ef08408081e1fc61bf00d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  connectedBlocksCount: 0
   breakForcePerPin: 25
   frameUntilColliderReEvaluation: 2
   visited: 0
@@ -869,6 +870,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06a6be3f450ef08408081e1fc61bf00d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  connectedBlocksCount: 0
   breakForcePerPin: 25
   frameUntilColliderReEvaluation: 2
   visited: 0
@@ -1053,7 +1055,7 @@ GameObject:
   - component: {fileID: 1137134761}
   - component: {fileID: 1137134762}
   m_Layer: 0
-  m_Name: Block4x2
+  m_Name: Block4x2Debug
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1360,6 +1362,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06a6be3f450ef08408081e1fc61bf00d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  connectedBlocksCount: 0
   breakForcePerPin: 25
   frameUntilColliderReEvaluation: 2
   visited: 0
@@ -1705,6 +1708,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06a6be3f450ef08408081e1fc61bf00d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  connectedBlocksCount: 0
   breakForcePerPin: 25
   frameUntilColliderReEvaluation: 2
   visited: 0

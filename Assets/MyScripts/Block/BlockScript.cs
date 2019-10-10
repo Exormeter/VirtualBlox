@@ -16,10 +16,12 @@ namespace Valve.VR.InteractionSystem
         private TapHandler tapHandler;
         private Hand attachedHand = null;
         private BlockGeometryScript blockGeometry;
+        private BlockManager blockManager;
         public int breakForcePerPin = 25;
         public int frameUntilColliderReEvaluation = 2;
         private FixedJoint tempAttach;
         public bool visited = false;
+        
         
 
         void Start()
@@ -46,20 +48,13 @@ namespace Valve.VR.InteractionSystem
         public void OnDetachedFromHand(Hand hand)
         {
             attachedHand = null;
-            SendMessageToConnectedBlocks("OnIndirectDetachedFromHand", false);
+            MatchRotationWithBlock();
+            SendMessageToConnectedBlocks("OnIndirectDetachedFromHand");
+        }
+
+        public void MatchRotationWithBlock()
+        {
             List<CollisionObject> currentCollisionObjects = grooveHandler.GetCollidingObjects();
-
-            //if (grooveHandler.GetCollidingObjects().Count != 0)
-            //{
-            //    currentCollisionObjects = grooveHandler.GetCollidingObjects();
-            //}
-
-            //else
-            //{
-            //    currentCollisionObjects = tapHandler.GetCollidingObjects();
-            //}
-            
-
             if (currentCollisionObjects.Count > 1)
             {
                 Rigidbody rigidBody = GetComponent<Rigidbody>();
@@ -74,6 +69,14 @@ namespace Valve.VR.InteractionSystem
                 rigidBody.isKinematic = false;
                 StartCoroutine(EvaluateColliderAfterMatching());
             }
+
+            else
+            {
+                foreach (BlockContainer blockContainer in connectedBlocks)
+                {
+                    blockContainer.BlockScript.MatchRotationWithBlock();
+                }
+            }
         }
 
         IEnumerator EvaluateColliderAfterMatching()
@@ -83,6 +86,7 @@ namespace Valve.VR.InteractionSystem
                 if(i == frameUntilColliderReEvaluation)
                 {
                     Debug.Log("Evaluating Colliders");
+                    
                     SendMessageToConnectedBlocks("EvaluateCollider");
                 }
                 yield return new WaitForFixedUpdate();
@@ -90,10 +94,10 @@ namespace Valve.VR.InteractionSystem
             
         }
 
-
         //TODO: Tap Collider Case
         private void EvaluateCollider()
         {
+            Debug.Log("Evaluate Collier for Block: " + gameObject.name);
             Destroy(tempAttach);
             Dictionary<GameObject, List<GameObject>> blockToTapDict = new Dictionary<GameObject, List<GameObject>>();
             foreach (CollisionObject collisionObject in grooveHandler.GetCollidingObjects())
@@ -109,13 +113,16 @@ namespace Valve.VR.InteractionSystem
             }
             foreach(GameObject collidedBlock in blockToTapDict.Keys)
             {
-                FixedJoint fixedJoint = gameObject.AddComponent<FixedJoint>();
-                fixedJoint.connectedBody = collidedBlock.GetComponent<Rigidbody>();
-                fixedJoint.breakForce = breakForcePerPin * blockToTapDict[collidedBlock].Count;
-                AddConnectedBlock(collidedBlock, fixedJoint, OtherBlockConnectedOn.GROOVE);
-                collidedBlock.GetComponent<BlockScript>().AddConnectedBlock(gameObject, fixedJoint, OtherBlockConnectedOn.GROOVE);
-                SendMessage("OnBlockAttach");
-                
+                if(!connectedBlocks.Exists(alreadyConnected => collidedBlock.Equals(alreadyConnected.BlockRootObject)))
+                {
+                    FixedJoint fixedJoint = gameObject.AddComponent<FixedJoint>();
+                    fixedJoint.connectedBody = collidedBlock.GetComponent<Rigidbody>();
+                    fixedJoint.breakForce = breakForcePerPin * blockToTapDict[collidedBlock].Count;
+
+                    AddConnectedBlock(collidedBlock, fixedJoint, OtherBlockConnectedOn.GROOVE);
+                    collidedBlock.GetComponent<BlockScript>().AddConnectedBlock(gameObject, fixedJoint, OtherBlockConnectedOn.GROOVE);
+                    SendMessage("OnBlockAttach");
+                }
             }
         }
 
@@ -194,7 +201,7 @@ namespace Valve.VR.InteractionSystem
             {
                 connectedBlocks.Remove(container);
                 container.BlockScript.RemoveBlockConnections();
-            }
+            } 
         }
 
         public List<BlockContainer> SearchDestroyedJoint()
@@ -219,7 +226,11 @@ namespace Valve.VR.InteractionSystem
             {
                 if (!blockContainer.BlockScript.visited)
                 {
-                    return blockContainer.BlockScript.IsIndirectlyAttachedToHand();
+                    if (blockContainer.BlockScript.IsIndirectlyAttachedToHand())
+                    {
+                        return true;
+                    }
+                     
                 }
             }
 
@@ -250,27 +261,47 @@ namespace Valve.VR.InteractionSystem
             {
                 if (!blockContainer.BlockScript.visited)
                 {
-                    return blockContainer.BlockScript.IsIndirectlyAttachedToHand();
+                    if (blockContainer.BlockScript.IsIndirectlyAttachedToFloor())
+                    {
+                        return true;
+                    }
                 }
             }
 
             return false;
         }
 
-        public void SendMessageToConnectedBlocks(string message, bool selfNotification = true)
+        private void SendMessageToConnectedBlocks(string message, List<int> visitedNodes, bool selfNotification = true)
         {
-            visited = true;
+            visitedNodes.Add(gameObject.GetHashCode());
+            foreach (BlockContainer blockContainer in connectedBlocks)
+            {
+                if (!visitedNodes.Contains(blockContainer.BlockRootObject.GetHashCode()))
+                {
+                    blockContainer.BlockScript.SendMessageToConnectedBlocks(message, visitedNodes);
+                }
+            }
             if (selfNotification)
             {
                 BroadcastMessage(message);
             }
+        }
+
+        public void SendMessageToConnectedBlocks(string message, bool selfNotification = true)
+        {
+            List<int> visitedNodes = new List<int>();
             
+            visitedNodes.Add(gameObject.GetHashCode());
             foreach (BlockContainer blockContainer in connectedBlocks)
             {
-                if (!blockContainer.BlockScript.visited)
+                if (!visitedNodes.Contains(blockContainer.BlockRootObject.GetHashCode()))
                 {
-                    blockContainer.BlockScript.SendMessageToConnectedBlocks(message);
+                    blockContainer.BlockScript.SendMessageToConnectedBlocks(message, visitedNodes);
                 }
+            }
+            if (selfNotification)
+            {
+                BroadcastMessage(message);
             }
         }
 
@@ -308,23 +339,24 @@ namespace Valve.VR.InteractionSystem
             ConnectedOn = connectedOn;
         }
 
-        //public override bool Equals(object obj)
-        //{
-        //    if ((obj == null) || !this.GetType().Equals(obj.GetType()))
-        //    {
-        //        return false;
-        //    }
-        //    else
-        //    {
-        //        GameObject gameObject = (GameObject) obj;
-        //        return gameObject.GetInstanceID() == BlockRootObject.GetInstanceID();
-        //    }
-        //}
+        public override bool Equals(object obj)
+        {
+            if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+            {
+                return false;
+            }
+            else
+            {
+                BlockContainer blockContainer = (BlockContainer) obj;
+                return blockContainer.BlockRootObject.GetInstanceID() == BlockRootObject.GetInstanceID();
+            }
+        }
 
-        //public override int GetHashCode()
-        //{
-        //    return BlockRootObject.GetHashCode();
-        //}
+
+        public override int GetHashCode()
+        {
+            return BlockRootObject.GetHashCode();
+        }
     }
 
     public enum OtherBlockConnectedOn

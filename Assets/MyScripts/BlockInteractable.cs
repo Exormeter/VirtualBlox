@@ -130,8 +130,9 @@ namespace Valve.VR.InteractionSystem
                 
             if(distanceHandToBlock >= pullDistanceMaximum)
             {
-                Debug.Log("Was Pulled");
-                this.BroadcastMessage("OnBlockPulled", pullingHand, SendMessageOptions.DontRequireReceiver);
+                //Vector3 direction = pullingHand.transform.position - transform.position;
+                //rigidBodies[0].AddForce(direction);
+                this.BroadcastMessage("OnHandTryingToPull", pullingHand, SendMessageOptions.DontRequireReceiver);
                 wasPulled = true;
             }
 

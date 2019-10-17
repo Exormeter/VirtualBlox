@@ -1,5 +1,7 @@
 {
-   "app_key" : "application.generated.unity.steamvr.exe",
+   "action_manifest_version" : 0,
+   "alias_info" : {},
+   "app_key" : "application.generated.unity.test.exe",
    "bindings" : {
       "/actions/buggy" : {
          "sources" : [
@@ -110,6 +112,9 @@
             {
                "inputs" : {
                   "click" : {
+                     "output" : "/actions/default/in/spawnblock"
+                  },
+                  "touch" : {
                      "output" : "/actions/default/in/teleport"
                   }
                },
@@ -169,6 +174,9 @@
             {
                "inputs" : {
                   "click" : {
+                     "output" : "/actions/default/in/spawnblock"
+                  },
+                  "touch" : {
                      "output" : "/actions/default/in/teleport"
                   }
                },
@@ -250,7 +258,10 @@
          ]
       }
    },
+   "category" : "steamvr_input",
    "controller_type" : "vive_controller",
    "description" : "",
-   "name" : "vive_controller"
+   "name" : "Meine Test [Testing] Konfiguration für Vive Controller",
+   "options" : {},
+   "simulated_actions" : []
 }

@@ -41,6 +41,11 @@
       "requirement": "optional"
     },
     {
+      "name": "/actions/default/in/SpawnBlock",
+      "type": "boolean",
+      "requirement": "optional"
+    },
+    {
       "name": "/actions/default/out/Haptic",
       "type": "vibration"
     },

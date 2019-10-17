@@ -5,22 +5,25 @@ using System;
 
 namespace Valve.VR.InteractionSystem
 {
-    public class GrooveHandler : MonoBehaviour, IConnector
+    public class GrooveHandler : MonoBehaviour, IConnectorHandler
     {
-        private Dictionary<GrooveCollider, CollisionObject> colliderDictionary = new Dictionary<GrooveCollider, CollisionObject>();
-        private BlockGeometryScript blockScript;
+        private Dictionary<IConnectorCollider, CollisionObject> colliderDictionary = new Dictionary<IConnectorCollider, CollisionObject>();
+        private List<GameObject> listHighLighter = new List<GameObject>();
         public GameObject pinHighLight;
-
-        private int colliderCount = 0;
-
+        public int occupiedGrooves = 0;
 
         // Start is called before the first frame update
         void Start()
         {
             foreach (GrooveCollider snaps in GetComponentsInChildren<GrooveCollider>())
             {
-                colliderDictionary.Add(snaps, new CollisionObject(snaps.gameObject));
+                colliderDictionary.Add(snaps, new CollisionObject());
             }
+        }
+
+        void Update()
+        {
+            occupiedGrooves = GetOccupiedGrooves().Count;
         }
 
         private bool IsAlmostEqual(float float1, float float2, float precision)
@@ -30,40 +33,42 @@ namespace Valve.VR.InteractionSystem
 
         public void RegisterCollision(GrooveCollider snappingCollider, GameObject tapCollider)
         {
-            colliderCount++;
-            if (GetComponentInParent<BlockScript>().IsDirectlyAttachedToHand() && tapCollider.transform.childCount == 0)
+            if (GetComponentInParent<BlockScript>().IsIndirectlyAttachedToHand() && tapCollider.transform.childCount == 0)
             {
                 AddPinHighLight(tapCollider);
             }
 
             colliderDictionary[snappingCollider].TapPosition = tapCollider;
+            colliderDictionary[snappingCollider].GroovePosition = snappingCollider.gameObject;
             colliderDictionary[snappingCollider].CollidedBlock = tapCollider.transform.root.gameObject;
         }
 
         public void UnregisterCollision(GrooveCollider snappingCollider, GameObject tapCollider)
         {
-            colliderCount--;
             RemovePinHighLight(tapCollider);
-            colliderDictionary[snappingCollider].TapPosition = null;
-            colliderDictionary[snappingCollider].CollidedBlock = null;
+            colliderDictionary[snappingCollider].ResetObject();
         }
 
         public void AddPinHighLight(GameObject tapCollider)
         {
+
             GameObject highLight = Instantiate(pinHighLight, tapCollider.transform.position, tapCollider.transform.rotation);
-            highLight.tag = "Light";
+            highLight.tag = "HighLight";
             highLight.transform.SetParent(tapCollider.transform);
             highLight.transform.localPosition = new Vector3(0, 0.0082f, 0);
-
+            listHighLighter.Add(highLight);
         }
 
         public void RemovePinHighLight(GameObject tapCollider)
         {
-            if (tapCollider.transform.childCount == 1)
+            for(int childIndex = 0; childIndex < tapCollider.transform.childCount; childIndex++)
             {
-                Destroy(tapCollider.transform.GetChild(0).gameObject);
+                if(tapCollider.transform.GetChild(childIndex).tag == "HighLight")
+                {
+                    listHighLighter.Remove(tapCollider.transform.GetChild(childIndex).gameObject);
+                    Destroy(tapCollider.transform.GetChild(childIndex).gameObject);
+                }
             }
-
         }
 
 
@@ -85,8 +90,17 @@ namespace Valve.VR.InteractionSystem
             return collisionList;
         }
 
+        private List<CollisionObject> GetOccupiedGrooves()
+        {
+            List<CollisionObject> collisionList = new List<CollisionObject>(colliderDictionary.Values);
+            collisionList.RemoveAll(collision => collision.IsConnected != true);
+            return collisionList;
+        }
+
         public void OnBlockAttach(GameObject block)
         {
+            listHighLighter.ForEach(highLigher => Destroy(highLigher));
+            listHighLighter.Clear();
             foreach(CollisionObject collisionObject in colliderDictionary.Values)
             {
                 if(collisionObject.CollidedBlock != null && collisionObject.CollidedBlock.GetHashCode() == block.GetHashCode())
@@ -114,59 +128,41 @@ namespace Valve.VR.InteractionSystem
     public class CollisionObject
     {
 
-        private GameObject tapPosition = null;
+        public GameObject TapPosition { get; set; } = null;
+        public GameObject GroovePosition { get; set; } = null;
+        
+
         public GameObject CollidedBlock { get; set; }
 
         public bool IsConnected { get; set; }
 
-        public GameObject TapPosition
-        {
-            get
-            {
-                return tapPosition;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    hasOffset = false;
-                }
-                else
-                {
-                    hasOffset = true;
-                }
-                tapPosition = value;
-            }
 
-        }
-        public GameObject GroovePosition { get; }
-        public bool hasOffset = false;
-
-        public CollisionObject(GameObject groovePosition)
+        public CollisionObject()
         {
-            this.GroovePosition = groovePosition;
+            
         }
 
         public Vector3 GetOffsetInWorldSpace(Transform transform)
         {
-            if (tapPosition == null)
+            if (TapPosition == null)
             {
                 return new Vector3();
             }
             Vector3 centerWorld = transform.TransformDirection(GroovePosition.transform.position);
-            Vector3 otherCenterWorld = transform.TransformDirection(tapPosition.transform.position);
+            Vector3 otherCenterWorld = transform.TransformDirection(TapPosition.transform.position);
             return centerWorld - otherCenterWorld;
         }
 
         public Vector3 GetOffset()
         {
-            return tapPosition.transform.position - GroovePosition.transform.position;
+            return TapPosition.transform.position - GroovePosition.transform.position;
         }
 
         public void ResetObject()
         {
             IsConnected = false;
-            tapPosition = null;
+            TapPosition = null;
+            GroovePosition = null;
             CollidedBlock = null;
         }
     }

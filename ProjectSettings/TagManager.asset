@@ -8,6 +8,7 @@ TagManager:
   - Groove
   - Floor
   - HighLight
+  - TapCollider
   layers:
   - Default
   - TransparentFX

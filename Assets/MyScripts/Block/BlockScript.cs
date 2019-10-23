@@ -17,8 +17,9 @@ namespace Valve.VR.InteractionSystem
         private TapHandler tapHandler;
         private Hand attachedHand = null;
         private BlockGeometryScript blockGeometry;
+        private Rigidbody rigidBody;
         
-        public int breakForcePerPin = 25;
+        public int breakForcePerPin = 2;
         public int frameUntilColliderReEvaluation = 2;
         private FixedJoint tempAttach;
 
@@ -27,6 +28,7 @@ namespace Valve.VR.InteractionSystem
             grooveHandler = GetComponentInChildren<GrooveHandler>();
             tapHandler = GetComponentInChildren<TapHandler>();
             blockGeometry = GetComponent<BlockGeometryScript>();
+            rigidBody = GetComponent<Rigidbody>();
         }
 
         
@@ -35,6 +37,7 @@ namespace Valve.VR.InteractionSystem
             connectedBlocksCount = connectedBlocks.Count;
         }
 
+
         public void OnAttachedToHand(Hand hand)
         {
             attachedHand = hand;
@@ -42,7 +45,7 @@ namespace Valve.VR.InteractionSystem
         } 
 
 
-        //TODO: Tap Collider Case
+        
         public void OnDetachedFromHand(Hand hand)
         {
             attachedHand = null;
@@ -87,25 +90,19 @@ namespace Valve.VR.InteractionSystem
         public void MatchRotationWithBlock()
         {
             GrooveOrTapHit(out List<CollisionObject> currentCollisionObjects, out OTHER_BLOCK_IS_CONNECTED_ON connectedOn);
-
-
             if (currentCollisionObjects.Count > 1)
             {
-                Rigidbody rigidBody = GetComponent<Rigidbody>();
-                rigidBody.isKinematic = true;
+                SendMessageToConnectedBlocks("SetKinematic");
                 GetComponent<BlockRotator>().RotateBlock(currentCollisionObjects, connectedOn);
 
-                tempAttach = gameObject.AddComponent<FixedJoint>();
-                if(connectedOn == OTHER_BLOCK_IS_CONNECTED_ON.GROOVE)
-                {
-                    tempAttach.connectedBody = currentCollisionObjects[0].TapPosition.GetComponentInParent<Rigidbody>();
-                }
-                else
-                {
-                    tempAttach.connectedBody = currentCollisionObjects[0].GroovePosition.GetComponentInParent<Rigidbody>();
-                }
-                
-                rigidBody.isKinematic = false;
+                //if(connectedOn == OTHER_BLOCK_IS_CONNECTED_ON.GROOVE)
+                //{
+                //    tempAttach.connectedBody = currentCollisionObjects[0].TapPosition.GetComponentInParent<Rigidbody>();
+                //}
+                //else
+                //{
+                //    tempAttach.connectedBody = currentCollisionObjects[0].GroovePosition.GetComponentInParent<Rigidbody>();
+                //}
                 StartCoroutine(EvaluateColliderAfterMatching());
             }
         }
@@ -119,19 +116,22 @@ namespace Valve.VR.InteractionSystem
                     Debug.Log("Evaluating Colliders");
                     
                     SendMessageToConnectedBlocks("EvaluateCollider");
+                    SendMessageToConnectedBlocks("CheckFreeze");
                 }
                 yield return new WaitForFixedUpdate();
             }
             
         }
 
-        //TODO: Tap Collider Case
         private void EvaluateCollider()
         {
             Debug.Log("Evaluate Collider for Block: " + gameObject.name);
-            Destroy(tempAttach);
+            SendMessageToConnectedBlocks("UnsetKinematic");
+            
             GrooveOrTapHit(out List<CollisionObject> currentCollisionObjects, out OTHER_BLOCK_IS_CONNECTED_ON connectedOn);
             Dictionary<GameObject, int> blockToTapDict = new Dictionary<GameObject, int>();
+
+            //Wieviele Taps oder Grooves wurden nach dem Rotieren getroffen?
             foreach (CollisionObject collisionObject in currentCollisionObjects)
             {
                 if (!blockToTapDict.ContainsKey(collisionObject.CollidedBlock))
@@ -144,18 +144,20 @@ namespace Valve.VR.InteractionSystem
                 }
             }
 
+            //Zu welchem Block muss eine Verbindnung aufgebaut werden mit welcher Stärke?
             foreach(GameObject collidedBlock in blockToTapDict.Keys)
             {
                 if(!connectedBlocks.Exists(alreadyConnected => collidedBlock.Equals(alreadyConnected.BlockRootObject)))
                 {
-                    FixedJoint oldJoint = gameObject.GetComponent<FixedJoint>();
-                    FixedJoint fixedJoint = gameObject.AddComponent<FixedJoint>();
-                    fixedJoint.connectedBody = collidedBlock.GetComponent<Rigidbody>();
-                    fixedJoint.breakForce = breakForcePerPin * blockToTapDict[collidedBlock];
-                    fixedJoint.breakForce = breakForcePerPin * blockToTapDict[collidedBlock];
+                    //FixedJoint joint = gameObject.AddComponent<FixedJoint>();
+                    //joint.connectedBody = collidedBlock.GetComponent<Rigidbody>();
+                    //joint.breakForce = Mathf.Infinity;
+                    //joint.breakTorque = breakForcePerPin * blockToTapDict[collidedBlock];
 
-                    
-                    AddConnectedBlock(collidedBlock, fixedJoint, connectedOn);
+
+
+                    ConfigurableJoint joint = SetConfigurableJoint(collidedBlock.GetComponent<Rigidbody>());
+                    AddConnectedBlock(collidedBlock, joint, connectedOn);
                     OTHER_BLOCK_IS_CONNECTED_ON otherConnection;
                     if(connectedOn == OTHER_BLOCK_IS_CONNECTED_ON.GROOVE)
                     {
@@ -165,7 +167,7 @@ namespace Valve.VR.InteractionSystem
                     {
                         otherConnection = OTHER_BLOCK_IS_CONNECTED_ON.GROOVE;
                     }
-                    collidedBlock.GetComponent<BlockScript>().AddConnectedBlock(gameObject, fixedJoint, otherConnection);
+                    collidedBlock.GetComponent<BlockScript>().AddConnectedBlock(gameObject, joint, otherConnection);
                     BroadcastMessage("OnBlockAttach", collidedBlock);
                     collidedBlock.BroadcastMessage("OnBlockAttach", gameObject);
                 }
@@ -319,6 +321,34 @@ namespace Valve.VR.InteractionSystem
             connectedBlocks.Remove(container);
         }
 
+        public void FreezeBlock()
+        {
+            rigidBody.constraints = RigidbodyConstraints.FreezeAll;
+        }
+
+        public void UnfreezeBlock()
+        {
+            rigidBody.constraints = RigidbodyConstraints.None;
+        }
+
+        public void CheckFreeze()
+        {
+            if (IsIndirectlyAttachedToFloor())
+            {
+                FreezeBlock();
+            }
+        }
+
+        public void SetKinematic()
+        {
+            rigidBody.isKinematic = true;
+        }
+
+        public void UnsetKinematic()
+        {
+            rigidBody.isKinematic = false;
+        }
+
         private void GrooveOrTapHit(out List<CollisionObject> collisionList, out OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
         {
             if(tapHandler.GetCollidingObjects().Count > 0)
@@ -339,8 +369,30 @@ namespace Valve.VR.InteractionSystem
             connectedOn = OTHER_BLOCK_IS_CONNECTED_ON.NOT_CONNECTED;
         }
 
-        
+        private ConfigurableJoint SetConfigurableJoint(Rigidbody connectedBody)
+        {
+            ConfigurableJoint configurableJoint = gameObject.AddComponent<ConfigurableJoint>();
+            configurableJoint.xMotion = ConfigurableJointMotion.Locked;
+            configurableJoint.yMotion = ConfigurableJointMotion.Locked;
+            configurableJoint.zMotion = ConfigurableJointMotion.Locked;
+            configurableJoint.angularXMotion = ConfigurableJointMotion.Locked;
+            configurableJoint.angularYMotion = ConfigurableJointMotion.Locked;
+            configurableJoint.angularZMotion = ConfigurableJointMotion.Locked;
+            //configurableJoint.autoConfigureConnectedAnchor = true;
+            configurableJoint.projectionMode = JointProjectionMode.PositionAndRotation;
+            configurableJoint.projectionAngle = 0.001f;
+            configurableJoint.projectionDistance = 0.001f;
+            //configurableJoint.connectedAnchor = connectedBody.position;
+            //configurableJoint.anchor = gameObject.transform.position;
+            //configurableJoint.enableCollision = true;
+            configurableJoint.breakForce = Mathf.Infinity;
+            configurableJoint.breakTorque = Mathf.Infinity;
+            configurableJoint.connectedBody = connectedBody;
+            return configurableJoint;
+        }
     }
+
+    
 
     public class BlockContainer
     {

@@ -217,6 +217,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pinHighLight: {fileID: 0}
+  occupiedTaps: 0
 --- !u!1 &371677116
 GameObject:
   m_ObjectHideFlags: 0
@@ -609,6 +610,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pinHighLight: {fileID: 0}
+  occupiedTaps: 0
 --- !u!1 &919301905
 GameObject:
   m_ObjectHideFlags: 0
@@ -654,6 +656,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pinHighLight: {fileID: 3618188176987479035, guid: 924c2651d6146ce44b407a863079e66c,
     type: 3}
+  occupiedGrooves: 0
 --- !u!1 &929960464
 GameObject:
   m_ObjectHideFlags: 0
@@ -747,6 +750,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pinHighLight: {fileID: 0}
+  occupiedTaps: 0
 --- !u!1 &1137134752
 GameObject:
   m_ObjectHideFlags: 0
@@ -1133,6 +1137,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pinHighLight: {fileID: 0}
+  occupiedTaps: 0
 --- !u!1 &1388306715
 GameObject:
   m_ObjectHideFlags: 0
@@ -1753,6 +1758,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pinHighLight: {fileID: 3618188176987479035, guid: 924c2651d6146ce44b407a863079e66c,
     type: 3}
+  occupiedGrooves: 0
 --- !u!1 &2023915165
 GameObject:
   m_ObjectHideFlags: 0
@@ -1798,6 +1804,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pinHighLight: {fileID: 3618188176987479035, guid: 924c2651d6146ce44b407a863079e66c,
     type: 3}
+  occupiedGrooves: 0
 --- !u!1001 &257168285314300057
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1873,7 +1880,13 @@ PrefabInstance:
     - target: {fileID: 257168285543960267, guid: 04c0a04a17fb4104687ffb3ee690570d,
         type: 3}
       propertyPath: m_Mass
-      value: 0.1
+      value: 4
       objectReference: {fileID: 0}
+    - target: {fileID: 257168285543960266, guid: 04c0a04a17fb4104687ffb3ee690570d,
+        type: 3}
+      propertyPath: material
+      value: 
+      objectReference: {fileID: 13400000, guid: d9db7e13e3d8dee4abe598bf09202d90,
+        type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 04c0a04a17fb4104687ffb3ee690570d, type: 3}

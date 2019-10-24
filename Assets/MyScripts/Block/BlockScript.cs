@@ -19,9 +19,13 @@ namespace Valve.VR.InteractionSystem
         private BlockGeometryScript blockGeometry;
         private Rigidbody rigidBody;
         
-        public int breakForcePerPin = 2;
+
+        private Joint jointDebug;
+        
+        public int breakForcePerPin = 3;
+        public bool IsFroozen;
+        public bool UnfroozenForPhsicsCheck;
         public int frameUntilColliderReEvaluation = 2;
-        private FixedJoint tempAttach;
 
         void Start()
         {
@@ -35,6 +39,11 @@ namespace Valve.VR.InteractionSystem
         void Update()
         {
             connectedBlocksCount = connectedBlocks.Count;
+            if(jointDebug != null)
+            {
+                Debug.Log("Torque: " + jointDebug.currentTorque);
+                Debug.Log("Force: " + jointDebug.currentForce);
+            }
         }
 
 
@@ -94,15 +103,6 @@ namespace Valve.VR.InteractionSystem
             {
                 SendMessageToConnectedBlocks("SetKinematic");
                 GetComponent<BlockRotator>().RotateBlock(currentCollisionObjects, connectedOn);
-
-                //if(connectedOn == OTHER_BLOCK_IS_CONNECTED_ON.GROOVE)
-                //{
-                //    tempAttach.connectedBody = currentCollisionObjects[0].TapPosition.GetComponentInParent<Rigidbody>();
-                //}
-                //else
-                //{
-                //    tempAttach.connectedBody = currentCollisionObjects[0].GroovePosition.GetComponentInParent<Rigidbody>();
-                //}
                 StartCoroutine(EvaluateColliderAfterMatching());
             }
         }
@@ -117,6 +117,7 @@ namespace Valve.VR.InteractionSystem
                     
                     SendMessageToConnectedBlocks("EvaluateCollider");
                     SendMessageToConnectedBlocks("CheckFreeze");
+                    SendMessageToConnectedBlocks("UnsetKinematic");
                 }
                 yield return new WaitForFixedUpdate();
             }
@@ -126,8 +127,7 @@ namespace Valve.VR.InteractionSystem
         private void EvaluateCollider()
         {
             Debug.Log("Evaluate Collider for Block: " + gameObject.name);
-            SendMessageToConnectedBlocks("UnsetKinematic");
-            
+            Debug.Log("Is Kinematic: " + rigidBody.isKinematic);
             GrooveOrTapHit(out List<CollisionObject> currentCollisionObjects, out OTHER_BLOCK_IS_CONNECTED_ON connectedOn);
             Dictionary<GameObject, int> blockToTapDict = new Dictionary<GameObject, int>();
 
@@ -149,14 +149,15 @@ namespace Valve.VR.InteractionSystem
             {
                 if(!connectedBlocks.Exists(alreadyConnected => collidedBlock.Equals(alreadyConnected.BlockRootObject)))
                 {
-                    //FixedJoint joint = gameObject.AddComponent<FixedJoint>();
-                    //joint.connectedBody = collidedBlock.GetComponent<Rigidbody>();
-                    //joint.breakForce = Mathf.Infinity;
-                    //joint.breakTorque = breakForcePerPin * blockToTapDict[collidedBlock];
+                    FixedJoint joint = gameObject.AddComponent<FixedJoint>();
+                    joint.connectedBody = collidedBlock.GetComponent<Rigidbody>();
+                    joint.breakForce = Mathf.Infinity;
+                    joint.breakTorque = breakForcePerPin * blockToTapDict[collidedBlock];
 
 
 
-                    ConfigurableJoint joint = SetConfigurableJoint(collidedBlock.GetComponent<Rigidbody>());
+                    //ConfigurableJoint joint = SetConfigurableJoint(collidedBlock.GetComponent<Rigidbody>(), blockToTapDict[collidedBlock]);
+                    jointDebug = joint;
                     AddConnectedBlock(collidedBlock, joint, connectedOn);
                     OTHER_BLOCK_IS_CONNECTED_ON otherConnection;
                     if(connectedOn == OTHER_BLOCK_IS_CONNECTED_ON.GROOVE)
@@ -195,21 +196,22 @@ namespace Valve.VR.InteractionSystem
             
         }
 
-        public void OnHandTryingToPull()
-        {
-            RemoveBlockConnections();
-        }
-
         public void RemoveBlockConnections()
         {
-            List<BlockContainer> containerList = SearchDestroyedJoint(); 
-            foreach(BlockContainer container in containerList)
+            List<BlockContainer> containerList = SearchDestroyedJoint();
+            foreach (BlockContainer container in containerList)
             {
                 connectedBlocks.Remove(container);
                 container.BlockScript.RemoveBlockConnections();
                 BroadcastMessage("OnBlockDetach", container.BlockRootObject, SendMessageOptions.DontRequireReceiver);
                 SendMessageToConnectedBlocks("RemovedConnection");
-            } 
+            }
+            SendMessageToConnectedBlocks("CheckFreeze");
+        }
+
+        public void OnHandTryingToPull()
+        {
+            RemoveBlockConnections();
         }
 
         public List<BlockContainer> SearchDestroyedJoint()
@@ -324,11 +326,13 @@ namespace Valve.VR.InteractionSystem
         public void FreezeBlock()
         {
             rigidBody.constraints = RigidbodyConstraints.FreezeAll;
+            IsFroozen = true;
         }
 
         public void UnfreezeBlock()
         {
             rigidBody.constraints = RigidbodyConstraints.None;
+            IsFroozen = false;
         }
 
         public void CheckFreeze()
@@ -337,16 +341,26 @@ namespace Valve.VR.InteractionSystem
             {
                 FreezeBlock();
             }
+            else
+            {
+                UnfreezeBlock();
+            }
         }
 
         public void SetKinematic()
         {
-            rigidBody.isKinematic = true;
+            if (!gameObject.tag.Equals("Floor"))
+            {
+                rigidBody.isKinematic = true;
+            }
         }
 
         public void UnsetKinematic()
         {
-            rigidBody.isKinematic = false;
+            if (!gameObject.tag.Equals("Floor"))
+            {
+                rigidBody.isKinematic = false;
+            }
         }
 
         private void GrooveOrTapHit(out List<CollisionObject> collisionList, out OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
@@ -369,7 +383,7 @@ namespace Valve.VR.InteractionSystem
             connectedOn = OTHER_BLOCK_IS_CONNECTED_ON.NOT_CONNECTED;
         }
 
-        private ConfigurableJoint SetConfigurableJoint(Rigidbody connectedBody)
+        private ConfigurableJoint SetConfigurableJoint(Rigidbody connectedBody, int connectedPinCount)
         {
             ConfigurableJoint configurableJoint = gameObject.AddComponent<ConfigurableJoint>();
             configurableJoint.xMotion = ConfigurableJointMotion.Locked;
@@ -385,8 +399,8 @@ namespace Valve.VR.InteractionSystem
             //configurableJoint.connectedAnchor = connectedBody.position;
             //configurableJoint.anchor = gameObject.transform.position;
             //configurableJoint.enableCollision = true;
-            configurableJoint.breakForce = Mathf.Infinity;
-            configurableJoint.breakTorque = Mathf.Infinity;
+            configurableJoint.breakForce = connectedPinCount * breakForcePerPin * 10;
+            configurableJoint.breakTorque = connectedPinCount * breakForcePerPin;
             configurableJoint.connectedBody = connectedBody;
             return configurableJoint;
         }

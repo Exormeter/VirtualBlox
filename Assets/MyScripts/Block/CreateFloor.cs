@@ -33,26 +33,26 @@ namespace Valve.VR.InteractionSystem
         {
             for(int j = 0; j < tileCountY; j++)
             {
-                createCombinedTile(i, j);
+                CreateCombinedTile(i, j);
             }
         }
     }
 
-    private GameObject createCombinedTile(int row, int column)
+    private GameObject CreateCombinedTile(int row, int column)
     {
         GameObject container = new GameObject("CombinedTile");
         for (int x = row * 10; x < row * 10 + 10; x++)
         {
             for (int y = column * 10; y < column * 10 + 10; y++)
             {
-                createTile(container, x, y);
+                CreateTile(container, x, y);
             }
         }
-        combineTileMeshes(container);
+        CombineTileMeshes(container);
         return container;
     }
 
-    private void createTile(GameObject container, int x, int y)
+    private void CreateTile(GameObject container, int x, int y)
     {
         float xCoord = (this.startPosition.x + this.boundExtend.x * y * 2);
         float yCoord = this.startPosition.y;
@@ -63,7 +63,7 @@ namespace Valve.VR.InteractionSystem
         newTile.transform.SetParent(container.transform);
     }
 
-    private void combineTileMeshes(GameObject container)
+    private void CombineTileMeshes(GameObject container)
     {
         MeshFilter[] meshFilters = container.GetComponentsInChildren<MeshFilter>();
         

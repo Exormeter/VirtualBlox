@@ -60,7 +60,7 @@ public class VRInputModule : BaseInputModule
 
         if(newPointerPress == null)
         {
-            newPointerPress = 
+            newPointerPress = null; 
         }
     }
 

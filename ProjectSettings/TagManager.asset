@@ -10,6 +10,7 @@ TagManager:
   - HighLight
   - TapCollider
   - BlockManager
+  - PhysicManager
   layers:
   - Default
   - TransparentFX

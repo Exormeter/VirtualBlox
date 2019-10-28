@@ -13,11 +13,14 @@ namespace Valve.VR.InteractionSystem
         public List<BlockContainer> connectedBlocks = new List<BlockContainer>();
 
         public int connectedBlocksCount;
+        public int hash;
+        public PhysicSceneManager physicSceneManager;
         private GrooveHandler grooveHandler;
         private TapHandler tapHandler;
         private Hand attachedHand = null;
         private BlockGeometryScript blockGeometry;
         private Rigidbody rigidBody;
+        public Guid guid = Guid.NewGuid();
         
 
         private Joint jointDebug;
@@ -33,6 +36,13 @@ namespace Valve.VR.InteractionSystem
             tapHandler = GetComponentInChildren<TapHandler>();
             blockGeometry = GetComponent<BlockGeometryScript>();
             rigidBody = GetComponent<Rigidbody>();
+            physicSceneManager = GameObject.FindGameObjectWithTag("PhysicManager").GetComponent<PhysicSceneManager>();
+            if (!physicSceneManager.AlreadyExisits(guid))
+            {
+                GameObject cloneBlock = Instantiate(transform.gameObject);
+                cloneBlock.GetComponent<BlockScript>().guid = guid;
+                physicSceneManager.AddGameObjectToScene(cloneBlock);
+            }
         }
 
         
@@ -149,30 +159,35 @@ namespace Valve.VR.InteractionSystem
             {
                 if(!connectedBlocks.Exists(alreadyConnected => collidedBlock.Equals(alreadyConnected.BlockRootObject)))
                 {
-                    FixedJoint joint = gameObject.AddComponent<FixedJoint>();
-                    joint.connectedBody = collidedBlock.GetComponent<Rigidbody>();
-                    joint.breakForce = Mathf.Infinity;
-                    joint.breakTorque = breakForcePerPin * blockToTapDict[collidedBlock];
-
-
-
-                    //ConfigurableJoint joint = SetConfigurableJoint(collidedBlock.GetComponent<Rigidbody>(), blockToTapDict[collidedBlock]);
-                    jointDebug = joint;
-                    AddConnectedBlock(collidedBlock, joint, connectedOn);
-                    OTHER_BLOCK_IS_CONNECTED_ON otherConnection;
-                    if(connectedOn == OTHER_BLOCK_IS_CONNECTED_ON.GROOVE)
-                    {
-                        otherConnection = OTHER_BLOCK_IS_CONNECTED_ON.TAP;
-                    }
-                    else
-                    {
-                        otherConnection = OTHER_BLOCK_IS_CONNECTED_ON.GROOVE;
-                    }
-                    collidedBlock.GetComponent<BlockScript>().AddConnectedBlock(gameObject, joint, otherConnection);
-                    BroadcastMessage("OnBlockAttach", collidedBlock);
-                    collidedBlock.BroadcastMessage("OnBlockAttach", gameObject);
+                    ConnectBlocks(gameObject, collidedBlock, blockToTapDict[collidedBlock], connectedOn);
+                    physicSceneManager.ConnectBlocks(gameObject, collidedBlock, blockToTapDict[collidedBlock], connectedOn);
                 }
             }
+        }
+
+        public void ConnectBlocks(GameObject block, GameObject collidedBlock, int jointStrength, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
+        {
+            FixedJoint joint = block.AddComponent<FixedJoint>();
+            joint.connectedBody = collidedBlock.GetComponent<Rigidbody>();
+            joint.breakForce = Mathf.Infinity;
+            joint.breakTorque = breakForcePerPin * jointStrength;
+            //ConfigurableJoint joint = SetConfigurableJoint(collidedBlock.GetComponent<Rigidbody>(), blockToTapDict[collidedBlock]);
+
+            AddConnectedBlock(collidedBlock, joint, connectedOn);
+
+            OTHER_BLOCK_IS_CONNECTED_ON otherConnection;
+            if (connectedOn == OTHER_BLOCK_IS_CONNECTED_ON.GROOVE)
+            {
+                otherConnection = OTHER_BLOCK_IS_CONNECTED_ON.TAP;
+            }
+            else
+            {
+                otherConnection = OTHER_BLOCK_IS_CONNECTED_ON.GROOVE;
+            }
+
+            collidedBlock.GetComponent<BlockScript>().AddConnectedBlock(gameObject, joint, otherConnection);
+            BroadcastMessage("OnBlockAttach", collidedBlock);
+            collidedBlock.BroadcastMessage("OnBlockAttach", gameObject);
         }
 
         
@@ -340,6 +355,7 @@ namespace Valve.VR.InteractionSystem
             if (IsIndirectlyAttachedToFloor())
             {
                 FreezeBlock();
+                physicSceneManager.MatchBlock(transform.gameObject, guid);
             }
             else
             {

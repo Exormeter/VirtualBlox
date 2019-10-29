@@ -13,18 +13,17 @@ namespace Valve.VR.InteractionSystem
         public List<BlockContainer> connectedBlocks = new List<BlockContainer>();
 
         public int connectedBlocksCount;
-        public int hash;
         public PhysicSceneManager physicSceneManager;
         private GrooveHandler grooveHandler;
         private TapHandler tapHandler;
         private Hand attachedHand = null;
         private BlockGeometryScript blockGeometry;
         private Rigidbody rigidBody;
-        public Guid guid = Guid.NewGuid();
-        
 
-        private Joint jointDebug;
         
+        public bool IsSimulated = false;
+        public Guid guid = Guid.NewGuid();
+
         public int breakForcePerPin = 3;
         public bool IsFroozen;
         public bool UnfroozenForPhsicsCheck;
@@ -37,23 +36,22 @@ namespace Valve.VR.InteractionSystem
             blockGeometry = GetComponent<BlockGeometryScript>();
             rigidBody = GetComponent<Rigidbody>();
             physicSceneManager = GameObject.FindGameObjectWithTag("PhysicManager").GetComponent<PhysicSceneManager>();
+            physicSceneManager.AddGameObjectRefInGame(transform.gameObject);
             if (!physicSceneManager.AlreadyExisits(guid))
             {
-                GameObject cloneBlock = Instantiate(transform.gameObject);
-                cloneBlock.GetComponent<BlockScript>().guid = guid;
-                physicSceneManager.AddGameObjectToScene(cloneBlock);
+                GameObject twinBlock = Instantiate(transform.gameObject);
+                twinBlock.AddComponent<BlockScriptSim>();
+                twinBlock.GetComponent<BlockScriptSim>().breakForcePerPin = breakForcePerPin;
+                twinBlock.GetComponent<BlockScriptSim>().guid = guid;
+                physicSceneManager.AddGameObjectToPhysicScene(twinBlock);
             }
+            
         }
 
         
         void Update()
         {
             connectedBlocksCount = connectedBlocks.Count;
-            if(jointDebug != null)
-            {
-                Debug.Log("Torque: " + jointDebug.currentTorque);
-                Debug.Log("Force: " + jointDebug.currentForce);
-            }
         }
 
 
@@ -128,6 +126,7 @@ namespace Valve.VR.InteractionSystem
                     SendMessageToConnectedBlocks("EvaluateCollider");
                     SendMessageToConnectedBlocks("CheckFreeze");
                     SendMessageToConnectedBlocks("UnsetKinematic");
+                    physicSceneManager.StartSimulation();
                 }
                 yield return new WaitForFixedUpdate();
             }
@@ -159,8 +158,8 @@ namespace Valve.VR.InteractionSystem
             {
                 if(!connectedBlocks.Exists(alreadyConnected => collidedBlock.Equals(alreadyConnected.BlockRootObject)))
                 {
-                    ConnectBlocks(gameObject, collidedBlock, blockToTapDict[collidedBlock], connectedOn);
-                    physicSceneManager.ConnectBlocks(gameObject, collidedBlock, blockToTapDict[collidedBlock], connectedOn);
+                    ConnectBlocks(transform.gameObject, collidedBlock, blockToTapDict[collidedBlock], connectedOn);
+                    physicSceneManager.ConnectBlocks(guid, collidedBlock.GetComponent<BlockScript>().guid, blockToTapDict[collidedBlock], connectedOn);
                 }
             }
         }
@@ -185,9 +184,9 @@ namespace Valve.VR.InteractionSystem
                 otherConnection = OTHER_BLOCK_IS_CONNECTED_ON.GROOVE;
             }
 
-            collidedBlock.GetComponent<BlockScript>().AddConnectedBlock(gameObject, joint, otherConnection);
-            BroadcastMessage("OnBlockAttach", collidedBlock);
-            collidedBlock.BroadcastMessage("OnBlockAttach", gameObject);
+            collidedBlock.GetComponent<BlockScript>().AddConnectedBlock(transform.gameObject, joint, otherConnection);
+            BroadcastMessage("OnBlockAttach", collidedBlock, SendMessageOptions.DontRequireReceiver);
+            collidedBlock.BroadcastMessage("OnBlockAttach", transform.gameObject, SendMessageOptions.DontRequireReceiver);
         }
 
         
@@ -220,8 +219,25 @@ namespace Valve.VR.InteractionSystem
                 container.BlockScript.RemoveBlockConnections();
                 BroadcastMessage("OnBlockDetach", container.BlockRootObject, SendMessageOptions.DontRequireReceiver);
                 SendMessageToConnectedBlocks("RemovedConnection");
+                if (IsSimulated)
+                {
+                    physicSceneManager.JointBreak(guid, container.BlockScript.guid);
+                }
+                
             }
             SendMessageToConnectedBlocks("CheckFreeze");
+        }
+
+        public void RemoveJointViaSimulation(Guid connectedBlockGuid)
+        {
+            foreach(BlockContainer blockContainer in connectedBlocks)
+            {
+                if(blockContainer.BlockScript.guid == connectedBlockGuid)
+                {
+                    Destroy(blockContainer.ConnectedJoint);
+                    RemoveBlockConnections();
+                }
+            }
         }
 
         public void OnHandTryingToPull()

@@ -9,7 +9,13 @@ namespace Valve.VR.InteractionSystem
     public class PhysicSceneManager : MonoBehaviour
     {
         private PhysicsScene physicsScene;
-        private Dictionary<Guid, GameObject> exsitingBlocks = new Dictionary<Guid, GameObject>();
+        private Dictionary<Guid, GameObject> exsitingBlocksInSim = new Dictionary<Guid, GameObject>();
+        private Dictionary<Guid, GameObject> exsitingBlocksInGame = new Dictionary<Guid, GameObject>();
+        private List<Rigidbody> BlockMovement = new List<Rigidbody>();
+        public int physicSteps = 50;
+
+        public int simBlocks;
+        public int inGameBlocks;
         void Awake()
         {
             SceneManager.LoadSceneAsync(1, new LoadSceneParameters()
@@ -21,11 +27,24 @@ namespace Valve.VR.InteractionSystem
             physicsScene = SceneManager.GetSceneByBuildIndex(1).GetPhysicsScene();
         }
 
-        public void AddGameObjectToScene(GameObject gameObject)
+        private void Update()
         {
-            exsitingBlocks.Add(gameObject.GetComponent<BlockScript>().guid, gameObject);
+            simBlocks = exsitingBlocksInSim.Count;
+            inGameBlocks = exsitingBlocksInGame.Count;
+        }
+
+        
+
+        public void AddGameObjectToPhysicScene(GameObject gameObject)
+        {
+            exsitingBlocksInSim.Add(gameObject.GetComponent<BlockScriptSim>().guid, gameObject);
             StripGameObject(gameObject);
             SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetSceneByBuildIndex(1));
+        }
+
+        public void AddGameObjectRefInGame(GameObject gameObject)
+        {
+            exsitingBlocksInGame.Add(gameObject.GetComponent<BlockScript>().guid, gameObject);
         }
 
         private void StripGameObject(GameObject gameObject)
@@ -41,34 +60,51 @@ namespace Valve.VR.InteractionSystem
             }
             foreach (Component component in gameObject.GetComponents(typeof(Component)))
             {
-                if (!(component is BlockScript) && !(component is Rigidbody) && !(component is MeshFilter) && !(component is MeshRenderer) && !(component is Transform))
+                if (!(component is BlockScriptSim) && !(component is MeshFilter) && !(component is MeshRenderer) && !(component is Transform) && !(component is Collider) && !(component is Rigidbody))
                 {
                     Destroy(component);
                 }
             }
         }
 
-        internal void Simulate()
+        IEnumerator Simulate()
         {
-            physicsScene.Simulate(Time.fixedDeltaTime);
+            for(int i = 0; i <= physicSteps; i++)
+            {
+                physicsScene.Simulate(Time.fixedDeltaTime);
+                
+                yield return new WaitForFixedUpdate();
+            }
+
         }
 
         public bool AlreadyExisits(Guid guid)
         {
-            return exsitingBlocks.ContainsKey(guid);
+            return exsitingBlocksInSim.ContainsKey(guid);
         }
 
         public void MatchBlock(GameObject realBlock, Guid guid)
         {
-            GameObject simBlock = exsitingBlocks[guid];
-            simBlock.GetComponent<Rigidbody>().isKinematic = false;
-            simBlock.transform.SetPositionAndRotation(realBlock.transform.position, realBlock.transform.rotation);
-            simBlock.GetComponent<Rigidbody>().isKinematic = true;
+            GameObject simBlock = exsitingBlocksInSim[guid];
+            simBlock.GetComponent<BlockScriptSim>().MatchTwinBlock(realBlock);
         }
 
-        public void ConnectBlocks(GameObject gameObject, GameObject collidedBlock, int v)
+        public void ConnectBlocks(Guid block, Guid collidedBlock, int jointStrength, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
         {
-            
+            GameObject simBlock = exsitingBlocksInSim[block];
+            GameObject simCollidedBlock = exsitingBlocksInSim[collidedBlock];
+            simBlock.GetComponent<BlockScriptSim>().AddTempConnection(simBlock, simCollidedBlock, jointStrength, connectedOn);
+        }
+
+        public void JointBreak(Guid block, Guid connectedBlock)
+        {
+            GameObject realBlock = exsitingBlocksInGame[block];
+            realBlock.GetComponent<BlockScript>().RemoveJointViaSimulation(connectedBlock);
+        }
+
+        internal void StartSimulation()
+        {
+            StartCoroutine(Simulate());
         }
     }
 

@@ -23,7 +23,8 @@ namespace Valve.VR.InteractionSystem
         void Start()
         {
             rigidBody = GetComponent<Rigidbody>();
-            physicSceneManager = GameObject.FindGameObjectWithTag("PhysicManager").GetComponent<PhysicSceneManager>();  
+            physicSceneManager = GameObject.FindGameObjectWithTag("PhysicManager").GetComponent<PhysicSceneManager>();
+            transform.gameObject.SetActive(false);
         }
 
 
@@ -61,7 +62,7 @@ namespace Valve.VR.InteractionSystem
 
         private void OnJointBreak(float breakForce)
         {
-            Debug.Log("Joint Break");
+            Debug.Log("Joint Break Simulation");
             StartCoroutine(EvaluateJoints());
         }
 
@@ -87,16 +88,25 @@ namespace Valve.VR.InteractionSystem
                 container.BlockScriptSim.RemoveBlockConnections();
                 BroadcastMessage("OnBlockDetach", container.BlockRootObject, SendMessageOptions.DontRequireReceiver);
                 SendMessageToConnectedBlocks("RemovedConnection");
+                physicSceneManager.JointBreak(guid, container.BlockScriptSim.guid);
             }
         }
 
-        internal void MatchTwinBlock(GameObject realBlock)
+        public void MatchTwinBlock(Guid realBlockGuid)
         {
+            GameObject realBlock = physicSceneManager.GetRealBlockByGuid(realBlockGuid);
+            transform.gameObject.SetActive(true);
             transform.SetPositionAndRotation(realBlock.transform.position, realBlock.transform.rotation);
-            foreach(TempConnection tempConnection in tempConnectionList)
+            foreach(BlockContainer blockContainerReal in realBlock.GetComponent<BlockScript>().connectedBlocks)
             {
-                ConnectBlocks(transform.gameObject, tempConnection.otherBlock, tempConnection.jointStrength, tempConnection.connected_on);
+                GameObject containerSim = physicSceneManager.GetSimBlockByGuid(blockContainerReal.BlockScript.guid);
+                if (!connectedBlocks.Exists(alreadyConnected => containerSim.Equals(alreadyConnected.BlockRootObject)))
+                {
+                    containerSim.SetActive(true);
+                    ConnectBlocks(transform.gameObject, containerSim, 2, blockContainerReal.ConnectedOn);
+                }
             }
+
         }
 
         public List<BlockContainerSim> SearchDestroyedJoint()
@@ -124,11 +134,6 @@ namespace Valve.VR.InteractionSystem
             {
                 BroadcastMessage(message, SendMessageOptions.DontRequireReceiver);
             }
-        }
-
-        public void AddTempConnection(GameObject simBlock, GameObject simCollidedBlock, int jointStrength, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
-        {
-            tempConnectionList.Add(new TempConnection(simCollidedBlock, jointStrength, connectedOn));
         }
 
         public void AddConnectedBlock(GameObject block, Joint connectedJoint, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
@@ -177,6 +182,12 @@ namespace Valve.VR.InteractionSystem
             configurableJoint.breakTorque = connectedPinCount * breakForcePerPin;
             configurableJoint.connectedBody = connectedBody;
             return configurableJoint;
+        }
+
+        public void DisableTwin()
+        {
+            transform.gameObject.SetActive(false);
+            connectedBlocks.Clear();
         }
     }
 

@@ -25,7 +25,7 @@ namespace Valve.VR.InteractionSystem
         {
             if (spawnBlockAction.GetLastStateDown(leftHand) || spawnBlockAction.GetStateDown(righthand)) 
             {
-                GameObject block = Instantiate(spawnAble, new Vector3(0.2f, 0.7f, 0.3f), new Quaternion(0, 0, 0, 0));
+                GameObject block = Instantiate(spawnAble, transform.position, new Quaternion(0, 0, 0, 0));
                 block.SetActive(true);
                 //manager.StartSimulation();
             }

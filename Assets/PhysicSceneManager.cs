@@ -12,7 +12,7 @@ namespace Valve.VR.InteractionSystem
         private Dictionary<Guid, GameObject> exsitingBlocksInSim = new Dictionary<Guid, GameObject>();
         private Dictionary<Guid, GameObject> exsitingBlocksInGame = new Dictionary<Guid, GameObject>();
         private List<Rigidbody> BlockMovement = new List<Rigidbody>();
-        public int physicSteps = 50;
+        public int physicSteps = 10;
 
         public int simBlocks;
         public int inGameBlocks;
@@ -83,17 +83,15 @@ namespace Valve.VR.InteractionSystem
             return exsitingBlocksInSim.ContainsKey(guid);
         }
 
-        public void MatchBlock(GameObject realBlock, Guid guid)
+        
+        public GameObject GetRealBlockByGuid(Guid guid)
         {
-            GameObject simBlock = exsitingBlocksInSim[guid];
-            simBlock.GetComponent<BlockScriptSim>().MatchTwinBlock(realBlock);
+            return exsitingBlocksInGame[guid];
         }
 
-        public void ConnectBlocks(Guid block, Guid collidedBlock, int jointStrength, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
+        public GameObject GetSimBlockByGuid(Guid guid)
         {
-            GameObject simBlock = exsitingBlocksInSim[block];
-            GameObject simCollidedBlock = exsitingBlocksInSim[collidedBlock];
-            simBlock.GetComponent<BlockScriptSim>().AddTempConnection(simBlock, simCollidedBlock, jointStrength, connectedOn);
+            return exsitingBlocksInSim[guid];
         }
 
         public void JointBreak(Guid block, Guid connectedBlock)

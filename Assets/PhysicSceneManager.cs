@@ -12,7 +12,7 @@ namespace Valve.VR.InteractionSystem
         private Dictionary<Guid, GameObject> exsitingBlocksInSim = new Dictionary<Guid, GameObject>();
         private Dictionary<Guid, GameObject> exsitingBlocksInGame = new Dictionary<Guid, GameObject>();
         private List<Rigidbody> BlockMovement = new List<Rigidbody>();
-        public int physicSteps = 10;
+        public int physicSteps;
 
         public int simBlocks;
         public int inGameBlocks;
@@ -72,7 +72,7 @@ namespace Valve.VR.InteractionSystem
             for(int i = 0; i <= physicSteps; i++)
             {
                 physicsScene.Simulate(Time.fixedDeltaTime);
-                
+                Debug.Log("Simulate");
                 yield return new WaitForFixedUpdate();
             }
 

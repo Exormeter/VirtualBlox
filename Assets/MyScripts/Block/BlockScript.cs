@@ -25,7 +25,7 @@ namespace Valve.VR.InteractionSystem
         public int breakForcePerPin = 3;
         public bool IsFroozen;
         public bool UnfroozenForPhsicsCheck;
-        public int frameUntilColliderReEvaluation = 2;
+        public int frameUntilColliderReEvaluation;
 
         void Start()
         {
@@ -68,7 +68,11 @@ namespace Valve.VR.InteractionSystem
             BlockScript block = FindFirstCollidingBlock();
             if(block != null)
             {
-                block.MatchRotationWithBlock();
+                block.GetComponent<BlockScript>().GrooveOrTapHit(out List<CollisionObject> currentCollisionObjects, out OTHER_BLOCK_IS_CONNECTED_ON connectedOn);
+                block.MatchRotationWithBlock(currentCollisionObjects, connectedOn);
+
+                //Richte alle Blöcke nach Plazieren des ersten Blockes korrekt aus, alte Joints müssen vermutlich neu gesetzt werden 
+                block.SendMessageToConnectedBlocksBFS("MatchRotationWitchBlock");
             }
             SendMessageToConnectedBlocks("OnIndirectDetachedFromHand");
         }
@@ -103,9 +107,8 @@ namespace Valve.VR.InteractionSystem
             return null;
         }
 
-        public void MatchRotationWithBlock()
+        public void MatchRotationWithBlock(List<CollisionObject> currentCollisionObjects, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
         {
-            GrooveOrTapHit(out List<CollisionObject> currentCollisionObjects, out OTHER_BLOCK_IS_CONNECTED_ON connectedOn);
             if (currentCollisionObjects.Count > 1)
             {
                 SendMessageToConnectedBlocks("SetKinematic");
@@ -120,21 +123,31 @@ namespace Valve.VR.InteractionSystem
             {
                 if(i == frameUntilColliderReEvaluation)
                 {
-                    Debug.Log("Evaluating Colliders");
-
                     List<GameObject> connectedBlocksBeforeEvaluation = GetCurrentlyConnectedBlocks();
                     SendMessageToConnectedBlocks("EvaluateCollider");
                     if (IsIndirectlyAttachedToFloor())
                     {
-                        connectedBlocksBeforeEvaluation.ForEach(block => block.GetComponent<BlockScript>().blockScriptSim.MatchTwinBlock(block.GetComponent<BlockScript>().guid));
+                        SyncronizePhysicBlocks(connectedBlocksBeforeEvaluation);
                     }
                     SendMessageToConnectedBlocks("CheckFreeze"); 
-                    SendMessageToConnectedBlocks("UnsetKinematic");
+                    SendMessageToConnectedBlocks("UnsetKinematic"); 
                     physicSceneManager.StartSimulation();
                 }
                 yield return new WaitForFixedUpdate();
             }
             
+        }
+
+        private void SyncronizePhysicBlocks(List<GameObject> connectedBlocksBeforeEvaluation)
+        {
+            foreach (GameObject connectedBlockInHand in connectedBlocksBeforeEvaluation)
+            {
+                connectedBlockInHand.GetComponent<BlockScript>().blockScriptSim.MatchTwinBlock(connectedBlockInHand);
+            }
+            foreach (GameObject connectedBlockInHand in connectedBlocksBeforeEvaluation)
+            {
+                connectedBlockInHand.GetComponent<BlockScript>().blockScriptSim.ConnectBlocksAfterMatching(connectedBlockInHand);
+            }
         }
 
         private List<GameObject> GetCurrentlyConnectedBlocks(List<GameObject> visitedNodes = null)
@@ -364,6 +377,29 @@ namespace Valve.VR.InteractionSystem
                 BroadcastMessage(message, SendMessageOptions.DontRequireReceiver);
             }
         }
+
+        public void SendMessageToConnectedBlocksBFS(String message)
+        {
+            Queue<GameObject> blocksToVisit = new Queue<GameObject>();
+            List<int> visitedBlocks = new List<int>();
+            blocksToVisit.Enqueue(transform.gameObject);
+            visitedBlocks.Add(transform.gameObject.GetHashCode());
+
+            while(blocksToVisit.Count > 0)
+            {
+                GameObject currentBlock = blocksToVisit.Dequeue();
+                currentBlock.SendMessage(message);
+                foreach(BlockContainer currentBlockNeighbours in currentBlock.GetComponent<BlockScript>().connectedBlocks) {
+
+                    if (!visitedBlocks.Contains(currentBlockNeighbours.BlockRootObject.GetHashCode())){
+                        blocksToVisit.Enqueue(currentBlockNeighbours.BlockRootObject);
+                        visitedBlocks.Add(currentBlockNeighbours.BlockRootObject.GetHashCode());
+                    }
+                }
+            }
+            
+        }
+
 
         public void AddConnectedBlock(GameObject block, Joint connectedJoint, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
         {

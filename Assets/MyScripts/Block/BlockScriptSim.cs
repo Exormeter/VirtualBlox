@@ -92,12 +92,15 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
-        public void MatchTwinBlock(Guid realBlockGuid)
+        public void MatchTwinBlock(GameObject realBlock)
         {
-            GameObject realBlock = physicSceneManager.GetRealBlockByGuid(realBlockGuid);
             transform.gameObject.SetActive(true);
             transform.SetPositionAndRotation(realBlock.transform.position, realBlock.transform.rotation);
-            foreach(BlockContainer blockContainerReal in realBlock.GetComponent<BlockScript>().connectedBlocks)
+        }
+
+        public void ConnectBlocksAfterMatching(GameObject realBlock)
+        {
+            foreach (BlockContainer blockContainerReal in realBlock.GetComponent<BlockScript>().connectedBlocks)
             {
                 GameObject containerSim = physicSceneManager.GetSimBlockByGuid(blockContainerReal.BlockScript.guid);
                 if (!connectedBlocks.Exists(alreadyConnected => containerSim.Equals(alreadyConnected.BlockRootObject)))
@@ -106,7 +109,6 @@ namespace Valve.VR.InteractionSystem
                     ConnectBlocks(transform.gameObject, containerSim, 2, blockContainerReal.ConnectedOn);
                 }
             }
-
         }
 
         public List<BlockContainerSim> SearchDestroyedJoint()

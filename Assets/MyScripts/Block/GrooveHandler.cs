@@ -90,7 +90,7 @@ namespace Valve.VR.InteractionSystem
             return collisionList;
         }
 
-        private List<CollisionObject> GetOccupiedGrooves()
+        public List<CollisionObject> GetOccupiedGrooves()
         {
             List<CollisionObject> collisionList = new List<CollisionObject>(colliderDictionary.Values);
             collisionList.RemoveAll(collision => collision.IsConnected != true);

@@ -34,7 +34,7 @@ namespace Valve.VR.InteractionSystem
             return collisionList;
         }
 
-        private List<CollisionObject> GetOccupiedTaps()
+        public List<CollisionObject> GetOccupiedTaps()
         {
             List<CollisionObject> collisionList = new List<CollisionObject>(colliderDictionary.Values);
             collisionList.RemoveAll(collision => collision.IsConnected != true);

@@ -1537,7 +1537,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   connectedBlocksCount: 0
-  hash: 0
   physicSceneManager: {fileID: 0}
   breakForcePerPin: 25
   IsFroozen: 0
@@ -2675,7 +2674,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   connectedBlocksCount: 0
-  hash: 0
   physicSceneManager: {fileID: 0}
   breakForcePerPin: 25
   IsFroozen: 0
@@ -3125,7 +3123,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   connectedBlocksCount: 0
-  hash: 0
   physicSceneManager: {fileID: 0}
   breakForcePerPin: 5
   IsFroozen: 0
@@ -3569,6 +3566,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fdf0ed64d313650459469a6b20823a27, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  physicSteps: 20
+  simBlocks: 0
+  inGameBlocks: 0
 --- !u!4 &1850143301
 Transform:
   m_ObjectHideFlags: 0
@@ -3971,6 +3971,11 @@ PrefabInstance:
         type: 3}
       propertyPath: breakForcePerPin
       value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 257168285543960270, guid: 04c0a04a17fb4104687ffb3ee690570d,
+        type: 3}
+      propertyPath: frameUntilColliderReEvaluation
+      value: 103
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 04c0a04a17fb4104687ffb3ee690570d, type: 3}

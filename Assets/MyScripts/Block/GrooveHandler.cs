@@ -61,9 +61,9 @@ namespace Valve.VR.InteractionSystem
 
         public void RemovePinHighLight(GameObject tapCollider)
         {
-            for(int childIndex = 0; childIndex < tapCollider.transform.childCount; childIndex++)
+            for (int childIndex = 0; childIndex < tapCollider.transform.childCount; childIndex++)
             {
-                if(tapCollider.transform.GetChild(childIndex).tag == "HighLight")
+                if (tapCollider.transform.GetChild(childIndex).tag == "HighLight")
                 {
                     listHighLighter.Remove(tapCollider.transform.GetChild(childIndex).gameObject);
                     Destroy(tapCollider.transform.GetChild(childIndex).gameObject);
@@ -81,19 +81,19 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
-        
+
 
         public List<CollisionObject> GetCollidingObjects()
         {
             List<CollisionObject> collisionList = new List<CollisionObject>(colliderDictionary.Values);
-            collisionList.RemoveAll(collision => collision.CollidedBlock == null || collision.IsConnected == true);
+            collisionList.RemoveAll(collision => collision.CollidedBlock == null || collision.IsConnected);
             return collisionList;
         }
 
         public List<CollisionObject> GetOccupiedGrooves()
         {
             List<CollisionObject> collisionList = new List<CollisionObject>(colliderDictionary.Values);
-            collisionList.RemoveAll(collision => collision.IsConnected != true);
+            collisionList.RemoveAll(collision => !collision.IsConnected);
             return collisionList;
         }
 
@@ -101,9 +101,9 @@ namespace Valve.VR.InteractionSystem
         {
             listHighLighter.ForEach(highLigher => Destroy(highLigher));
             listHighLighter.Clear();
-            foreach(CollisionObject collisionObject in colliderDictionary.Values)
+            foreach (CollisionObject collisionObject in colliderDictionary.Values)
             {
-                if(collisionObject.CollidedBlock != null && collisionObject.CollidedBlock.GetHashCode() == block.GetHashCode())
+                if (collisionObject.CollidedBlock != null && collisionObject.CollidedBlock.GetHashCode() == block.GetHashCode())
                 {
                     collisionObject.IsConnected = true;
                 }
@@ -120,6 +120,13 @@ namespace Valve.VR.InteractionSystem
                 }
             }
         }
+
+        public List<CollisionObject> GetCollisionObjectsForGameObject(GameObject gameObject)
+        {
+            List<CollisionObject> collisionList = new List<CollisionObject>(colliderDictionary.Values);
+            collisionList.RemoveAll(block => block.CollidedBlock.GetHashCode() != gameObject.GetHashCode());
+            return collisionList;
+        }
     }
 
 
@@ -130,7 +137,7 @@ namespace Valve.VR.InteractionSystem
 
         public GameObject TapPosition { get; set; } = null;
         public GameObject GroovePosition { get; set; } = null;
-        
+
 
         public GameObject CollidedBlock { get; set; }
 
@@ -139,7 +146,7 @@ namespace Valve.VR.InteractionSystem
 
         public CollisionObject()
         {
-            
+
         }
 
         public Vector3 GetOffsetInWorldSpace(Transform transform)

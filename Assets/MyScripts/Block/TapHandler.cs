@@ -30,14 +30,14 @@ namespace Valve.VR.InteractionSystem
         public List<CollisionObject> GetCollidingObjects()
         {
             List<CollisionObject> collisionList = new List<CollisionObject>(colliderDictionary.Values);
-            collisionList.RemoveAll(collision => collision.CollidedBlock == null || collision.IsConnected == true);
+            collisionList.RemoveAll(collision => collision.CollidedBlock == null || collision.IsConnected);
             return collisionList;
         }
 
         public List<CollisionObject> GetOccupiedTaps()
         {
             List<CollisionObject> collisionList = new List<CollisionObject>(colliderDictionary.Values);
-            collisionList.RemoveAll(collision => collision.IsConnected != true);
+            collisionList.RemoveAll(collision => !collision.IsConnected);
             return collisionList;
         }
 
@@ -83,6 +83,13 @@ namespace Valve.VR.InteractionSystem
             {
                 collisionObject.ResetObject();
             }
+        }
+
+        public List<CollisionObject> GetCollisionObjectsForGameObject(GameObject gameObject)
+        {
+            List<CollisionObject> collisionList = new List<CollisionObject>(colliderDictionary.Values);
+            collisionList.RemoveAll(block => block.CollidedBlock.GetHashCode() != gameObject.GetHashCode());
+            return collisionList;
         }
     }
 }

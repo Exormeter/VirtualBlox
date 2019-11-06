@@ -29,7 +29,7 @@ public class MaterialHandler : MonoBehaviour
 
     void OnBlockAttach()
     {
-        if (GetComponent<BlockScript>().IsIndirectlyAttachedToHand())
+        if (GetComponent<BlockCommunication>().IsIndirectlyAttachedToHand())
         {
             meshRenderer.material = whileHoldingMaterial;
         }
@@ -47,7 +47,9 @@ public class MaterialHandler : MonoBehaviour
 
     void RemovedConnection()
     {
-        if (!GetComponent<BlockScript>().IsIndirectlyAttachedToHand())
+
+        //Needs IsIndirectlyAttachedToHand
+        if (GetComponent<BlockCommunication>().IsIndirectlyAttachedToHand())
         {
             meshRenderer.material = standardMaterial;
         }

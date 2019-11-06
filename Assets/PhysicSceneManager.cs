@@ -44,7 +44,7 @@ namespace Valve.VR.InteractionSystem
 
         public void AddGameObjectRefInGame(GameObject gameObject)
         {
-            exsitingBlocksInGame.Add(gameObject.GetComponent<BlockScript>().guid, gameObject);
+            exsitingBlocksInGame.Add(gameObject.GetComponent<BlockCommunication>().guid, gameObject);
         }
 
         private void StripGameObject(GameObject gameObject)
@@ -72,7 +72,6 @@ namespace Valve.VR.InteractionSystem
             for(int i = 0; i <= physicSteps; i++)
             {
                 physicsScene.Simulate(Time.fixedDeltaTime);
-                Debug.Log("Simulate");
                 yield return new WaitForFixedUpdate();
             }
 
@@ -97,7 +96,7 @@ namespace Valve.VR.InteractionSystem
         public void JointBreak(Guid block, Guid connectedBlock)
         {
             GameObject realBlock = exsitingBlocksInGame[block];
-            realBlock.GetComponent<BlockScript>().RemoveJointViaSimulation(connectedBlock);
+            realBlock.GetComponent<BlockCommunication>().RemoveJointViaSimulation(connectedBlock);
         }
 
         internal void StartSimulation()

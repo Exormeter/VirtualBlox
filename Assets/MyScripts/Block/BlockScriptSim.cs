@@ -33,15 +33,15 @@ namespace Valve.VR.InteractionSystem
             connectedBlocksCount = connectedBlocks.Count;
         }
 
-        public void ConnectBlocks(GameObject block, GameObject collidedBlock, int jointStrength, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
+        public void ConnectBlocks(GameObject block, GameObject collidedBlock, OTHER_BLOCK_IS_CONNECTED_ON connectedOn, int connectedPinsCount)
         {
             FixedJoint joint = block.AddComponent<FixedJoint>();
             joint.connectedBody = collidedBlock.GetComponent<Rigidbody>();
             joint.breakForce = Mathf.Infinity;
-            joint.breakTorque = breakForcePerPin * jointStrength;
+            joint.breakTorque = breakForcePerPin * connectedPinsCount;
             //ConfigurableJoint joint = SetConfigurableJoint(collidedBlock.GetComponent<Rigidbody>(), blockToTapDict[collidedBlock]);
 
-            AddConnectedBlock(collidedBlock, joint, connectedOn);
+            
 
             OTHER_BLOCK_IS_CONNECTED_ON otherConnection;
             if (connectedOn == OTHER_BLOCK_IS_CONNECTED_ON.GROOVE)
@@ -53,7 +53,8 @@ namespace Valve.VR.InteractionSystem
                 otherConnection = OTHER_BLOCK_IS_CONNECTED_ON.GROOVE;
             }
 
-            collidedBlock.GetComponent<BlockScriptSim>().AddConnectedBlock(transform.gameObject, joint, otherConnection);
+            AddConnectedBlock(collidedBlock, joint, connectedOn, connectedPinsCount);
+            collidedBlock.GetComponent<BlockScriptSim>().AddConnectedBlock(transform.gameObject, joint, otherConnection, connectedPinsCount);
             BroadcastMessage("OnBlockAttach", collidedBlock, SendMessageOptions.DontRequireReceiver);
             collidedBlock.BroadcastMessage("OnBlockAttach", transform.gameObject, SendMessageOptions.DontRequireReceiver);
         }
@@ -100,13 +101,13 @@ namespace Valve.VR.InteractionSystem
 
         public void ConnectBlocksAfterMatching(GameObject realBlock)
         {
-            foreach (BlockContainer blockContainerReal in realBlock.GetComponent<BlockScript>().connectedBlocks)
+            foreach (BlockContainer blockContainerReal in realBlock.GetComponent<BlockCommunication>().connectedBlocks)
             {
-                GameObject containerSim = physicSceneManager.GetSimBlockByGuid(blockContainerReal.BlockScript.guid);
+                GameObject containerSim = physicSceneManager.GetSimBlockByGuid(blockContainerReal.BlockCommunication.guid);
                 if (!connectedBlocks.Exists(alreadyConnected => containerSim.Equals(alreadyConnected.BlockRootObject)))
                 {
                     containerSim.SetActive(true);
-                    ConnectBlocks(transform.gameObject, containerSim, 2, blockContainerReal.ConnectedOn);
+                    ConnectBlocks(transform.gameObject, containerSim, blockContainerReal.ConnectedOn, blockContainerReal.ConnectedPinCount);
                 }
             }
         }
@@ -138,14 +139,19 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
-        public void AddConnectedBlock(GameObject block, Joint connectedJoint, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
+        public void AddConnectedBlock(GameObject block, Joint connectedJoint, OTHER_BLOCK_IS_CONNECTED_ON connectedOn, int connectedPinsCount)
         {
-            connectedBlocks.Add(new BlockContainerSim(block, connectedJoint, connectedOn));
+            connectedBlocks.Add(new BlockContainerSim(block, connectedJoint, connectedOn, connectedPinsCount));
         }
 
         public void RemoveConnectedBlock(BlockContainerSim container)
         {
             connectedBlocks.Remove(container);
+        }
+
+        public void RemoveConnectedBlock(GameObject block)
+        {
+            connectedBlocks.RemoveAll(connectedBlock => connectedBlock.BlockRootObject.GetHashCode() == block.GetHashCode());
         }
 
         public void SetKinematic()
@@ -188,8 +194,13 @@ namespace Valve.VR.InteractionSystem
 
         public void DisableTwin()
         {
-            transform.gameObject.SetActive(false);
+            foreach(BlockContainerSim blockContainerSim in connectedBlocks)
+            {
+                blockContainerSim.BlockScriptSim.RemoveConnectedBlock(transform.gameObject);
+                Destroy(blockContainerSim.ConnectedJoint);
+            }
             connectedBlocks.Clear();
+            transform.gameObject.SetActive(false);
         }
     }
 
@@ -198,17 +209,20 @@ namespace Valve.VR.InteractionSystem
     public class BlockContainerSim
     {
         public GameObject BlockRootObject { get; }
-        
+
         public Joint ConnectedJoint { get; }
         public OTHER_BLOCK_IS_CONNECTED_ON ConnectedOn { get; }
         public BlockScriptSim BlockScriptSim { get; }
 
-        public BlockContainerSim(GameObject block, Joint connectedJoint, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
+        public int ConnectedPinsCount {get;}
+
+        public BlockContainerSim(GameObject block, Joint connectedJoint, OTHER_BLOCK_IS_CONNECTED_ON connectedOn, int connectedPinsCount )
         {
             BlockRootObject = block;
             BlockScriptSim = block.GetComponent<BlockScriptSim>();
             ConnectedJoint = connectedJoint;
             ConnectedOn = connectedOn;
+            ConnectedPinsCount = connectedPinsCount;
         }
 
         public override bool Equals(object obj)

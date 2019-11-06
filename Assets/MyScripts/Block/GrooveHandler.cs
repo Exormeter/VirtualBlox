@@ -33,7 +33,7 @@ namespace Valve.VR.InteractionSystem
 
         public void RegisterCollision(GrooveCollider snappingCollider, GameObject tapCollider)
         {
-            if (GetComponentInParent<BlockScript>().IsIndirectlyAttachedToHand() && tapCollider.transform.childCount == 0)
+            if (GetComponentInParent<BlockCommunication>().IsIndirectlyAttachedToHand() && tapCollider.transform.childCount == 0)
             {
                 AddPinHighLight(tapCollider);
             }
@@ -124,6 +124,7 @@ namespace Valve.VR.InteractionSystem
         public List<CollisionObject> GetCollisionObjectsForGameObject(GameObject gameObject)
         {
             List<CollisionObject> collisionList = new List<CollisionObject>(colliderDictionary.Values);
+            collisionList.RemoveAll(block => block.CollidedBlock == null);
             collisionList.RemoveAll(block => block.CollidedBlock.GetHashCode() != gameObject.GetHashCode());
             return collisionList;
         }

@@ -15,7 +15,6 @@ namespace Valve.VR.InteractionSystem
         private BlockCommunication blockCommunication;
         public bool WasReMatchedWithBlock;
 
-        public int breakForcePerPin = 3;
         public bool IsFroozen;
         public int frameUntilColliderReEvaluation;
 
@@ -29,23 +28,16 @@ namespace Valve.VR.InteractionSystem
         }
 
 
-        void Update()
-        {
-
-        }
-
-
-        public void OnDetachedFromHand(Hand hand)
+        public void AttachToFloor()
         {
             GameObject block = blockCommunication.FindFirstCollidingBlock();
-            block.GetComponent<AttachFloorHandler>().GrooveOrTapHit(out List<CollisionObject> currentCollisionObjects, out OTHER_BLOCK_IS_CONNECTED_ON connectedOn);
-            if (block != null && currentCollisionObjects[0].CollidedBlock.GetComponent<BlockCommunication>().IsDirectlyAttachedToFloor())
+            if (block != null)
             {
+                block.GetComponent<AttachFloorHandler>().GrooveOrTapHit(out List<CollisionObject> currentCollisionObjects, out OTHER_BLOCK_IS_CONNECTED_ON connectedOn);
                 block.GetComponent<AttachFloorHandler>().MatchRotationWithCollidingBlock(currentCollisionObjects, connectedOn);
+                
+                
             }
-
-            //Duplicate in AttachHandHandler
-            blockCommunication.SendMessageToConnectedBlocks("OnIndirectDetachedFromHand");
         }
 
         public void MatchRotationWithCollidingBlock(List<CollisionObject> currentCollisionObjects, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
@@ -57,6 +49,7 @@ namespace Valve.VR.InteractionSystem
                 WasReMatchedWithBlock = true;
                 //Richte alle Blöcke nach Plazieren des ersten Blockes korrekt aus, alte Joints müssen vermutlich neu gesetzt werden 
                 blockCommunication.SendMessageToConnectedBlocksBFS("ReMatchConnectedBlock");
+                
                 StartCoroutine(EvaluateColliderAfterMatching());
             }
         }
@@ -126,30 +119,35 @@ namespace Valve.VR.InteractionSystem
             {
                 return;
             }
-
+            Debug.Log("Rematched");
             WasReMatchedWithBlock = true;
 
 
-            
 
 
+            BlockContainer connectedBlockContainer = null;
             //Durchsuche Verbundene Blöcke nach Block welcher bereits ausgerichtet ist
-            List<BlockContainer> connectedBlocks = blockCommunication.connectedBlocks;
-            connectedBlocks.RemoveAll(block => !block.AttachFloorHandler.WasReMatchedWithBlock);
+            foreach (BlockContainer connectedBlock in blockCommunication.connectedBlocks)
+            {
+                if (connectedBlock.AttachFloorHandler.WasReMatchedWithBlock)
+                {
+                    connectedBlockContainer = connectedBlock;
+                }
+            }
 
             // Finde herraus ob die Verbdingung über Groove oder Tap
             List<CollisionObject> connectionsToBlock = new List<CollisionObject>();
-            BlockContainer connectedBlockContainer = connectedBlocks[0];
+            
 
             //Durchsuche je nach dem den Tap oder GrooveHandler nach den richtigen CollisionObjects
             switch (connectedBlockContainer.ConnectedOn){
 
                 case OTHER_BLOCK_IS_CONNECTED_ON.GROOVE:
-                    connectionsToBlock = GetComponent<GrooveHandler>().GetCollisionObjectsForGameObject(connectedBlockContainer.BlockRootObject);
+                    connectionsToBlock = GetComponentInChildren<GrooveHandler>().GetCollisionObjectsForGameObject(connectedBlockContainer.BlockRootObject);
                     break;
 
                 case OTHER_BLOCK_IS_CONNECTED_ON.TAP:
-                    connectionsToBlock = GetComponent<TapHandler>().GetCollisionObjectsForGameObject(connectedBlockContainer.BlockRootObject);
+                    connectionsToBlock = GetComponentInChildren<TapHandler>().GetCollisionObjectsForGameObject(connectedBlockContainer.BlockRootObject);
                     break;
 
             }
@@ -169,6 +167,7 @@ namespace Valve.VR.InteractionSystem
         public void UnfreezeBlock()
         {
             rigidBody.constraints = RigidbodyConstraints.None;
+            blockCommunication.blockScriptSim.DisableTwin();
             IsFroozen = false;
         }
 
@@ -181,7 +180,6 @@ namespace Valve.VR.InteractionSystem
             else
             {
                 UnfreezeBlock();
-                blockCommunication.blockScriptSim.DisableTwin();
             }
         }
 
@@ -222,27 +220,6 @@ namespace Valve.VR.InteractionSystem
             connectedOn = OTHER_BLOCK_IS_CONNECTED_ON.NOT_CONNECTED;
         }
 
-        private ConfigurableJoint SetConfigurableJoint(Rigidbody connectedBody, int connectedPinCount)
-        {
-            ConfigurableJoint configurableJoint = gameObject.AddComponent<ConfigurableJoint>();
-            configurableJoint.xMotion = ConfigurableJointMotion.Locked;
-            configurableJoint.yMotion = ConfigurableJointMotion.Locked;
-            configurableJoint.zMotion = ConfigurableJointMotion.Locked;
-            configurableJoint.angularXMotion = ConfigurableJointMotion.Locked;
-            configurableJoint.angularYMotion = ConfigurableJointMotion.Locked;
-            configurableJoint.angularZMotion = ConfigurableJointMotion.Locked;
-            //configurableJoint.autoConfigureConnectedAnchor = true;
-            configurableJoint.projectionMode = JointProjectionMode.PositionAndRotation;
-            configurableJoint.projectionAngle = 0.001f;
-            configurableJoint.projectionDistance = 0.001f;
-            //configurableJoint.connectedAnchor = connectedBody.position;
-            //configurableJoint.anchor = gameObject.transform.position;
-            //configurableJoint.enableCollision = true;
-            configurableJoint.breakForce = connectedPinCount * breakForcePerPin * 10;
-            configurableJoint.breakTorque = connectedPinCount * breakForcePerPin;
-            configurableJoint.connectedBody = connectedBody;
-            return configurableJoint;
-        }
     }
 
 }

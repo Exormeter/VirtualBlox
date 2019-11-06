@@ -29,7 +29,7 @@ namespace Valve.VR.InteractionSystem
         private Hand pullingHand = null;
         private GrabTypes pullingGrabType;
         private GrooveHandler grooveHandler;
-        private float nextPulseTime = 0;
+        //private float nextPulseTime = 0;
 
         private List<Hand> holdingHands = new List<Hand>();
         private List<Rigidbody> holdingBodies = new List<Rigidbody>();
@@ -89,7 +89,7 @@ namespace Valve.VR.InteractionSystem
         {
             GrabTypes startingGrabType = hand.GetGrabStarting();
 
-            if (startingGrabType != GrabTypes.None && GetComponent<BlockScript>().IsIndirectlyAttachedToHand())
+            if (startingGrabType != GrabTypes.None && GetComponent<BlockCommunication>().IsIndirectlyAttachedToFloor())
             {
                 pullingHand = hand;
                 pullingGrabType = startingGrabType;
@@ -130,9 +130,7 @@ namespace Valve.VR.InteractionSystem
                 
             if(distanceHandToBlock >= pullDistanceMaximum)
             {
-                //Vector3 direction = pullingHand.transform.position - transform.position;
-                //rigidBodies[0].AddForce(direction);
-                this.BroadcastMessage("OnHandTryingToPull", pullingHand, SendMessageOptions.DontRequireReceiver);
+                GetComponent<BlockCommunication>().TryBlockPull();
                 wasPulled = true;
             }
 

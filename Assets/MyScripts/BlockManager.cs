@@ -9,7 +9,7 @@ namespace Valve.VR.InteractionSystem
     public class BlockManager : MonoBehaviour
     {
 
-        public List<BlockScript> currentBlocksInGame = new List<BlockScript>();
+        
         // Start is called before the first frame update
         void Start()
         {
@@ -18,10 +18,7 @@ namespace Valve.VR.InteractionSystem
  
         
 
-        public void AddBlock(BlockScript blockScript)
-        {
-            currentBlocksInGame.Add(blockScript);
-        }
+        
     }
 }
 

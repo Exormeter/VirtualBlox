@@ -90,8 +90,11 @@ namespace Valve.VR.InteractionSystem
         combinedTile.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
         combinedTile.GetComponent<MeshRenderer>().material = this.material;
         combinedTile.AddComponent(typeof(BlockGeometryScript));
-        combinedTile.AddComponent(typeof(BlockScript));
-
+        combinedTile.AddComponent(typeof(BlockCommunication));
+        combinedTile.GetComponent<BlockCommunication>().frameUntilColliderReEvaluation = 2;
+        combinedTile.GetComponent<BlockCommunication>().breakForcePerPin = 2;
+        combinedTile.AddComponent<AttachFloorHandler>();
+        combinedTile.AddComponent<AttachHandHandler>();
         Destroy(container);
         //combinedTile.transform.SetParent(this.transform);
         transform.gameObject.SetActive(true);

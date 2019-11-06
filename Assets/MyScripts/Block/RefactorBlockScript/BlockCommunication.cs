@@ -8,11 +8,13 @@ namespace Valve.VR.InteractionSystem
 {
     public class BlockCommunication : MonoBehaviour
     {
+        public int connectedBlockCount;
         public List<BlockContainer> connectedBlocks = new List<BlockContainer>();
         public Guid guid = Guid.NewGuid();
         public PhysicSceneManager physicSceneManager;
         public BlockScriptSim blockScriptSim;
         public int frameUntilColliderReEvaluation;
+        public int breakForcePerPin;
 
 
         void Start()
@@ -28,6 +30,11 @@ namespace Valve.VR.InteractionSystem
                 blockScriptSim = twinBlock.GetComponent<BlockScriptSim>();
                 physicSceneManager.AddGameObjectToPhysicScene(twinBlock);
             }
+        }
+
+        private void Update()
+        {
+            connectedBlockCount = connectedBlocks.Count;
         }
 
         public List<GameObject> GetCurrentlyConnectedBlocks(List<GameObject> visitedNodes = null)
@@ -60,7 +67,7 @@ namespace Valve.VR.InteractionSystem
 
             visitedNodes.Add(gameObject.GetHashCode());
 
-            if (GetComponent<GrooveHandler>().GetCollidingObjects().Count > 0 || GetComponent<TapHandler>().GetCollidingObjects().Count > 0)
+            if (GetComponentInChildren<GrooveHandler>().GetCollidingObjects().Count > 0 || GetComponentInChildren<TapHandler>().GetCollidingObjects().Count > 0)
             {
                 return transform.gameObject;
             }
@@ -95,7 +102,7 @@ namespace Valve.VR.InteractionSystem
             SendMessageToConnectedBlocks("CheckFreeze");
         }
 
-        
+
 
         public List<BlockContainer> SearchDestroyedJoint()
         {
@@ -123,6 +130,8 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
+        
+
         public void SendMessageToConnectedBlocksBFS(String message)
         {
             Queue<GameObject> blocksToVisit = new Queue<GameObject>();
@@ -147,19 +156,17 @@ namespace Valve.VR.InteractionSystem
 
         }
 
-        public void ConnectBlocks(GameObject block, GameObject collidedBlock, int jointStrength, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
+        public void ConnectBlocks(GameObject block, GameObject collidedBlock, int connectedPinCount, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
         {
-            if(connectedBlocks.Exists(alreadyConnected => collidedBlock.Equals(alreadyConnected.BlockRootObject))){
+            if (connectedBlocks.Exists(alreadyConnected => collidedBlock.Equals(alreadyConnected.BlockRootObject))) {
                 return;
             }
 
             FixedJoint joint = block.AddComponent<FixedJoint>();
             joint.connectedBody = collidedBlock.GetComponent<Rigidbody>();
             joint.breakForce = Mathf.Infinity;
-            joint.breakTorque = breakForcePerPin * jointStrength;
+            joint.breakTorque = breakForcePerPin * connectedPinCount;
             //ConfigurableJoint joint = SetConfigurableJoint(collidedBlock.GetComponent<Rigidbody>(), blockToTapDict[collidedBlock]);
-
-            AddConnectedBlock(collidedBlock, joint, connectedOn);
 
             OTHER_BLOCK_IS_CONNECTED_ON otherConnection;
             if (connectedOn == OTHER_BLOCK_IS_CONNECTED_ON.GROOVE)
@@ -171,19 +178,25 @@ namespace Valve.VR.InteractionSystem
                 otherConnection = OTHER_BLOCK_IS_CONNECTED_ON.GROOVE;
             }
 
-            collidedBlock.GetComponent<BlockCommunication>().AddConnectedBlock(transform.gameObject, joint, otherConnection);
+            AddConnectedBlock(collidedBlock, joint, connectedOn, connectedPinCount);
+            collidedBlock.GetComponent<BlockCommunication>().AddConnectedBlock(transform.gameObject, joint, otherConnection, connectedPinCount);
             BroadcastMessage("OnBlockAttach", collidedBlock, SendMessageOptions.DontRequireReceiver);
             collidedBlock.BroadcastMessage("OnBlockAttach", transform.gameObject, SendMessageOptions.DontRequireReceiver);
         }
 
-        public void AddConnectedBlock(GameObject block, Joint connectedJoint, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
+        public void AddConnectedBlock(GameObject block, Joint connectedJoint, OTHER_BLOCK_IS_CONNECTED_ON connectedOn, int connectedPinCount)
         {
-            connectedBlocks.Add(new BlockContainer(block, connectedJoint, connectedOn));
+            connectedBlocks.Add(new BlockContainer(block, connectedJoint, connectedOn, connectedPinCount));
         }
 
         public void RemoveConnectedBlock(BlockContainer container)
         {
             connectedBlocks.Remove(container);
+        }
+
+        public bool IsFloor()
+        {
+            return transform.gameObject.tag.Equals("Floor");
         }
 
         public bool IsDirectlyAttachedToFloor()
@@ -206,7 +219,7 @@ namespace Valve.VR.InteractionSystem
             }
 
             visitedNodes.Add(gameObject.GetHashCode());
-            if (IsDirectlyAttachedToFloor())
+            if (IsFloor() || IsDirectlyAttachedToFloor())
             {
                 return true;
             }
@@ -215,7 +228,7 @@ namespace Valve.VR.InteractionSystem
             {
                 if (!visitedNodes.Contains(blockContainer.BlockRootObject.GetHashCode()))
                 {
-                    if (blockContainer.BlockScript.IsIndirectlyAttachedToFloor(visitedNodes))
+                    if (blockContainer.BlockCommunication.IsIndirectlyAttachedToFloor(visitedNodes))
                     {
                         return true;
                     }
@@ -225,11 +238,47 @@ namespace Valve.VR.InteractionSystem
             return false;
         }
 
+
+        public bool IsDirectlyAttachedToHand()
+        {
+            return GetComponent<AttachHandHandler>().IsAttachedToHand();
+        }
+
+
+        public bool IsIndirectlyAttachedToHand(List<int> visitedNodes = null)
+        {
+            if (visitedNodes == null)
+            {
+                visitedNodes = new List<int>();
+            }
+
+            visitedNodes.Add(gameObject.GetHashCode());
+            if (IsDirectlyAttachedToHand())
+            {
+                return true;
+            }
+
+            foreach (BlockContainer blockContainer in connectedBlocks)
+            {
+                if (!visitedNodes.Contains(blockContainer.BlockRootObject.GetHashCode()))
+                {
+                    if (blockContainer.BlockCommunication.IsIndirectlyAttachedToHand(visitedNodes))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+
+
         public void RemoveJointViaSimulation(Guid connectedBlockGuid)
         {
             foreach (BlockContainer blockContainer in connectedBlocks)
             {
-                if (blockContainer.BlockScript.guid == connectedBlockGuid)
+                if (blockContainer.BlockCommunication.guid == connectedBlockGuid)
                 {
                     Destroy(blockContainer.ConnectedJoint);
                     StartCoroutine(EvaluateJoints());
@@ -258,12 +307,24 @@ namespace Valve.VR.InteractionSystem
 
         }
 
-        public void OnHandTryingToPull()
+        public bool TryBlockPull()
         {
-            RemoveBlockConnections();
+            OTHER_BLOCK_IS_CONNECTED_ON otherConnection = connectedBlocks[0].ConnectedOn;
+            foreach(BlockContainer connectedBlock in connectedBlocks)
+            {
+                if(connectedBlock.ConnectedOn != otherConnection)
+                {
+                    return false;
+                }
+            }
+            foreach(BlockContainer connectedBlock in connectedBlocks)
+            {
+                Destroy(connectedBlock.ConnectedJoint);
+                GetComponent<AttachFloorHandler>().UnfreezeBlock();
+                StartCoroutine(EvaluateJoints());
+            }
+            return true;
         }
-
-
 
     }
 
@@ -274,24 +335,24 @@ namespace Valve.VR.InteractionSystem
         public TapHandler TapHandler { get; }
         public BlockGeometryScript BlockGeometry { get; }
         public Joint ConnectedJoint { get; }
-        public OTHER_BLOCK_IS_CONNECTED_ON ConnectedOn { get; }
-        public BlockScript BlockScript { get; }
+        public OTHER_BLOCK_IS_CONNECTED_ON ConnectedOn { get; } 
         public AttachFloorHandler AttachFloorHandler { get; }
         public AttachHandHandler AttachHandHandler { get; }
         public BlockCommunication BlockCommunication{ get;}
+        public int ConnectedPinCount { get; }
 
-        public BlockContainer(GameObject block, Joint connectedJoint, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
+        public BlockContainer(GameObject block, Joint connectedJoint, OTHER_BLOCK_IS_CONNECTED_ON connectedOn, int connectedPin)
         {
             BlockRootObject = block;
             GrooveHandler = block.GetComponentInChildren<GrooveHandler>();
             TapHandler = block.GetComponentInChildren<TapHandler>();
             BlockGeometry = block.GetComponent<BlockGeometryScript>();
-            BlockScript = block.GetComponent<BlockScript>();
             BlockCommunication = block.GetComponent<BlockCommunication>();
             AttachHandHandler = block.GetComponent<AttachHandHandler>();
             AttachFloorHandler = block.GetComponent<AttachFloorHandler>();
             ConnectedJoint = connectedJoint;
             ConnectedOn = connectedOn;
+            ConnectedPinCount = connectedPin;
         }
 
         public override bool Equals(object obj)

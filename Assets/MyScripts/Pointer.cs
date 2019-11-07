@@ -9,7 +9,7 @@ public class Pointer: MonoBehaviour
 
     private LineRenderer lineRenderer = null;
     // Start is called before the first frame update
-    private void Start()
+    private void Awake()
     {
         lineRenderer = GetComponent<LineRenderer>();
     }

@@ -66,7 +66,7 @@ namespace Valve.VR
 
         protected int deviceIndex = -1;
 
-        protected SteamVR_HistoryBuffer historyBuffer = new SteamVR_HistoryBuffer(30);
+        public SteamVR_HistoryBuffer historyBuffer = new SteamVR_HistoryBuffer(30);
         
 
         protected virtual void Start()

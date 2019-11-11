@@ -27,7 +27,7 @@ namespace Valve.VR.InteractionSystem
             {
                 GameObject block = Instantiate(spawnAble, transform.position, new Quaternion(0, 0, 0, 0));
                 block.SetActive(true);
-                //manager.StartSimulation();
+                
             }
         }
     }

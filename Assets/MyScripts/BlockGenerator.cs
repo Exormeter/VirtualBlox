@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 using UnityEngine;
 
 namespace Valve.VR.InteractionSystem
@@ -10,17 +11,64 @@ namespace Valve.VR.InteractionSystem
     {
 
         public GameObject Block1x1;
-        private float heigt = 0.04f;
+        public Canvas canvas;
+        public GameObject Toggle;
+        public SteamVR_Input_Sources leftHand;
+        public SteamVR_Input_Sources righthand;
+        public SteamVR_Action_Boolean spawnBlockAction = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("SpawnBlock");
+        private List<List<GameObject>> matrix = new List<List<GameObject>>();
+        public int Rows;
+        public int Columns;
+        private readonly float heigt = 0.08f;
+
         // Start is called before the first frame update
         void Start()
         {
+            for(int r = 0; r < Rows; r++)
+            {
+                matrix.Add(new List<GameObject>());
+                for(int c = 0; c < Columns; c++)
+                {
+                    
+                    GameObject toggle = Instantiate(Toggle, canvas.transform, true);
+                    RectTransform rectTransfrom = toggle.GetComponent<RectTransform>();
+                    rectTransfrom.localScale = new Vector3(1, 1, 1);
+                    Vector3 anchorPosition = new Vector3(r * rectTransfrom.sizeDelta.x, - c * rectTransfrom.sizeDelta.y, 0);
+
+                    toggle.GetComponent<RectTransform>().anchoredPosition = anchorPosition;
+                    matrix[r].Add(toggle);
+                }
+            }
+            
+        }
+
+        void Update()
+        {
+            if (spawnBlockAction.GetLastStateDown(leftHand) || spawnBlockAction.GetStateDown(righthand))
+            {
+                //GameObject block = Instantiate(spawnAble, transform.position, new Quaternion(0, 0, 0, 0));
+                //block.SetActive(true);
+                GenerateBlock();
+            }
+        }
+
+        private void GenerateBlock()
+        {
             List<GameObject> objects = new List<GameObject>();
-            Debug.Log(Block1x1.GetComponent<MeshFilter>().mesh.bounds.ToString("F5"));
             GameObject container = new GameObject();
-            objects.Add(Instantiate(Block1x1, new Vector3(heigt, 0, heigt), Quaternion.identity, container.transform));
-            objects.Add(Instantiate(Block1x1, new Vector3(-heigt, 0, heigt), Quaternion.identity, container.transform));
-            objects.Add(Instantiate(Block1x1, new Vector3(heigt, 0, -heigt), Quaternion.identity, container.transform));
-            objects.Add(Instantiate(Block1x1, new Vector3(-heigt, 0, -heigt), Quaternion.identity, container.transform));
+            for (int r = 0; r < Rows; r++)
+            {
+                for (int c = 0; c < Columns; c++)
+                {
+                    Toggle toggle = matrix[r][c].GetComponent<Toggle>();
+                    if (toggle.isOn)
+                    {
+                        GameObject blockPart = Instantiate(Block1x1, new Vector3(r * heigt, 0, c * heigt), Quaternion.identity, container.transform);
+                        blockPart.SetActive(true);
+                        objects.Add(blockPart);
+                    }
+                }
+            }
             CombineTileMeshes(container);
         }
 
@@ -34,11 +82,9 @@ namespace Valve.VR.InteractionSystem
             {
                 combine[i].mesh = meshFilters[i].sharedMesh;
                 combine[i].transform = meshFilters[i].transform.localToWorldMatrix;
-                meshFilters[i].gameObject.SetActive(false);
             }
 
-            GameObject combinedTile = new GameObject("Floor");
-            combinedTile.tag = "Floor";
+            GameObject combinedTile = new GameObject("Block");
             combinedTile.AddComponent(typeof(MeshFilter));
             combinedTile.AddComponent(typeof(MeshRenderer));
             combinedTile.AddComponent(typeof(Rigidbody));
@@ -50,17 +96,8 @@ namespace Valve.VR.InteractionSystem
             //combinedTile.GetComponent<MeshRenderer>().material = this.material;
             combinedTile.AddComponent(typeof(BlockGeometryScript));
             combinedTile.AddComponent(typeof(BlockCommunication));
-
-            //Destroy(container);
-            //combinedTile.transform.SetParent(this.transform);
-            transform.gameObject.SetActive(true);
-
+            Destroy(container); 
         }
 
-        // Update is called once per frame
-        void Update()
-        {
-        
-        }
     }
 }

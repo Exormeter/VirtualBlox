@@ -29,6 +29,7 @@ namespace Valve.VR.InteractionSystem
         private Hand pullingHand = null;
         private GrabTypes pullingGrabType;
         private GrooveHandler grooveHandler;
+        //private LineRenderer lineRenderer;
         //private float nextPulseTime = 0;
 
         private List<Hand> holdingHands = new List<Hand>();
@@ -42,6 +43,7 @@ namespace Valve.VR.InteractionSystem
         {
             GetComponentsInChildren<Rigidbody>(rigidBodies);
             grooveHandler = GetComponentInChildren<GrooveHandler>();
+            gameObject.AddComponent<LineRenderer>();
         }
 
 

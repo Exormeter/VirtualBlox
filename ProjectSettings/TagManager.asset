@@ -11,6 +11,7 @@ TagManager:
   - TapCollider
   - BlockManager
   - PhysicManager
+  - Visited
   layers:
   - Default
   - TransparentFX

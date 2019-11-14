@@ -101,9 +101,9 @@ namespace Valve.VR.InteractionSystem
 
         public void ConnectBlocksAfterMatching(GameObject realBlock)
         {
-            foreach (BlockContainer blockContainerReal in realBlock.GetComponent<BlockCommunication>().connectedBlocks)
+            foreach (BlockContainer blockContainerReal in realBlock.GetComponent<BlockCommunication>().ConnectedBlocks)
             {
-                GameObject containerSim = physicSceneManager.GetSimBlockByGuid(blockContainerReal.BlockCommunication.guid);
+                GameObject containerSim = physicSceneManager.GetSimBlockByGuid(blockContainerReal.BlockCommunication.Guid);
                 if (!connectedBlocks.Exists(alreadyConnected => containerSim.Equals(alreadyConnected.BlockRootObject)))
                 {
                     containerSim.SetActive(true);

@@ -44,7 +44,7 @@ namespace Valve.VR.InteractionSystem
 
         public void AddGameObjectRefInGame(GameObject gameObject)
         {
-            exsitingBlocksInGame.Add(gameObject.GetComponent<BlockCommunication>().guid, gameObject);
+            exsitingBlocksInGame.Add(gameObject.GetComponent<BlockCommunication>().Guid, gameObject);
         }
 
         private void StripGameObject(GameObject gameObject)

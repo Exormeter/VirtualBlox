@@ -1836,6 +1836,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Block1x1: {fileID: 1678263863}
+  PrecurserBlock: {fileID: 385857102}
+  material: {fileID: 0}
   canvas: {fileID: 948794495}
   Toggle: {fileID: 4929744458283625446, guid: 654f231ca2c5111479ed595360e79780, type: 3}
   leftHand: 1
@@ -2990,6 +2992,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 257168285543960270, guid: 04c0a04a17fb4104687ffb3ee690570d, type: 3}
+    - {fileID: 257168285543960278, guid: 04c0a04a17fb4104687ffb3ee690570d, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 04c0a04a17fb4104687ffb3ee690570d, type: 3}
 --- !u!224 &553717827463473197
 RectTransform:

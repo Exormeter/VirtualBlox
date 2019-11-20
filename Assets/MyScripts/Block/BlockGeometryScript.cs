@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace Valve.VR.InteractionSystem
 {
@@ -13,8 +14,10 @@ namespace Valve.VR.InteractionSystem
         private const float BRICK_WALL_WIDTH = 0.008f;
         private const float BRICK_WALL_WIDTH_HALF = BRICK_WALL_WIDTH / 2;
         private const float BRICK_PIN_DISTANCE = 0.08f;
+        private const float BRICK_LENGTH = 0.08f;
         private const float BRICK_PIN_DIAMETER = 0.048f;
         private Mesh mesh;
+        private BlockStructure blockStructure;
 
         public PhysicMaterial material;
 
@@ -84,8 +87,6 @@ namespace Valve.VR.InteractionSystem
 
             AddPinTriggerCollider(BRICK_PIN_HEIGHT_HALF, taps, "Tap");
             AddPinTriggerCollider(-BRICK_HEIGHT / 1.1f, grooves, "Groove");
-
-            //AddPinTriggerCollider(BRICK_PIN_HEIGHT_HALF, taps, "TapCollider");
         }
 
         private void Start()
@@ -144,7 +145,7 @@ namespace Valve.VR.InteractionSystem
         // Update is called once per frame
         void Update()
         {
-            DrawBlockNormalsDebug();
+            
         }
 
         private void DrawBlockNormalsDebug()
@@ -161,6 +162,122 @@ namespace Valve.VR.InteractionSystem
 
         }
 
+        public void SetStructure(BlockStructure structure)
+        {
+            this.blockStructure = structure;
+            RemoveWallCollider();
+            
+            List<List<BlockPart>> allWallsInStrucure = new List<List<BlockPart>>();
+
+            SearchWallsInStructure(DIRECTION.UP).ForEach(wall => allWallsInStrucure.Add(wall));
+            SearchWallsInStructure(DIRECTION.DOWN).ForEach(wall => allWallsInStrucure.Add(wall));
+            SearchWallsInStructure(DIRECTION.LEFT).ForEach(wall => allWallsInStrucure.Add(wall));
+            SearchWallsInStructure(DIRECTION.RIGHT).ForEach(wall => allWallsInStrucure.Add(wall));
+
+            AddWallCollider(allWallsInStrucure);
+        }
+
+
+        public void AddWallCollider(List<List<BlockPart>> allWallsInStructure)
+        {
+            foreach(List<BlockPart> wall in allWallsInStructure)
+            {
+                float wallLength = wall.Count * BRICK_LENGTH;
+                Vector2 matrixCenter = new Vector2(blockStructure.RowsCropped - 1 / 2, blockStructure.ColsCropped - 1 / 2);
+
+                Vector3 center = mesh.bounds.center;
+                center.x = (blockStructure.ColsCropped - 1) / 2 * BRICK_LENGTH;
+                center.z = (blockStructure.RowsCropped - 1) / 2 * BRICK_LENGTH;
+
+
+                switch (wall[0].WallDirection)
+                {
+                    case DIRECTION.UP:
+                        float allRows = 0;
+                        wall.ForEach(blockPart => allRows += blockPart.Row);
+                        float averageX =  allRows / wall.Count;
+                        Vector3 size = new Vector3(wallLength, BRICK_HEIGHT, BRICK_WALL_WIDTH);
+
+                        float centerColliderX = mesh.bounds.center.x + (matrixCenter.x - averageX) * BRICK_LENGTH;
+                        float centerColliderZ = mesh.bounds.center.z + (matrixCenter.y - wall[0].Row) * BRICK_LENGTH;
+
+
+
+                        Vector3 centerCollider = new Vector3(centerColliderX , mesh.bounds.center.y - BRICK_PIN_HEIGHT_HALF, centerColliderZ);
+                        AddBoxCollider(size, centerCollider, false, transform.gameObject);
+                        break;
+
+                    case DIRECTION.DOWN:
+                        
+                        break;
+
+                    case DIRECTION.LEFT:
+                        
+                        break;
+
+                    case DIRECTION.RIGHT:
+                       
+                        break;
+                }
+            }
+        }
+
+        private List<List<BlockPart>> SearchWallsInStructure(DIRECTION direction)
+        {
+            List<List<BlockPart>> allWallsInStructure = new List<List<BlockPart>>();
+            for (int row = 0; row < blockStructure.RowsCropped; row++)
+            {
+                for (int col = 0; col < blockStructure.ColsCropped; col++)
+                {
+                    if (blockStructure[row, col] != null && !blockStructure[row, col].WasDirectionVisited(direction))
+                    {
+                        List<BlockPart> tempList = SearchWallsAtLocation(row, col, direction);
+                        if(tempList != null && tempList.Count != 0)
+                        {
+                            allWallsInStructure.Add(tempList);
+                        }
+                        
+                    }
+                }
+            }
+            return allWallsInStructure;
+        }
+
+        private List<BlockPart> SearchWallsAtLocation(int row, int col, DIRECTION direction, List<BlockPart> wallInStructure = null)
+        {
+            
+            if(row >= blockStructure.RowsCropped || col >= blockStructure.ColsCropped || row < 0 || col < 0)
+            {
+                return wallInStructure;
+            }
+
+            if (wallInStructure == null)
+            {
+                wallInStructure = new List<BlockPart>();
+            }
+
+            if (blockStructure[row, col] != null && !blockStructure.HasNeighbour(row, col, direction) )
+            {
+                blockStructure[row, col].DirectionVisited(direction);
+                wallInStructure.Add(new BlockPart(row, col, direction));
+                if(direction == DIRECTION.UP || direction == DIRECTION.DOWN)
+                {
+                    SearchWallsAtLocation(row, col + 1, direction, wallInStructure);
+                }
+                else
+                {
+                    SearchWallsAtLocation(row + 1, col, direction, wallInStructure);
+                }
+                
+            }
+
+            return wallInStructure;
+        }
+
+        private void RemoveWallCollider()
+        {
+            //throw new NotImplementedException();
+        }
 
         private void AddWallCollider()
         {
@@ -195,7 +312,6 @@ namespace Valve.VR.InteractionSystem
             Vector3 extends = mesh.bounds.extents;
             Vector3 blockCorner = new Vector3(center.x + extends.x, center.y + extends.y - BRICK_PIN_HEIGHT, center.z + extends.z);
             Vector3 firstPinCenterPoint = new Vector3(blockCorner.x - (BRICK_PIN_DISTANCE / 2), blockCorner.y + heightOffset, blockCorner.z - (BRICK_PIN_DISTANCE / 2));
-            //AddBoxCollider(new Vector3(0.01f, 0.01f, 0.01f), blockCorner, false, this.gameObject);
 
             Vector3 currentPinCenterPoint = firstPinCenterPoint;
 
@@ -288,7 +404,7 @@ namespace Valve.VR.InteractionSystem
             return center;
         }
 
-        public GameObject getRootGameObject()
+        public GameObject GetRootGameObject()
         {
             return gameObject;
         }

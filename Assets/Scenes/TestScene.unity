@@ -1845,8 +1845,8 @@ MonoBehaviour:
   spawnBlockAction:
     actionPath: /actions/default/in/SpawnBlock
     needsReinit: 0
-  Rows: 2
-  Columns: 6
+  Rows: 6
+  Columns: 2
 --- !u!114 &929960468
 MonoBehaviour:
   m_ObjectHideFlags: 0

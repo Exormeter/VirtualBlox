@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine;
 using System;
-using System.Linq;
 
 namespace Valve.VR.InteractionSystem
 {
@@ -37,7 +36,7 @@ namespace Valve.VR.InteractionSystem
                     GameObject toggle = Instantiate(Toggle, canvas.transform, true);
                     RectTransform rectTransfrom = toggle.GetComponent<RectTransform>();
                     rectTransfrom.localScale = new Vector3(1, 1, 1);
-                    Vector3 anchorPosition = new Vector3(r * rectTransfrom.sizeDelta.x, -c * rectTransfrom.sizeDelta.y, 0);
+                    Vector3 anchorPosition = new Vector3(c * rectTransfrom.sizeDelta.x, -r * rectTransfrom.sizeDelta.y, 0);
 
                     toggle.GetComponent<RectTransform>().anchoredPosition = anchorPosition;
                     matrix[r].Add(toggle);
@@ -51,37 +50,39 @@ namespace Valve.VR.InteractionSystem
             if (spawnBlockAction.GetLastStateDown(leftHand) || spawnBlockAction.GetStateDown(righthand))
             {
 
-                List<BlockStructure<GameObject>> blockStructures = FindStructures();
-                foreach (BlockStructure<GameObject> blockStructure in blockStructures)
+                List<BlockStructure> blockStructures = FindStructures();
+                foreach (BlockStructure blockStructure in blockStructures)
                 {
                     GenerateBlock(blockStructure);
                 }
             }
         }
 
-        private void GenerateBlock(BlockStructure<GameObject> structure)
+        private void GenerateBlock(BlockStructure structure)
         {
             List<GameObject> objects = new List<GameObject>();
             GameObject container = new GameObject();
-            for(int row = 0; row < structure.Rows; row++)
+            structure.GetCroppedMatrix();
+            for (int row = 0; row < structure.RowsCropped; row++)
             {
-                for (int col = 0; col < structure.Cols; col++)
+                for (int col = 0; col < structure.ColsCropped; col++)
                 {
-                    if(structure.GetCroppedMatrix()[row, col] != null)
+                    if (structure[row, col] != null)
                     {
                         GameObject blockPart = Instantiate(Block1x1, new Vector3(row * heigt, 0, col * heigt), Quaternion.identity, container.transform);
                         blockPart.SetActive(true);
                         objects.Add(blockPart);
                     }
-                    
+
                 }
             }
-            CombineTileMeshes(container);
+            GameObject newBlock = CombineTileMeshes(container);
+            newBlock.GetComponent<BlockGeometryScript>().SetStructure(structure);
         }
 
-        private List<BlockStructure<GameObject>> FindStructures()
+        private List<BlockStructure> FindStructures()
         {
-            List<BlockStructure<GameObject>> blockStructures = new List<BlockStructure<GameObject>>();
+            List<BlockStructure> blockStructures = new List<BlockStructure>();
             for (int row = 0; row < Rows; row++)
             {
                 for (int col = 0; col < Columns; col++)
@@ -89,7 +90,7 @@ namespace Valve.VR.InteractionSystem
                     Toggle toggle = matrix[row][col].GetComponent<Toggle>();
                     if (toggle.isOn && !matrix[row][col].tag.Equals("Visited"))
                     {
-                        BlockStructure<GameObject> structure = new BlockStructure<GameObject>(Rows, Columns);
+                        BlockStructure structure = new BlockStructure(Rows, Columns);
                         FindAdjacentNodes(structure, row, col);
                         blockStructures.Add(structure);
                     }
@@ -111,7 +112,7 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
-        private void FindAdjacentNodes(BlockStructure<GameObject> structure, int row, int column)
+        private void FindAdjacentNodes(BlockStructure structure, int row, int column)
         {
             if (row >= matrix.Count || column >= matrix[0].Count || row < 0 || column < 0 || matrix[row][column].tag.Equals("Visited"))
                 return;
@@ -120,7 +121,7 @@ namespace Valve.VR.InteractionSystem
 
             if (matrix[row][column].GetComponent<Toggle>().isOn)
             {
-                structure.AddNode(matrix[row][column], row, column);
+                structure.AddNode(new BlockPart(row, column), row, column);
                 FindAdjacentNodes(structure, row, column - 1);
                 FindAdjacentNodes(structure, row, column + 1);
                 FindAdjacentNodes(structure, row - 1, column);
@@ -128,7 +129,7 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
-        private void CombineTileMeshes(GameObject container)
+        private GameObject CombineTileMeshes(GameObject container)
         {
             MeshFilter[] meshFilters = container.GetComponentsInChildren<MeshFilter>();
 
@@ -149,6 +150,7 @@ namespace Valve.VR.InteractionSystem
 
             combinedBlock.transform.position = new Vector3(0, 2, 0);
             AddPrecurserComponents(combinedBlock);
+            return combinedBlock;
 
         }
 
@@ -177,94 +179,53 @@ namespace Valve.VR.InteractionSystem
         }
     }
 
-    public class BlockStructure<T>{
+    
 
-        private readonly T[,] matrix;
-        private T [,] croppedMatrix;
-        public int Rows { get; }
-        public int Cols { get; }
-        public BlockStructure(int row, int col)
+    public class BlockPart{
+
+        public int Row;
+        public int Col;
+
+        public HashSet<DIRECTION> visitedDirections = new HashSet<DIRECTION>();
+        public DIRECTION WallDirection;
+
+        public Vector3 partCenter;
+
+        public BlockPart(int row, int col)
         {
-            Rows = row;
-            Cols = col;
-            matrix = new T[row, col];
+            Row = row;
+            Col = col;
         }
 
-        public void AddNode(T node, int row, int col)
+        public BlockPart(int row, int col, DIRECTION wallDirection)
         {
-            matrix[row, col] = node;
+            WallDirection = wallDirection;
+            Row = row;
+            Col = col;
         }
 
-        public T[, ] GetCroppedMatrix()
+        public void ResetVisited()
         {
-
-            if(croppedMatrix != null)
-            {
-                return croppedMatrix;
-            }
-
-            int emptyRows = 0;
-            int emptyCols = 0;
-
-            for(int row = 0; row < Rows; row++)
-            {
-                if(!IsEmpty(GetRow(matrix, row)))
-                {
-                    emptyRows = row;
-                    break;
-                }
-            }
-
-            for (int col = 0; col < Cols; col++)
-            {
-                if (!IsEmpty(GetColumn(matrix, col)))
-                {
-                    emptyCols = col;
-                    break;
-                }
-            }
-
-            croppedMatrix = new T[Rows, Cols];
-            for(int row = 0; row < Rows; row++)
-            {
-                for (int col = 0; col < Cols; col++)
-                {
-                    if(matrix[row, col] != null)
-                    {
-                        croppedMatrix[row - emptyRows, col - emptyCols] = matrix[row, col];
-                    }
-                }
-            }
-            return croppedMatrix;
-
-
+            visitedDirections.Clear();
         }
 
-        private bool IsEmpty(T[] array)
+        public void DirectionVisited(DIRECTION direction)
         {
-            for(int i = 0; i < array.Length; i++)
-            {
-                if(array[i] != null)
-                {
-                    return false;
-                }
-            }
-            return true;
+            visitedDirections.Add(direction);
         }
 
-        private T[] GetColumn(T[,] matrix, int columnNumber)
+        public bool WasDirectionVisited(DIRECTION direction)
         {
-            return Enumerable.Range(0, matrix.GetLength(0))
-                    .Select(x => matrix[x, columnNumber])
-                    .ToArray();
+            return visitedDirections.Contains(direction);
         }
-
-        private T[] GetRow(T[,] matrix, int rowNumber)
-        {
-            return Enumerable.Range(0, matrix.GetLength(1))
-                    .Select(x => matrix[rowNumber, x])
-                    .ToArray();
-        }
-
     }
+
+    public enum DIRECTION
+    {
+        LEFT,
+        RIGHT,
+        UP,
+        DOWN
+    }
+
 }

@@ -22,7 +22,7 @@ namespace Valve.VR.InteractionSystem
         private List<List<GameObject>> matrix = new List<List<GameObject>>();
         public int Rows;
         public int Columns;
-        private readonly float heigt = 0.08f;
+        private readonly float length = 0.08f;
 
         // Start is called before the first frame update
         void Start()
@@ -39,6 +39,7 @@ namespace Valve.VR.InteractionSystem
                     Vector3 anchorPosition = new Vector3(c * rectTransfrom.sizeDelta.x, -r * rectTransfrom.sizeDelta.y, 0);
 
                     toggle.GetComponent<RectTransform>().anchoredPosition = anchorPosition;
+                    toggle.GetComponent<Toggle>().isOn = true;
                     matrix[r].Add(toggle);
                 }
             }
@@ -47,37 +48,53 @@ namespace Valve.VR.InteractionSystem
 
         void Update()
         {
-            if (spawnBlockAction.GetLastStateDown(leftHand) || spawnBlockAction.GetStateDown(righthand))
-            {
+            //if (spawnBlockAction.GetLastStateDown(leftHand) || spawnBlockAction.GetStateDown(righthand))
+            //{    
 
+            //    List<BlockStructure> blockStructures = FindStructures();
+            //    foreach (BlockStructure blockStructure in blockStructures)
+            //    {
+            //        GenerateBlock(blockStructure);
+            //    }
+            //}
+            if (Input.GetKeyUp("space"))
+            {
+                Debug.Log("test");
                 List<BlockStructure> blockStructures = FindStructures();
                 foreach (BlockStructure blockStructure in blockStructures)
                 {
                     GenerateBlock(blockStructure);
                 }
+                
             }
         }
 
         private void GenerateBlock(BlockStructure structure)
         {
-            List<GameObject> objects = new List<GameObject>();
             GameObject container = new GameObject();
             structure.GetCroppedMatrix();
+            float rowMiddlePoint = (float) (structure.RowsCropped - 1) / 2;
+            float colMiddlePoint = (float) (structure.ColsCropped - 1) / 2;
             for (int row = 0; row < structure.RowsCropped; row++)
             {
                 for (int col = 0; col < structure.ColsCropped; col++)
                 {
                     if (structure[row, col] != null)
                     {
-                        GameObject blockPart = Instantiate(Block1x1, new Vector3(row * heigt, 0, col * heigt), Quaternion.identity, container.transform);
+
+                        Vector3 partPosition = new Vector3((rowMiddlePoint - row) * length, 0, (colMiddlePoint - col) * length);
+                        GameObject blockPart = Instantiate(Block1x1, partPosition, Quaternion.identity, container.transform);
                         blockPart.SetActive(true);
-                        objects.Add(blockPart);
                     }
 
                 }
             }
-            GameObject newBlock = CombineTileMeshes(container);
-            newBlock.GetComponent<BlockGeometryScript>().SetStructure(structure);
+            Debug.Break();
+            //GameObject newBlock = CombineTileMeshes(container);
+            //AddPrecurserComponents(newBlock);
+            
+            //newBlock.GetComponent<BlockGeometryScript>().SetStructure(structure);
+            Debug.Break();
         }
 
         private List<BlockStructure> FindStructures()
@@ -147,9 +164,6 @@ namespace Valve.VR.InteractionSystem
             combinedBlock.GetComponent<MeshFilter>().mesh = new Mesh();
             combinedBlock.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
             Destroy(container);
-
-            combinedBlock.transform.position = new Vector3(0, 2, 0);
-            AddPrecurserComponents(combinedBlock);
             return combinedBlock;
 
         }
@@ -160,6 +174,7 @@ namespace Valve.VR.InteractionSystem
             for (int i = 0; i < components.Length; i++)
             {
                 CopyComponent(components[i], combinedBlock);
+
             }
 
         }

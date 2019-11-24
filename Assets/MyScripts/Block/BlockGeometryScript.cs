@@ -183,40 +183,40 @@ namespace Valve.VR.InteractionSystem
             foreach(List<BlockPart> wall in allWallsInStructure)
             {
                 float wallLength = wall.Count * BRICK_LENGTH;
-                Vector2 matrixCenter = new Vector2(blockStructure.RowsCropped - 1 / 2, blockStructure.ColsCropped - 1 / 2);
+                float rowMiddlePoint = (float) (blockStructure.RowsCropped - 1) / 2;
+                float colMiddlePoint = (float) (blockStructure.ColsCropped - 1) / 2;
 
-                Vector3 center = mesh.bounds.center;
-                center.x = (blockStructure.ColsCropped - 1) / 2 * BRICK_LENGTH;
-                center.z = (blockStructure.RowsCropped - 1) / 2 * BRICK_LENGTH;
+                Vector3 centerMesh = mesh.bounds.center;
 
 
                 switch (wall[0].WallDirection)
                 {
                     case DIRECTION.UP:
-                        float allRows = 0;
-                        wall.ForEach(blockPart => allRows += blockPart.Row);
-                        float averageX =  allRows / wall.Count;
-                        Vector3 size = new Vector3(wallLength, BRICK_HEIGHT, BRICK_WALL_WIDTH);
 
-                        float centerColliderX = mesh.bounds.center.x + (matrixCenter.x - averageX) * BRICK_LENGTH;
-                        float centerColliderZ = mesh.bounds.center.z + (matrixCenter.y - wall[0].Row) * BRICK_LENGTH;
-
+                        float wallCloumnAverage = 0;
+                        wall.ForEach(blockPart => wallCloumnAverage += blockPart.Col);
+                        wallCloumnAverage /= wall.Count;
+                        float centerColliderZ = centerMesh.z - ((colMiddlePoint - wallCloumnAverage) * BRICK_LENGTH);
+                        float centerColliderX = (rowMiddlePoint - wall[0].Row) * BRICK_LENGTH;
 
 
-                        Vector3 centerCollider = new Vector3(centerColliderX , mesh.bounds.center.y - BRICK_PIN_HEIGHT_HALF, centerColliderZ);
+                        Vector3 size = new Vector3(BRICK_WALL_WIDTH, BRICK_HEIGHT, wallLength);
+
+                        Vector3 centerCollider = new Vector3(centerColliderX - BRICK_WALL_WIDTH_HALF, centerMesh.y - BRICK_PIN_HEIGHT_HALF, centerColliderZ);
+
                         AddBoxCollider(size, centerCollider, false, transform.gameObject);
                         break;
 
                     case DIRECTION.DOWN:
-                        
+
                         break;
 
                     case DIRECTION.LEFT:
-                        
+
                         break;
 
                     case DIRECTION.RIGHT:
-                       
+
                         break;
                 }
             }
@@ -369,13 +369,13 @@ namespace Valve.VR.InteractionSystem
             return collider;
         }
 
-        private Collider AddBoxCollider(Vector3 size, Vector3 center, bool isTrigger, GameObject otherGameObject)
+        private Collider AddBoxCollider(Vector3 sizeCollider, Vector3 centerCollider, bool isTrigger, GameObject otherGameObject)
         {
-            BoxCollider collider = otherGameObject.AddComponent<BoxCollider>();
-            collider.size = size;
-            collider.center = center;
-            collider.isTrigger = isTrigger;
-            return collider;
+            BoxCollider newCollider = otherGameObject.AddComponent<BoxCollider>();
+            newCollider.size = sizeCollider;
+            newCollider.center = centerCollider;
+            newCollider.isTrigger = isTrigger;
+            return newCollider;
         }
 
         public Vector3 GetCenterTop()

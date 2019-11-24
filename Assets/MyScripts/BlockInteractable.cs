@@ -4,8 +4,8 @@ using System.Collections.Generic;
 namespace Valve.VR.InteractionSystem
 {
     //-------------------------------------------------------------------------
-    [RequireComponent(typeof(Interactable))]
-    [RequireComponent(typeof(BlockGeometryScript))]
+    //[RequireComponent(typeof(Interactable))]
+    //[RequireComponent(typeof(BlockGeometryScript))]
     public class BlockInteractable : MonoBehaviour
     {
         public enum AttachMode
@@ -43,7 +43,7 @@ namespace Valve.VR.InteractionSystem
         {
             GetComponentsInChildren<Rigidbody>(rigidBodies);
             grooveHandler = GetComponentInChildren<GrooveHandler>();
-            gameObject.AddComponent<LineRenderer>();
+            //gameObject.AddComponent<LineRenderer>();
         }
 
 

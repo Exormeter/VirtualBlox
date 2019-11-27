@@ -12,9 +12,11 @@ namespace Valve.VR.InteractionSystem
         public GameObject pinHighLight;
         public int occupiedGrooves = 0;
 
-        // Start is called before the first frame update
+        
         void Start()
         {
+            pinHighLight = Resources.Load("CheckMark", typeof(GameObject)) as GameObject;
+
             foreach (GrooveCollider snaps in GetComponentsInChildren<GrooveCollider>())
             {
                 colliderDictionary.Add(snaps, new CollisionObject());

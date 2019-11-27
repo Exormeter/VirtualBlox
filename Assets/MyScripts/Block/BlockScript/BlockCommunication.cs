@@ -17,15 +17,16 @@ namespace Valve.VR.InteractionSystem
         public BlockScriptSim blockScriptSim;
         public int frameUntilColliderReEvaluation;
         public int breakForcePerPin;
-
-
+ 
         void Start()
         {
             physicSceneManager = GameObject.FindGameObjectWithTag("PhysicManager").GetComponent<PhysicSceneManager>();
             physicSceneManager.AddGameObjectRefInGame(transform.gameObject);
             if (!physicSceneManager.AlreadyExisits(Guid))
             {
+                
                 GameObject twinBlock = Instantiate(transform.gameObject);
+                
                 twinBlock.AddComponent<BlockScriptSim>();
                 twinBlock.GetComponent<BlockScriptSim>().breakForcePerPin = breakForcePerPin;
                 twinBlock.GetComponent<BlockScriptSim>().guid = Guid;
@@ -327,7 +328,6 @@ namespace Valve.VR.InteractionSystem
             }
             return true;
         }
-
     }
 
     public class BlockContainer

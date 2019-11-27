@@ -8,6 +8,7 @@ public class MaterialHandler : MonoBehaviour
     private Material standardMaterial;
     public Material whileHoldingMaterial;
     private MeshRenderer meshRenderer;
+    
     // Start is called before the first frame update
     void Start()
     {

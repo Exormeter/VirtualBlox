@@ -16,10 +16,11 @@ namespace Valve.VR.InteractionSystem
         private const float BRICK_PIN_DISTANCE = 0.08f;
         private const float BRICK_LENGTH = 0.08f;
         private const float BRICK_PIN_DIAMETER = 0.048f;
+        private GameObject tapContainer;
+        private GameObject groovesContainer;
         private Mesh mesh;
         private BlockStructure blockStructure;
-
-        public PhysicMaterial material;
+        private List<Collider> wallColliderList = new List<Collider>();
 
         [HideInInspector]
         public GameObject CornerTopA { get; private set; }
@@ -51,45 +52,36 @@ namespace Valve.VR.InteractionSystem
                 BRICK_HEIGHT = 0.096f;
             }
 
-            AddWallCollider();
             GameObject taps = new GameObject("Taps");
+            taps.tag = "Tap";
+            taps.AddComponent<TapHandler>();
+            taps.transform.SetParent(this.transform);
+            taps.transform.localPosition = new Vector3(0f, 0f, 0f);
+
             GameObject grooves = new GameObject("Grooves");
+            grooves.tag = "Groove";
+            grooves.AddComponent<GrooveHandler>();
+            grooves.transform.SetParent(this.transform);
+            grooves.transform.localPosition = new Vector3(0f, 0f, 0f);
+            tapContainer = taps;
+            groovesContainer = grooves;
 
-            for (int i = 0; i < transform.childCount; i++)
-            {
-                if (transform.GetChild(i).gameObject.tag == "Tap")
-                {
-                    Destroy(taps);
-                    taps = transform.GetChild(i).gameObject;
-                }
-                else if(transform.GetChild(i).gameObject.tag == "Groove")
-                {
-                    Destroy(grooves);
-                    grooves = transform.GetChild(i).gameObject;
-                }
-            }
-
-            if (!taps.tag.Equals("Tap"))
-            {
-                taps.tag = "Tap";
-                taps.AddComponent<TapHandler>();
-                taps.transform.SetParent(this.transform);
-                taps.transform.localPosition = new Vector3(0f, 0f, 0f);
-            }
-
-            if (!grooves.tag.Equals("Groove"))
-            {
-                grooves.tag = "Groove";
-                grooves.AddComponent<GrooveHandler>();
-                grooves.transform.SetParent(this.transform);
-                grooves.transform.localPosition = new Vector3(0f, 0f, 0f);
-            }
-
-            AddPinTriggerCollider(BRICK_PIN_HEIGHT_HALF, taps, "Tap");
-            AddPinTriggerCollider(-BRICK_HEIGHT / 1.1f, grooves, "Groove");
         }
 
         private void Start()
+        {
+            //Structure was not set, so try to calculate Walls
+            if(GetComponents<Collider>().Length == 0)
+            {
+                AddWallCollider();
+                AddPinTriggerCollider(BRICK_PIN_HEIGHT_HALF, tapContainer, "Tap");
+                AddPinTriggerCollider(-BRICK_HEIGHT / 1.1f, groovesContainer, "Groove");
+            }
+            
+            AddCorners();
+        }
+
+        private void AddCorners()
         {
             Vector3 size = mesh.bounds.size;
             Vector3 center = transform.TransformPoint(mesh.bounds.center);
@@ -142,11 +134,6 @@ namespace Valve.VR.InteractionSystem
         }
 
 
-        // Update is called once per frame
-        void Update()
-        {
-            
-        }
 
         private void DrawBlockNormalsDebug()
         {
@@ -163,7 +150,7 @@ namespace Valve.VR.InteractionSystem
         }
 
         public void SetStructure(BlockStructure structure)
-        {
+        {   
             this.blockStructure = structure;
             RemoveWallCollider();
             
@@ -175,8 +162,39 @@ namespace Valve.VR.InteractionSystem
             SearchWallsInStructure(DIRECTION.RIGHT).ForEach(wall => allWallsInStrucure.Add(wall));
 
             AddWallCollider(allWallsInStrucure);
+            AddTopCollider();
+            AddPinTriggerColliderByStructure(BRICK_PIN_HEIGHT_HALF, tapContainer, "Tap");
+            AddPinTriggerColliderByStructure(-BRICK_HEIGHT / 1.1f, groovesContainer, "Groove");
+
         }
 
+        public BlockStructure GetStructure()
+        {
+            return blockStructure;
+        }
+
+        private void AddTopCollider()
+        {
+            Vector3 topSideSize = new Vector3(BRICK_LENGTH, BRICK_WALL_WIDTH, BRICK_LENGTH);
+            float rowMiddlePoint = (float)(blockStructure.RowsCropped - 1) / 2;
+            float colMiddlePoint = (float)(blockStructure.ColsCropped - 1) / 2;
+
+            for (int row = 0; row < blockStructure.RowsCropped; row++)
+            {
+                for(int col = 0; col < blockStructure.ColsCropped; col++)
+                {
+                    if(blockStructure[row, col] != null)
+                    {
+                        float centerX = (rowMiddlePoint - row) * BRICK_LENGTH;
+                        float centerY = GetCenterTop().y - (BRICK_WALL_WIDTH / 2);
+                        float centerZ = (colMiddlePoint - col) * BRICK_LENGTH;
+                        
+                        Vector3 colliderCenter = new Vector3(centerX, centerY, centerZ);
+                        AddBoxCollider(topSideSize, colliderCenter, false, transform.gameObject);
+                    }
+                }
+            }
+        }
 
         public void AddWallCollider(List<List<BlockPart>> allWallsInStructure)
         {
@@ -186,38 +204,67 @@ namespace Valve.VR.InteractionSystem
                 float rowMiddlePoint = (float) (blockStructure.RowsCropped - 1) / 2;
                 float colMiddlePoint = (float) (blockStructure.ColsCropped - 1) / 2;
 
-                Vector3 centerMesh = mesh.bounds.center;
-
+                Vector3 centerMesh = GetComponent<MeshFilter>().mesh.bounds.center;
+                float wallCloumnAverage = 0;
+                float wallRowAverage = 0;
+                wall.ForEach(blockPart => {
+                    wallRowAverage += blockPart.Row;
+                    wallCloumnAverage += blockPart.Col;
+                });
+                wallRowAverage /= wall.Count;
+                wallCloumnAverage /= wall.Count;
 
                 switch (wall[0].WallDirection)
                 {
                     case DIRECTION.UP:
+                        {
+                            float centerColliderZ = (colMiddlePoint - wallCloumnAverage) * BRICK_LENGTH;
+                            float centerColliderX = (rowMiddlePoint + 0.5f - wall[0].Row) * BRICK_LENGTH;
 
-                        float wallCloumnAverage = 0;
-                        wall.ForEach(blockPart => wallCloumnAverage += blockPart.Col);
-                        wallCloumnAverage /= wall.Count;
-                        float centerColliderZ = centerMesh.z - ((colMiddlePoint - wallCloumnAverage) * BRICK_LENGTH);
-                        float centerColliderX = (rowMiddlePoint - wall[0].Row) * BRICK_LENGTH;
+                            Vector3 size = new Vector3(BRICK_WALL_WIDTH, BRICK_HEIGHT, wallLength);
+                            Vector3 centerCollider = new Vector3(centerColliderX - BRICK_WALL_WIDTH_HALF, centerMesh.y - BRICK_PIN_HEIGHT_HALF, centerColliderZ);
 
-
-                        Vector3 size = new Vector3(BRICK_WALL_WIDTH, BRICK_HEIGHT, wallLength);
-
-                        Vector3 centerCollider = new Vector3(centerColliderX - BRICK_WALL_WIDTH_HALF, centerMesh.y - BRICK_PIN_HEIGHT_HALF, centerColliderZ);
-
-                        AddBoxCollider(size, centerCollider, false, transform.gameObject);
-                        break;
+                            AddBoxCollider(size, centerCollider, false, transform.gameObject);
+                            break;
+                        }
 
                     case DIRECTION.DOWN:
+                        {
+                            float centerColliderZ = (colMiddlePoint - wallCloumnAverage) * BRICK_LENGTH;
+                            float centerColliderX = (rowMiddlePoint - 0.5f - wall[0].Row) * BRICK_LENGTH;
 
-                        break;
+                            Vector3 size = new Vector3(BRICK_WALL_WIDTH, BRICK_HEIGHT, wallLength);
+                            Vector3 centerCollider = new Vector3(centerColliderX + BRICK_WALL_WIDTH_HALF, centerMesh.y - BRICK_PIN_HEIGHT_HALF, centerColliderZ);
+
+                            AddBoxCollider(size, centerCollider, false, transform.gameObject);
+                            break;
+                        }
+                        
 
                     case DIRECTION.LEFT:
+                        {
+                            float centerColliderX = (rowMiddlePoint - wallRowAverage) * BRICK_LENGTH;
+                            float centerColliderZ = (colMiddlePoint + 0.5f - wall[0].Col) * BRICK_LENGTH;
 
-                        break;
+                            Vector3 size = new Vector3(wallLength, BRICK_HEIGHT, BRICK_WALL_WIDTH);
+                            Vector3 centerCollider = new Vector3(centerColliderX, centerMesh.y - BRICK_PIN_HEIGHT_HALF, centerColliderZ - BRICK_WALL_WIDTH_HALF);
+
+                            AddBoxCollider(size, centerCollider, false, transform.gameObject);
+                            break;
+                        }
+                            
 
                     case DIRECTION.RIGHT:
+                        {
+                            float centerColliderX = (rowMiddlePoint - wallRowAverage) * BRICK_LENGTH;
+                            float centerColliderZ = (colMiddlePoint - 0.5f - wall[0].Col) * BRICK_LENGTH;
 
-                        break;
+                            Vector3 size = new Vector3(wallLength, BRICK_HEIGHT, BRICK_WALL_WIDTH);
+                            Vector3 centerCollider = new Vector3(centerColliderX, centerMesh.y - BRICK_PIN_HEIGHT_HALF, centerColliderZ + BRICK_WALL_WIDTH_HALF);
+
+                            AddBoxCollider(size, centerCollider, false, transform.gameObject);
+                            break;
+                        }
                 }
             }
         }
@@ -276,7 +323,11 @@ namespace Valve.VR.InteractionSystem
 
         private void RemoveWallCollider()
         {
-            //throw new NotImplementedException();
+            for(int i = 0; i < wallColliderList.Count; i++)
+            {
+                Destroy(wallColliderList[i]);
+            }
+            wallColliderList.Clear();
         }
 
         private void AddWallCollider()
@@ -334,6 +385,40 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
+        private void AddPinTriggerColliderByStructure(float heightOffset, GameObject containerObject, String tag)
+        {
+            for (int index = 0; index < containerObject.transform.childCount; index++)
+            {
+                Destroy(containerObject.transform.GetChild(index).gameObject);
+            }
+
+            float rowMiddlePoint = (float)(blockStructure.RowsCropped - 1) / 2;
+            float colMiddlePoint = (float)(blockStructure.ColsCropped - 1) / 2;
+
+            for (int row = 0; row < blockStructure.RowsCropped; row++)
+            {
+                for (int col = 0; col < blockStructure.ColsCropped; col++)
+                {
+                    if(blockStructure[row, col] != null)
+                    {
+                        bool isTrigger = true;
+                        if (tag.Equals("Tap"))
+                        {
+                            isTrigger = false;
+                        }
+
+                        float centerX = (rowMiddlePoint - row) * BRICK_LENGTH;
+                        float centerY = GetCenterTop().y + heightOffset;
+                        float centerZ = (colMiddlePoint - col) * BRICK_LENGTH;
+
+                        Vector3 currentPinCenterPoint = new Vector3(centerX, centerY, centerZ);
+                        AddGameObjectCollider(currentPinCenterPoint, tag, containerObject, isTrigger);
+                    }
+                    
+                }
+            }
+        }
+
         private void AddGameObjectCollider(Vector3 position, String tag, GameObject container, bool isTrigger)
         {
             GameObject colliderObject = new GameObject("Collider");
@@ -366,6 +451,7 @@ namespace Valve.VR.InteractionSystem
             collider.center = center;
             collider.isTrigger = isTrigger;
             collider.material = material;
+            wallColliderList.Add(collider);
             return collider;
         }
 
@@ -375,13 +461,14 @@ namespace Valve.VR.InteractionSystem
             newCollider.size = sizeCollider;
             newCollider.center = centerCollider;
             newCollider.isTrigger = isTrigger;
+            wallColliderList.Add(newCollider);
             return newCollider;
         }
 
         public Vector3 GetCenterTop()
         {
-            Vector3 center = mesh.bounds.center;
-            Vector3 extends = mesh.bounds.extents;
+            Vector3 center = GetComponent<MeshFilter>().mesh.bounds.center;
+            Vector3 extends = GetComponent<MeshFilter>().mesh.bounds.extents;
             center.y = center.y + extends.y - BRICK_PIN_HEIGHT;
             return center;
 

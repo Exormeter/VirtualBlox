@@ -39,7 +39,6 @@ namespace Valve.VR.InteractionSystem
                     Vector3 anchorPosition = new Vector3(c * rectTransfrom.sizeDelta.x, -r * rectTransfrom.sizeDelta.y, 0);
 
                     toggle.GetComponent<RectTransform>().anchoredPosition = anchorPosition;
-                    toggle.GetComponent<Toggle>().isOn = true;
                     matrix[r].Add(toggle);
                 }
             }
@@ -48,15 +47,15 @@ namespace Valve.VR.InteractionSystem
 
         void Update()
         {
-            //if (spawnBlockAction.GetLastStateDown(leftHand) || spawnBlockAction.GetStateDown(righthand))
-            //{    
+            if (spawnBlockAction.GetLastStateDown(leftHand) || spawnBlockAction.GetStateDown(righthand))
+            {
 
-            //    List<BlockStructure> blockStructures = FindStructures();
-            //    foreach (BlockStructure blockStructure in blockStructures)
-            //    {
-            //        GenerateBlock(blockStructure);
-            //    }
-            //}
+                List<BlockStructure> blockStructures = FindStructures();
+                foreach (BlockStructure blockStructure in blockStructures)
+                {
+                    GenerateBlock(blockStructure);
+                }
+            }
             if (Input.GetKeyUp("space"))
             {
                 Debug.Log("test");
@@ -89,12 +88,11 @@ namespace Valve.VR.InteractionSystem
 
                 }
             }
-            Debug.Break();
-            //GameObject newBlock = CombineTileMeshes(container);
-            //AddPrecurserComponents(newBlock);
+            GameObject newBlock = CombineTileMeshes(container);
+            newBlock.AddComponent<BlockGeometryScript>().SetStructure(structure);
+            newBlock.transform.position = new Vector3(0, 2, 0);
+            AddPrecurserComponents(newBlock);
             
-            //newBlock.GetComponent<BlockGeometryScript>().SetStructure(structure);
-            Debug.Break();
         }
 
         private List<BlockStructure> FindStructures()
@@ -174,7 +172,6 @@ namespace Valve.VR.InteractionSystem
             for (int i = 0; i < components.Length; i++)
             {
                 CopyComponent(components[i], combinedBlock);
-
             }
 
         }

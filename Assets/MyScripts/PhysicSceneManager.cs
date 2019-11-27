@@ -11,7 +11,7 @@ namespace Valve.VR.InteractionSystem
         private PhysicsScene physicsScene;
         private Dictionary<Guid, GameObject> exsitingBlocksInSim = new Dictionary<Guid, GameObject>();
         private Dictionary<Guid, GameObject> exsitingBlocksInGame = new Dictionary<Guid, GameObject>();
-        private List<Rigidbody> BlockMovement = new List<Rigidbody>();
+        //private List<Rigidbody> BlockMovement = new List<Rigidbody>();
         public int physicSteps;
 
         public int simBlocks;
@@ -60,7 +60,7 @@ namespace Valve.VR.InteractionSystem
             }
             foreach (Component component in gameObject.GetComponents(typeof(Component)))
             {
-                if (!(component is BlockScriptSim) && !(component is MeshFilter) && !(component is MeshRenderer) && !(component is Transform) && !(component is Collider) && !(component is Rigidbody))
+                if (!(component is BlockScriptSim) && !(component is MeshFilter) && !(component is MeshRenderer) && !(component is Transform) && !(component is Collider) && !(component is Rigidbody) && !(component is BlockGeometryScript))
                 {
                     Destroy(component);
                 }

@@ -12,6 +12,7 @@ namespace Valve.VR.InteractionSystem
     {
 
         public GameObject Block1x1;
+        public GameObject Block1x1Flat;
         public GameObject PrecurserBlock;
         public Material material;
         public Canvas canvas;
@@ -19,14 +20,18 @@ namespace Valve.VR.InteractionSystem
         public SteamVR_Input_Sources leftHand;
         public SteamVR_Input_Sources righthand;
         public SteamVR_Action_Boolean spawnBlockAction = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("SpawnBlock");
-        private List<List<GameObject>> matrix = new List<List<GameObject>>();
         public int Rows;
         public int Columns;
+
+        private List<List<GameObject>> matrix = new List<List<GameObject>>();
+        private GameObject currentlyChoosenBlock;
+        private bool currentlyChoosenFlat = true;
         private readonly float length = 0.08f;
 
         // Start is called before the first frame update
         void Start()
         {
+            currentlyChoosenBlock = Block1x1Flat;
             for (int r = 0; r < Rows; r++)
             {
                 matrix.Add(new List<GameObject>());
@@ -35,7 +40,8 @@ namespace Valve.VR.InteractionSystem
 
                     GameObject toggle = Instantiate(Toggle, canvas.transform, true);
                     RectTransform rectTransfrom = toggle.GetComponent<RectTransform>();
-                    rectTransfrom.localScale = new Vector3(1, 1, 1);
+                    rectTransfrom.localScale = new Vector3(2, 2, 1);
+
                     Vector3 anchorPosition = new Vector3(c * rectTransfrom.sizeDelta.x, -r * rectTransfrom.sizeDelta.y, 0);
 
                     toggle.GetComponent<RectTransform>().anchoredPosition = anchorPosition;
@@ -82,7 +88,7 @@ namespace Valve.VR.InteractionSystem
                     {
 
                         Vector3 partPosition = new Vector3((rowMiddlePoint - row) * length, 0, (colMiddlePoint - col) * length);
-                        GameObject blockPart = Instantiate(Block1x1, partPosition, Quaternion.identity, container.transform);
+                        GameObject blockPart = Instantiate(currentlyChoosenBlock, partPosition, Quaternion.identity, container.transform);
                         blockPart.SetActive(true);
                     }
 
@@ -188,6 +194,20 @@ namespace Valve.VR.InteractionSystem
 
             }
             return copy;
+        }
+
+        public void ChangeBlockSize()
+        {
+            if (currentlyChoosenFlat)
+            {
+                currentlyChoosenBlock = Block1x1;
+            }
+            else
+            {
+                currentlyChoosenBlock = Block1x1Flat;
+            }
+            currentlyChoosenFlat = !currentlyChoosenFlat;
+                
         }
     }
 

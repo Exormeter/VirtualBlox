@@ -13,7 +13,7 @@ public class VRInputModule : BaseInputModule
 
     private GameObject currentObject = null;
     private PointerEventData pointData = null;
-    // Start is called before the first frame update
+    
 
     protected override void Awake()
     {
@@ -22,7 +22,6 @@ public class VRInputModule : BaseInputModule
         pointData = new PointerEventData(eventSystem);
     }
 
-    // Update is called once per frame
     public override void Process()
     {
         pointData.Reset();
@@ -54,18 +53,35 @@ public class VRInputModule : BaseInputModule
 
     private void ProcessPress(PointerEventData data)
     {
-        data.pointerCurrentRaycast = data.pointerCurrentRaycast;
+        data.pointerPressRaycast = data.pointerCurrentRaycast;
 
         GameObject newPointerPress = ExecuteEvents.ExecuteHierarchy(currentObject, data, ExecuteEvents.pointerDownHandler);
 
-        if(newPointerPress == null)
+        if (newPointerPress == null)
         {
-            newPointerPress = null; 
+            newPointerPress = ExecuteEvents.GetEventHandler<IPointerClickHandler>(currentObject);
         }
+
+        data.pressPosition = data.position;
+        data.pointerPress = newPointerPress;
+        data.rawPointerPress = currentObject;
     }
 
     private void ProcessRelease(PointerEventData data)
     {
+        ExecuteEvents.Execute(data.pointerPress, data, ExecuteEvents.pointerUpHandler);
 
+        GameObject pointerUpHandler = ExecuteEvents.GetEventHandler<IPointerClickHandler>(currentObject);
+
+        if(data.pointerPress == pointerUpHandler)
+        {
+            ExecuteEvents.Execute(data.pointerPress, data, ExecuteEvents.pointerClickHandler);
+        }
+
+        eventSystem.SetSelectedGameObject(null);
+
+        data.pressPosition = Vector2.zero;
+        data.pointerPress = null;
+        data.rawPointerPress = null;
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.UI;
 using UnityEngine;
 using System;
 
@@ -15,66 +14,20 @@ namespace Valve.VR.InteractionSystem
         public GameObject Block1x1Flat;
         public GameObject PrecurserBlock;
         public Material material;
-        public Canvas canvas;
-        public GameObject Toggle;
-        public SteamVR_Input_Sources leftHand;
-        public SteamVR_Input_Sources righthand;
-        public SteamVR_Action_Boolean spawnBlockAction = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("SpawnBlock");
-        public int Rows;
-        public int Columns;
 
-        private List<List<GameObject>> matrix = new List<List<GameObject>>();
-        private GameObject currentlyChoosenBlock;
-        private bool currentlyChoosenFlat = true;
+
+        private Dictionary<BLOCKSIZE, GameObject> partSizes = new Dictionary<BLOCKSIZE, GameObject>();
         private readonly float length = 0.08f;
 
         // Start is called before the first frame update
         void Start()
         {
-            currentlyChoosenBlock = Block1x1Flat;
-            for (int r = 0; r < Rows; r++)
-            {
-                matrix.Add(new List<GameObject>());
-                for (int c = 0; c < Columns; c++)
-                {
-
-                    GameObject toggle = Instantiate(Toggle, canvas.transform, true);
-                    RectTransform rectTransfrom = toggle.GetComponent<RectTransform>();
-                    rectTransfrom.localScale = new Vector3(2, 2, 1);
-
-                    Vector3 anchorPosition = new Vector3(c * rectTransfrom.sizeDelta.x, -r * rectTransfrom.sizeDelta.y, 0);
-
-                    toggle.GetComponent<RectTransform>().anchoredPosition = anchorPosition;
-                    matrix[r].Add(toggle);
-                }
-            }
+            partSizes.Add(BLOCKSIZE.FLAT, Block1x1Flat);
+            partSizes.Add(BLOCKSIZE.NORMAL, Block1x1);
 
         }
 
-        void Update()
-        {
-            if (spawnBlockAction.GetLastStateDown(leftHand) || spawnBlockAction.GetStateDown(righthand))
-            {
-
-                List<BlockStructure> blockStructures = FindStructures();
-                foreach (BlockStructure blockStructure in blockStructures)
-                {
-                    GenerateBlock(blockStructure);
-                }
-            }
-            if (Input.GetKeyUp("space"))
-            {
-                Debug.Log("test");
-                List<BlockStructure> blockStructures = FindStructures();
-                foreach (BlockStructure blockStructure in blockStructures)
-                {
-                    GenerateBlock(blockStructure);
-                }
-                
-            }
-        }
-
-        private void GenerateBlock(BlockStructure structure)
+        public GameObject GenerateBlock(BlockStructure structure)
         {
             GameObject container = new GameObject();
             structure.GetCroppedMatrix();
@@ -88,7 +41,7 @@ namespace Valve.VR.InteractionSystem
                     {
 
                         Vector3 partPosition = new Vector3((rowMiddlePoint - row) * length, 0, (colMiddlePoint - col) * length);
-                        GameObject blockPart = Instantiate(currentlyChoosenBlock, partPosition, Quaternion.identity, container.transform);
+                        GameObject blockPart = Instantiate(partSizes[structure.BlockSize], partPosition, Quaternion.identity, container.transform);
                         blockPart.SetActive(true);
                     }
 
@@ -98,57 +51,13 @@ namespace Valve.VR.InteractionSystem
             newBlock.AddComponent<BlockGeometryScript>().SetStructure(structure);
             newBlock.transform.position = new Vector3(0, 2, 0);
             AddPrecurserComponents(newBlock);
+            return newBlock;
             
         }
 
-        private List<BlockStructure> FindStructures()
-        {
-            List<BlockStructure> blockStructures = new List<BlockStructure>();
-            for (int row = 0; row < Rows; row++)
-            {
-                for (int col = 0; col < Columns; col++)
-                {
-                    Toggle toggle = matrix[row][col].GetComponent<Toggle>();
-                    if (toggle.isOn && !matrix[row][col].tag.Equals("Visited"))
-                    {
-                        BlockStructure structure = new BlockStructure(Rows, Columns);
-                        FindAdjacentNodes(structure, row, col);
-                        blockStructures.Add(structure);
-                    }
-                }
-            }
-            ResetMatrix();
-            return blockStructures;
-        }
+        
 
-        private void ResetMatrix()
-        {
-            for (int row = 0; row < Rows; row++)
-            {
-                for (int col = 0; col < Columns; col++)
-                {
-                    Toggle toggle = matrix[row][col].GetComponent<Toggle>();
-                    matrix[row][col].tag = "Untagged";
-                }
-            }
-        }
-
-        private void FindAdjacentNodes(BlockStructure structure, int row, int column)
-        {
-            if (row >= matrix.Count || column >= matrix[0].Count || row < 0 || column < 0 || matrix[row][column].tag.Equals("Visited"))
-                return;
-
-            matrix[row][column].tag = "Visited";
-
-            if (matrix[row][column].GetComponent<Toggle>().isOn)
-            {
-                structure.AddNode(new BlockPart(row, column), row, column);
-                FindAdjacentNodes(structure, row, column - 1);
-                FindAdjacentNodes(structure, row, column + 1);
-                FindAdjacentNodes(structure, row - 1, column);
-                FindAdjacentNodes(structure, row + 1, column);
-            }
-        }
+        
 
         private GameObject CombineTileMeshes(GameObject container)
         {
@@ -196,19 +105,6 @@ namespace Valve.VR.InteractionSystem
             return copy;
         }
 
-        public void ChangeBlockSize()
-        {
-            if (currentlyChoosenFlat)
-            {
-                currentlyChoosenBlock = Block1x1;
-            }
-            else
-            {
-                currentlyChoosenBlock = Block1x1Flat;
-            }
-            currentlyChoosenFlat = !currentlyChoosenFlat;
-                
-        }
     }
 
     
@@ -258,6 +154,21 @@ namespace Valve.VR.InteractionSystem
         RIGHT,
         UP,
         DOWN
+    }
+
+    public enum BLOCKSIZE
+    {
+        NORMAL,
+        FLAT
+    }
+
+    public enum BLOCKCOLOR
+    {
+        RED,
+        GREEN,
+        BLUE,
+        YELLOW,
+        ORANGE
     }
 
 }

@@ -12,6 +12,11 @@ TagManager:
   - BlockManager
   - PhysicManager
   - Visited
+  - Toggle Bg
+  - OnText
+  - Handle
+  - Off Text
+  - BlockGenerator
   layers:
   - Default
   - TransparentFX

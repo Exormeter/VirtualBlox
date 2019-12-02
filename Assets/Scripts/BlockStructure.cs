@@ -15,11 +15,17 @@ namespace Valve.VR.InteractionSystem
         public int Cols { get; }
         public int RowsCropped { get; private set; }
         public int ColsCropped { get; private set; }
-        public BlockStructure(int row, int col)
+        public BLOCKSIZE BlockSize { get; }
+        public BLOCKCOLOR BlockColor { get;  }
+
+        public BlockStructure(int row, int col, BLOCKSIZE size, BLOCKCOLOR color)
         {
             Rows = row;
             Cols = col;
             matrix = new BlockPart[row, col];
+            BlockSize = size;
+            BlockColor = color;
+
         }
 
         public void AddNode(BlockPart node, int row, int col)

@@ -9,8 +9,9 @@
       "type": "boolean"
     },
     {
-      "name": "/actions/default/in/GrabPinch",
-      "type": "boolean"
+      "name": "/actions/default/in/GrabTrigger",
+      "type": "boolean",
+      "requirement": "suggested"
     },
     {
       "name": "/actions/default/in/GrabGrip",
@@ -44,6 +45,10 @@
       "name": "/actions/default/in/SpawnBlock",
       "type": "boolean",
       "requirement": "optional"
+    },
+    {
+      "name": "/actions/default/in/ClickCircle",
+      "type": "boolean"
     },
     {
       "name": "/actions/default/out/Haptic",
@@ -139,7 +144,6 @@
     {
       "language_tag": "en_US",
       "/actions/default/in/GrabGrip": "Grab Grip",
-      "/actions/default/in/GrabPinch": "Grab Pinch",
       "/actions/default/in/HeadsetOnHead": "Headset on head (proximity sensor)",
       "/actions/default/in/InteractUI": "Interact With UI",
       "/actions/default/in/Pose": "Pose",

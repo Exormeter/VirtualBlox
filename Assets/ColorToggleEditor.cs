@@ -1,4 +1,5 @@
 ﻿using UnityEditor;
+using UnityEngine;
 
 namespace Valve.VR.InteractionSystem
 {
@@ -9,7 +10,7 @@ namespace Valve.VR.InteractionSystem
         {
             UnityEngine.UI.ColorToggle targetColorToggle = (UnityEngine.UI.ColorToggle)target;
 
-            targetColorToggle.blockColor = (BLOCKCOLOR)EditorGUILayout.EnumPopup("Block Color", targetColorToggle.blockColor);
+            targetColorToggle.blockColor = EditorGUILayout.ColorField("Block Color", targetColorToggle.blockColor);
 
             // Show default inspector property editor
             base.OnInspectorGUI();

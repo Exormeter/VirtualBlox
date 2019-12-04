@@ -24,11 +24,11 @@ namespace Valve.VR.InteractionSystem
         {
             partSizes.Add(BLOCKSIZE.FLAT, Block1x1Flat);
             partSizes.Add(BLOCKSIZE.NORMAL, Block1x1);
-
         }
 
         public GameObject GenerateBlock(BlockStructure structure)
         {
+            material.color = structure.BlockColor;
             GameObject container = new GameObject();
             structure.GetCroppedMatrix();
             float rowMiddlePoint = (float) (structure.RowsCropped - 1) / 2;
@@ -76,6 +76,8 @@ namespace Valve.VR.InteractionSystem
             combinedBlock.AddComponent(typeof(MeshRenderer));
             combinedBlock.GetComponent<MeshFilter>().mesh = new Mesh();
             combinedBlock.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
+            combinedBlock.GetComponent<MeshRenderer>().material = material;
+
             Destroy(container);
             return combinedBlock;
 

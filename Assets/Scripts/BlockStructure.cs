@@ -16,9 +16,9 @@ namespace Valve.VR.InteractionSystem
         public int RowsCropped { get; private set; }
         public int ColsCropped { get; private set; }
         public BLOCKSIZE BlockSize { get; }
-        public BLOCKCOLOR BlockColor { get;  }
+        public Color BlockColor { get;  }
 
-        public BlockStructure(int row, int col, BLOCKSIZE size, BLOCKCOLOR color)
+        public BlockStructure(int row, int col, BLOCKSIZE size, Color color)
         {
             Rows = row;
             Cols = col;

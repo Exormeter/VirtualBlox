@@ -17,6 +17,8 @@ TagManager:
   - Handle
   - Off Text
   - BlockGenerator
+  - ColorChooser
+  - LaserPointer
   layers:
   - Default
   - TransparentFX

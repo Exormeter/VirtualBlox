@@ -33,11 +33,11 @@ namespace Valve.VR
             }
         }
         
-        public virtual SteamVR_Action_Boolean GrabPinch
+        public virtual SteamVR_Action_Boolean GrabTrigger
         {
             get
             {
-                return SteamVR_Actions.default_GrabPinch;
+                return SteamVR_Actions.default_GrabTrigger;
             }
         }
         
@@ -94,6 +94,14 @@ namespace Valve.VR
             get
             {
                 return SteamVR_Actions.default_SpawnBlock;
+            }
+        }
+        
+        public virtual SteamVR_Action_Boolean ClickCircle
+        {
+            get
+            {
+                return SteamVR_Actions.default_ClickCircle;
             }
         }
         

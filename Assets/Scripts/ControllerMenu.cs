@@ -13,38 +13,58 @@ namespace Valve.VR.InteractionSystem
         public int Rows;
         public int Columns;
         public GameObject Toggle;
-        //public SteamVR_Input_Sources leftHand;
-        //public SteamVR_Input_Sources righthand;
-        //public SteamVR_Action_Boolean spawnBlockAction = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("SpawnBlock");
+        public GameObject CanvasContainer;
 
+        
+        public Hand hand;
+        
+        public SteamVR_Action_Boolean spawnBlockAction = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("SpawnBlock");
+
+        [HideInInspector]
+        public bool MenuOpen = false;
+
+        private SteamVR_Input_Sources handInput;
         private Canvas canvas;
         private List<List<GameObject>> matrix = new List<List<GameObject>>();
         private ColorToggleGroup toggleGroup;
-        private BLOCKSIZE currentBlocksize;
-        private BLOCKCOLOR currentBlockColor;
+        private BLOCKSIZE currentBlocksize = BLOCKSIZE.NORMAL;
+        private Color currentBlockColor = Color.gray;
         private BlockGenerator blockGenerator;
+
         // Start is called before the first frame update
         void Start()
         {
-            canvas = GetComponent<Canvas>();
-            blockGenerator = GameObject.FindGameObjectWithTag("BlockGenerator").GetComponent<BlockGenerator>();
             PopulateMatrix();
-            toggleGroup = GameObject.Find("ColorChooser").GetComponent<ColorToggleGroup>();
+
+            handInput = hand.handType;
+            canvas = CanvasContainer.GetComponent<Canvas>();
+
+            blockGenerator = GameObject.FindGameObjectWithTag("BlockGenerator").GetComponent<BlockGenerator>();
+            
+            //Change to own ColorChooser
+            toggleGroup = GameObject.FindGameObjectWithTag("ColorChooser").GetComponent<ColorToggleGroup>();
             toggleGroup.OnChange += ColorOnChange;
+
+            CanvasContainer.SetActive(false);
+
+            
         }
 
         // Update is called once per frame
         void Update()
         {
-            //if (spawnBlockAction.GetLastStateDown(leftHand) || spawnBlockAction.GetStateDown(righthand))
-            //{
+            if (spawnBlockAction.GetStateDown(handInput))
+            {
 
-            //    List<BlockStructure> blockStructures = FindStructures();
-            //    foreach (BlockStructure blockStructure in blockStructures)
-            //    {
-            //        blockGenerator.GenerateBlock(blockStructure);
-            //    }
-            //}
+                List<BlockStructure> blockStructures = FindStructures();
+                foreach (BlockStructure blockStructure in blockStructures)
+                {
+                    GameObject generatedBlock = blockGenerator.GenerateBlock(blockStructure);
+                    generatedBlock.GetComponent<Rigidbody>().isKinematic = true;
+                    hand.AttachObject(generatedBlock, GrabTypes.Grip, generatedBlock.GetComponent<BlockInteractable>().attachmentFlags);
+                }
+            }
+
             if (Input.GetKeyUp("space"))
             {
                 List<BlockStructure> blockStructures = FindStructures();
@@ -56,9 +76,33 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
-        private void ColorOnChange(Toggle newActive)
+        private void ColorOnChange(Color blockColor)
         {
-            Debug.Log(string.Format("Toggle {0} selected", newActive.name));
+            currentBlockColor = blockColor;
+        }
+
+        public void OpenMenu(SteamVR_Input_Sources hand)
+        {
+            CanvasContainer.SetActive(true);
+        }
+
+        public void CloseMenu(SteamVR_Input_Sources hand)
+        {
+            CanvasContainer.SetActive(false);
+            DeactivatePointer();
+        }
+
+        public void ActivatePointer(SteamVR_Input_Sources hand)
+        {
+            GameObject pointer = GameObject.FindGameObjectWithTag("LaserPointer");
+            pointer.SetActive(true);
+            pointer.transform.SetParent(gameObject.transform);
+        }
+
+        public void DeactivatePointer()
+        {
+            GameObject pointer = GameObject.FindGameObjectWithTag("LaserPointer");
+            pointer.SetActive(false);
         }
 
 
@@ -70,9 +114,11 @@ namespace Valve.VR.InteractionSystem
                 for (int c = 0; c < Columns; c++)
                 {
 
-                    GameObject toggle = Instantiate(Toggle, canvas.transform, true);
+                    GameObject toggle = Instantiate(Toggle, Vector3.zero, Quaternion.identity, canvas.transform);
                     RectTransform rectTransfrom = toggle.GetComponent<RectTransform>();
                     rectTransfrom.localScale = new Vector3(2, 2, 1);
+                    rectTransfrom.localPosition = Vector3.zero;
+                    rectTransfrom.localRotation = Quaternion.identity;
 
                     Vector3 anchorPosition = new Vector3(c * rectTransfrom.sizeDelta.x, -r * rectTransfrom.sizeDelta.y, 0);
 
@@ -141,8 +187,9 @@ namespace Valve.VR.InteractionSystem
             {
                 currentBlocksize = BLOCKSIZE.NORMAL;
             }
-
         }
+
+        
     }
 }
 

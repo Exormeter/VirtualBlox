@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class Pointer: MonoBehaviour
 {
-    public float defaultLenght = 5.0f;
-    public VRInputModule inputModule;
+    public float defaultLenght;
+    //public VRInputModule inputModule;
 
     private LineRenderer lineRenderer = null;
     // Start is called before the first frame update

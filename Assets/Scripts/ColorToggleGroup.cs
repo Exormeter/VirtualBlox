@@ -3,46 +3,11 @@ using UnityEngine.UI;
 using System.Linq;
 
 
-//namespace Valve.VR.InteractionSystem
-//{
-//    public class BetterToggleGroup : ToggleGroup
-//    {
-//        public delegate void ChangedEventHandler(Toggle newActive);
-
-//        public event ChangedEventHandler OnChange;
-
-//        public void Start()
-//        {
-//            foreach (Transform transformToggle in gameObject.transform)
-//            {
-//                var toggle = transformToggle.gameObject.GetComponent<ColorToggle>();
-//                toggle.onValueChanged.AddListener((isSelected) => {
-//                    if (!isSelected)
-//                    {
-//                        return;
-//                    }
-//                    var activeToggle = Active();
-//                    DoOnChange(activeToggle);
-//                });
-//            }
-//        }
-
-//        public Toggle Active()
-//        {
-//            return ActiveToggles().FirstOrDefault();
-//        }
-
-//        protected virtual void DoOnChange(Toggle newactive)
-//        {
-//            var handler = OnChange;
-//            if (handler != null) handler(newactive);
-//        }
-//    }
-//}
 
 using System;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
+using Valve.VR.InteractionSystem;
 
 namespace UnityEngine.UI
 {
@@ -57,6 +22,10 @@ namespace UnityEngine.UI
     public class ColorToggleGroup : UIBehaviour
     {
         [SerializeField] private bool m_AllowSwitchOff = false;
+
+        public delegate void ChangedEventHandler(Color blockColor);
+
+        public event ChangedEventHandler OnChange;
 
         /// <summary>
         /// Is it allowed that no toggle is switched on?
@@ -76,6 +45,38 @@ namespace UnityEngine.UI
         {
             if (toggle == null || !m_Toggles.Contains(toggle))
                 throw new ArgumentException(string.Format("Toggle {0} is not part of ToggleGroup {1}", new object[] { toggle, this }));
+        }
+
+        public new void Start()
+        {
+            foreach (Transform transformToggle in gameObject.transform)
+            {
+                var toggle = transformToggle.gameObject.GetComponent<UnityEngine.UI.ColorToggle>();
+                //var toggle = transformToggle.gameObject.GetComponents<Component>();
+                toggle.onValueChanged.AddListener((isSelected, blockColor) =>
+                {
+                    if (!isSelected)
+                    {
+                        return;
+                    }
+                    var activeToggle = Active();
+                    DoOnChange(blockColor);
+                });
+            }
+        }
+
+        public ColorToggle Active()
+        {
+            return ActiveToggles().FirstOrDefault();
+        }
+
+        protected virtual void DoOnChange(Color blockColor)
+        {
+            ChangedEventHandler handler = OnChange;
+            if (handler != null)
+            {
+                handler(blockColor);
+            }
         }
 
         /// <summary>

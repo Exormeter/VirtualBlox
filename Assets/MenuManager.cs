@@ -15,7 +15,7 @@ namespace Valve.VR.InteractionSystem
 
 
         [System.Serializable]
-        public class PoseEvent: UnityEvent<SteamVR_Input_Sources> { }
+        public class PoseEvent: UnityEvent<HANDSIDE> { }
 
         [SerializeField]
         public PoseEvent OnPoseOpenMenuLeft = new PoseEvent();
@@ -29,7 +29,7 @@ namespace Valve.VR.InteractionSystem
         [SerializeField]
         public PoseEvent OnPoseCloseMenuRight = new PoseEvent();
 
-        private bool menuOpen = false;
+        private MenuState currentMenuState = MenuState.BOTH_CLOSED;
         
 
         // Start is called before the first frame update
@@ -50,42 +50,56 @@ namespace Valve.VR.InteractionSystem
         {
             for (; ; )
             {
+
+
+                switch (currentMenuState)
+                {
+                    case MenuState.BOTH_CLOSED:
+
+                        if (ShouldShowMenu(LeftHandInput, 345, 10, 265, 295))
+                        {
+                            OnPoseOpenMenuLeft.Invoke(HANDSIDE.HAND_LEFT);
+                            currentMenuState = MenuState.LEFT_OPEN;
+                        }
+
+                        else if (ShouldShowMenu(RightHandInput, 345, 10, 60, 95))
+                        {
+                            OnPoseOpenMenuRight.Invoke(HANDSIDE.HAND_RIGHT);
+                            currentMenuState = MenuState.RIGHT_OPEN;
+                        }
+                        break;
+
+                    case MenuState.LEFT_OPEN:
+
+                        if (ShouldCloseMenu(LeftHandInput, 15, 340, 310, 260))
+                        {
+                            OnPoseCloseMenuLeft.Invoke(HANDSIDE.HAND_LEFT);
+                            currentMenuState = MenuState.BOTH_CLOSED;
+                        }
+                        break;
+
+                    case MenuState.RIGHT_OPEN:
+                        if (ShouldCloseMenu(RightHandInput, 15, 340, 100, 60))
+                        {
+                            OnPoseCloseMenuRight.Invoke(HANDSIDE.HAND_RIGHT);
+                            currentMenuState = MenuState.BOTH_CLOSED;
+                        }
+                        break;
+                }
                 
-
-                if (ShouldShowMenu(LeftHandInput) && !menuOpen)
-                {
-                    OnPoseOpenMenuLeft.Invoke(LeftHandInput);
-                }
-
-                else if (ShouldShowMenu(RightHandInput) && !menuOpen)
-                {
-                    OnPoseOpenMenuRight.Invoke(RightHandInput);
-                }
-
-                else if(ShouldCloseMenu(LeftHandInput) && menuOpen)
-                {
-                    OnPoseCloseMenuLeft.Invoke(LeftHandInput);
-                }
-
-                else if (ShouldCloseMenu(RightHandInput) && menuOpen)
-                {
-                    OnPoseCloseMenuRight.Invoke(RightHandInput);
-                }
-
-
                 yield return new WaitForSeconds(0.3f);
             }
         }
 
 
-        private bool ShouldShowMenu(SteamVR_Input_Sources hand)
+        private bool ShouldShowMenu(SteamVR_Input_Sources hand, float minX, float maxX, float minZ, float maxZ)
         {
             for (int i = 0; i < 5; i++)
             {
 
-                Pose.GetPoseAtTimeOffset(LeftHandInput, (float)i / 5, out Vector3 position, out Quaternion rotation, out Vector3 velocity, out Vector3 angularVelocity);
+                Pose.GetPoseAtTimeOffset(hand, (float)i / 5, out Vector3 position, out Quaternion rotation, out Vector3 velocity, out Vector3 angularVelocity);
 
-                if (!IsBetween(355, 5, rotation.eulerAngles.x) || !IsBetween(73, 85, rotation.eulerAngles.z))
+                if (!IsBetween(minX, maxX, rotation.eulerAngles.x) || !IsBetween(minZ, maxZ, rotation.eulerAngles.z))
                 {
                     return false;
                 }
@@ -93,14 +107,15 @@ namespace Valve.VR.InteractionSystem
             return true;
         }
 
-        private bool ShouldCloseMenu(SteamVR_Input_Sources hand)
+
+        private bool ShouldCloseMenu(SteamVR_Input_Sources hand, float minX, float maxX, float minZ, float maxZ)
         {
             for (int i = 0; i < 5; i++)
             {
 
-                Pose.GetPoseAtTimeOffset(LeftHandInput, (float)i / 5, out Vector3 position, out Quaternion rotation, out Vector3 velocity, out Vector3 angularVelocity);
+                Pose.GetPoseAtTimeOffset(hand, (float)i / 5, out Vector3 position, out Quaternion rotation, out Vector3 velocity, out Vector3 angularVelocity);
 
-                if (!IsBetween(355, 5, rotation.eulerAngles.x) || !IsBetween(73, 85, rotation.eulerAngles.z))
+                if (!IsBetween(minX, maxX, rotation.eulerAngles.x) || !IsBetween(minZ, maxZ, rotation.eulerAngles.z))
                 {
                     return false;
                 }
@@ -124,5 +139,14 @@ namespace Valve.VR.InteractionSystem
             return false;
         }
 
+    }
+
+    public enum MenuState
+    {
+        BOTH_CLOSED,
+        LEFT_OPEN,
+        LEFT_CLOSED,
+        RIGHT_OPEN,
+        RIGHT_CLOSED
     }
 }

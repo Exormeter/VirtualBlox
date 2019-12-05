@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,35 +15,32 @@ namespace Valve.VR.InteractionSystem
         public int Columns;
         public GameObject Toggle;
         public GameObject CanvasContainer;
+        public ColorToggleGroup toggleGroup;
+        public GameObject pointer;
 
         
         public Hand hand;
         
         public SteamVR_Action_Boolean spawnBlockAction = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("SpawnBlock");
 
-        [HideInInspector]
-        public bool MenuOpen = false;
-
         private SteamVR_Input_Sources handInput;
         private Canvas canvas;
         private List<List<GameObject>> matrix = new List<List<GameObject>>();
-        private ColorToggleGroup toggleGroup;
         private BLOCKSIZE currentBlocksize = BLOCKSIZE.NORMAL;
         private Color currentBlockColor = Color.gray;
         private BlockGenerator blockGenerator;
+        private readonly int frameUntilColliderReEvaluation = 2;
 
         // Start is called before the first frame update
         void Start()
         {
-            PopulateMatrix();
+            
 
             handInput = hand.handType;
             canvas = CanvasContainer.GetComponent<Canvas>();
-
+            PopulateMatrix();
             blockGenerator = GameObject.FindGameObjectWithTag("BlockGenerator").GetComponent<BlockGenerator>();
-            
-            //Change to own ColorChooser
-            toggleGroup = GameObject.FindGameObjectWithTag("ColorChooser").GetComponent<ColorToggleGroup>();
+
             toggleGroup.OnChange += ColorOnChange;
 
             CanvasContainer.SetActive(false);
@@ -55,13 +53,10 @@ namespace Valve.VR.InteractionSystem
         {
             if (spawnBlockAction.GetStateDown(handInput))
             {
-
-                List<BlockStructure> blockStructures = FindStructures();
-                foreach (BlockStructure blockStructure in blockStructures)
+                if(hand.currentAttachedObject == null && hand.hoveringInteractable == null)
                 {
-                    GameObject generatedBlock = blockGenerator.GenerateBlock(blockStructure);
-                    generatedBlock.GetComponent<Rigidbody>().isKinematic = true;
-                    hand.AttachObject(generatedBlock, GrabTypes.Grip, generatedBlock.GetComponent<BlockInteractable>().attachmentFlags);
+                    List<BlockStructure> blockStructures = FindStructures();
+                    StartCoroutine(AttachNewBlockToHand(blockGenerator.GenerateBlock(blockStructures[0])));
                 }
             }
 
@@ -76,32 +71,57 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
+        private IEnumerator AttachNewBlockToHand(GameObject generatedBlock)
+        {
+            {
+                for (int i = 0; i <= frameUntilColliderReEvaluation; i++)
+                {
+                    if (i == frameUntilColliderReEvaluation)
+                    {
+
+                        generatedBlock.transform.position = hand.objectAttachmentPoint.transform.position;
+                        generatedBlock.GetComponent<BlockInteractable>().PhysicsAttach(hand, GrabTypes.Grip);
+                    }
+                    yield return new WaitForFixedUpdate();
+                }
+
+            }
+        }
+
         private void ColorOnChange(Color blockColor)
         {
             currentBlockColor = blockColor;
         }
 
-        public void OpenMenu(SteamVR_Input_Sources hand)
+        public void OpenMenu(HANDSIDE hand)
         {
             CanvasContainer.SetActive(true);
         }
 
-        public void CloseMenu(SteamVR_Input_Sources hand)
+        public void CloseMenu(HANDSIDE hand)
         {
             CanvasContainer.SetActive(false);
             DeactivatePointer();
         }
 
-        public void ActivatePointer(SteamVR_Input_Sources hand)
-        {
-            GameObject pointer = GameObject.FindGameObjectWithTag("LaserPointer");
+        public void ActivatePointer(HANDSIDE hand)
+        { 
             pointer.SetActive(true);
             pointer.transform.SetParent(gameObject.transform);
+
+            if(hand == HANDSIDE.HAND_LEFT)
+            {
+                pointer.transform.localPosition = new Vector3(0.5f, 0, 0);
+            }
+            else
+            {
+                pointer.transform.localPosition = Vector3.zero;
+            }
+            pointer.transform.localRotation = Quaternion.identity;
         }
 
         public void DeactivatePointer()
         {
-            GameObject pointer = GameObject.FindGameObjectWithTag("LaserPointer");
             pointer.SetActive(false);
         }
 
@@ -189,7 +209,13 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
-        
+
+    }
+
+    public enum HANDSIDE
+    {
+        HAND_LEFT,
+        HAND_RIGHT
     }
 }
 

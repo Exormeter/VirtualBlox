@@ -108,6 +108,7 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
+        
        
         public List<BlockStructure> GetStructures()
         {
@@ -129,6 +130,37 @@ namespace Valve.VR.InteractionSystem
             return blockStructures;
         }
 
+        public void SetStructure(BlockStructure structure)
+        {
+            ClearMatrix();
+            BlockPart[,] croppedMatrix = structure.GetCroppedMatrix();
+            if (structure.RowsCropped > Rows)
+            {
+                for (; structure.RowsCropped > Rows;)
+                {
+                    AddRow();
+                }
+            }
+
+            if (structure.ColsCropped > Columns)
+            {
+                for (; structure.ColsCropped > Columns;)
+                {
+                    AddCol();
+                }
+            }
+
+            for (int row = 0; row < structure.RowsCropped; row++)
+            {
+                for (int col = 0; col < structure.ColsCropped; col++)
+                {
+                    if(croppedMatrix[row, col] != null)
+                    {
+                        matrix[row][col].GetComponent<Toggle>().isOn = true; 
+                    }
+                }
+            }
+        }
 
         private void FindAdjacentNodes(BlockStructure structure, int row, int column)
         {
@@ -153,8 +185,18 @@ namespace Valve.VR.InteractionSystem
             {
                 for (int col = 0; col < Columns; col++)
                 {
-                    Toggle toggle = matrix[row][col].GetComponent<Toggle>();
                     matrix[row][col].tag = "Untagged";
+                }
+            }
+        }
+
+        private void ClearMatrix()
+        {
+            for (int row = 0; row < Rows; row++)
+            {
+                for (int col = 0; col < Columns; col++)
+                {
+                    matrix[row][col].GetComponent<Toggle>().isOn = false;
                 }
             }
         }

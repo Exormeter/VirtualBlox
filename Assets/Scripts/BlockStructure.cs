@@ -11,12 +11,14 @@ namespace Valve.VR.InteractionSystem
 
         private readonly BlockPart[,] matrix;
         private BlockPart[,] croppedMatrix;
+        private int columns;
+
         public int Rows { get; }
         public int Cols { get; }
         public int RowsCropped { get; private set; }
         public int ColsCropped { get; private set; }
-        public BLOCKSIZE BlockSize { get; }
-        public Color BlockColor { get;  }
+        public BLOCKSIZE BlockSize { get; set; }
+        public Color BlockColor { get; set; }
 
         public BlockStructure(int row, int col, BLOCKSIZE size, Color color)
         {
@@ -26,6 +28,12 @@ namespace Valve.VR.InteractionSystem
             BlockSize = size;
             BlockColor = color;
 
+        }
+
+        public BlockStructure(int rows, int columns)
+        {
+            Rows = rows;
+            this.columns = columns;
         }
 
         public void AddNode(BlockPart node, int row, int col)

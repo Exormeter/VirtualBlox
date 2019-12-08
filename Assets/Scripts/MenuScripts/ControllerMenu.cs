@@ -3,19 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 
 namespace Valve.VR.InteractionSystem
 {
     public class ControllerMenu : MonoBehaviour
     {
-
-        
-        public int Rows;
-        public int Columns;
-        public GameObject Toggle;
         public GameObject CanvasContainer;
         public ColorToggleGroup toggleGroup;
+        public MatrixController matrixController;
         public GameObject pointer;
 
         
@@ -24,8 +21,6 @@ namespace Valve.VR.InteractionSystem
         public SteamVR_Action_Boolean spawnBlockAction = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("SpawnBlock");
 
         private SteamVR_Input_Sources handInput;
-        private Canvas canvas;
-        private List<List<GameObject>> matrix = new List<List<GameObject>>();
         private BLOCKSIZE currentBlocksize = BLOCKSIZE.NORMAL;
         private Color currentBlockColor = Color.gray;
         private BlockGenerator blockGenerator;
@@ -37,8 +32,7 @@ namespace Valve.VR.InteractionSystem
             
 
             handInput = hand.handType;
-            canvas = CanvasContainer.GetComponent<Canvas>();
-            PopulateMatrix();
+           
             blockGenerator = GameObject.FindGameObjectWithTag("BlockGenerator").GetComponent<BlockGenerator>();
 
             toggleGroup.OnChange += ColorOnChange;
@@ -55,14 +49,17 @@ namespace Valve.VR.InteractionSystem
             {
                 if(hand.currentAttachedObject == null && hand.hoveringInteractable == null)
                 {
-                    List<BlockStructure> blockStructures = FindStructures();
-                    StartCoroutine(AttachNewBlockToHand(blockGenerator.GenerateBlock(blockStructures[0])));
+                    List<BlockStructure> blockStructures = matrixController.GetStructures();
+                    BlockStructure blockStructure = blockStructures[0];
+                    blockStructure.BlockColor = currentBlockColor;
+                    blockStructure.BlockSize = currentBlocksize;
+                    StartCoroutine(AttachNewBlockToHand(blockGenerator.GenerateBlock(blockStructure)));
                 }
             }
 
             if (Input.GetKeyUp("space"))
             {
-                List<BlockStructure> blockStructures = FindStructures();
+                List<BlockStructure> blockStructures = matrixController.GetStructures();
                 foreach (BlockStructure blockStructure in blockStructures)
                 {
                     blockGenerator.GenerateBlock(blockStructure);
@@ -125,77 +122,6 @@ namespace Valve.VR.InteractionSystem
             pointer.SetActive(false);
         }
 
-
-        private void PopulateMatrix()
-        {
-            for (int r = 0; r < Rows; r++)
-            {
-                matrix.Add(new List<GameObject>());
-                for (int c = 0; c < Columns; c++)
-                {
-
-                    GameObject toggle = Instantiate(Toggle, Vector3.zero, Quaternion.identity, canvas.transform);
-                    RectTransform rectTransfrom = toggle.GetComponent<RectTransform>();
-                    rectTransfrom.localScale = new Vector3(2, 2, 1);
-                    rectTransfrom.localPosition = Vector3.zero;
-                    rectTransfrom.localRotation = Quaternion.identity;
-
-                    Vector3 anchorPosition = new Vector3(c * rectTransfrom.sizeDelta.x, -r * rectTransfrom.sizeDelta.y, 0);
-
-                    toggle.GetComponent<RectTransform>().anchoredPosition = anchorPosition;
-                    matrix[r].Add(toggle);
-                }
-            }
-        }
-
-        private List<BlockStructure> FindStructures()
-        {
-            List<BlockStructure> blockStructures = new List<BlockStructure>();
-            for (int row = 0; row < Rows; row++)
-            {
-                for (int col = 0; col < Columns; col++)
-                {
-                    Toggle toggle = matrix[row][col].GetComponent<Toggle>();
-                    if (toggle.isOn && !matrix[row][col].tag.Equals("Visited"))
-                    {
-                        BlockStructure structure = new BlockStructure(Rows, Columns, currentBlocksize, currentBlockColor);
-                        FindAdjacentNodes(structure, row, col);
-                        blockStructures.Add(structure);
-                    }
-                }
-            }
-            ResetMatrix();
-            return blockStructures;
-        }
-
-        private void FindAdjacentNodes(BlockStructure structure, int row, int column)
-        {
-            if (row >= matrix.Count || column >= matrix[0].Count || row < 0 || column < 0 || matrix[row][column].tag.Equals("Visited"))
-                return;
-
-            matrix[row][column].tag = "Visited";
-
-            if (matrix[row][column].GetComponent<Toggle>().isOn)
-            {
-                structure.AddNode(new BlockPart(row, column), row, column);
-                FindAdjacentNodes(structure, row, column - 1);
-                FindAdjacentNodes(structure, row, column + 1);
-                FindAdjacentNodes(structure, row - 1, column);
-                FindAdjacentNodes(structure, row + 1, column);
-            }
-        }
-
-        private void ResetMatrix()
-        {
-            for (int row = 0; row < Rows; row++)
-            {
-                for (int col = 0; col < Columns; col++)
-                {
-                    Toggle toggle = matrix[row][col].GetComponent<Toggle>();
-                    matrix[row][col].tag = "Untagged";
-                }
-            }
-        }
 
         public void ChangeBlockSize()
         {

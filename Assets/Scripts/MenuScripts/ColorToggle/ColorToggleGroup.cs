@@ -11,7 +11,6 @@ using Valve.VR.InteractionSystem;
 
 namespace UnityEngine.UI
 {
-    [AddComponentMenu("UI/Toggle Group", 32)]
     [DisallowMultipleComponent]
     /// <summary>
     /// A component that represents a group of UI.Toggles.
@@ -51,7 +50,7 @@ namespace UnityEngine.UI
         {
             foreach (Transform transformToggle in gameObject.transform)
             {
-                var toggle = transformToggle.gameObject.GetComponent<UnityEngine.UI.ColorToggle>();
+                var toggle = transformToggle.gameObject.GetComponent<ColorToggle>();
                 //var toggle = transformToggle.gameObject.GetComponents<Component>();
                 toggle.onValueChanged.AddListener((isSelected, blockColor) =>
                 {

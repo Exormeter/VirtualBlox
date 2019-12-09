@@ -26,7 +26,7 @@ public class DragHandler : MonoBehaviour, IDragHandler
 
     void Awake()
     {
-        matrixController = GetComponent<MatrixController>();
+        matrixController = GetComponentInParent<MatrixController>();
         startingRows = matrixController.Rows;
         startingCols = matrixController.Columns;
         currentCols = startingCols;
@@ -38,7 +38,7 @@ public class DragHandler : MonoBehaviour, IDragHandler
     // Start is called before the first frame update
     void Start()
     {
-        handleSprite.rectTransform.localPosition = new Vector3(startingCols * toggleWidth, -startingRows * toggleHeight, 0);
+        handleSprite.rectTransform.localPosition = new Vector3((startingCols - 0.5f) * toggleWidth, -(startingRows - 0.5f) * toggleHeight, 0);
     }
 
     // Update is called once per frame
@@ -49,54 +49,66 @@ public class DragHandler : MonoBehaviour, IDragHandler
 
     public void OnDrag(PointerEventData eventData)
     {
-        float positionDeltaX = 0;
-        float positionDeltaY = 0;
         
-        if(eventData.position.x < edgeHighX && eventData.position.x > edgeLowX)
+        Vector3 pointerPosition;
+        if (RectTransformUtility.ScreenPointToWorldPointInRectangle(handleSprite.rectTransform, eventData.position, eventData.pressEventCamera, out pointerPosition))
         {
-            positionDeltaX = eventData.position.x;
+            handleSprite.rectTransform.position = pointerPosition;
         }
 
-        if(eventData.position.y < edgeHighY && eventData.position.y > edgeLowY)
+        if (handleSprite.rectTransform.localPosition.x > edgeHighX)
         {
-            positionDeltaY = eventData.position.y;
+            handleSprite.rectTransform.localPosition = new Vector3(edgeHighX, handleSprite.rectTransform.localPosition.y, handleSprite.rectTransform.localPosition.z);
         }
 
-        handleSprite.rectTransform.localPosition += new Vector3(positionDeltaX, positionDeltaY, 0);
+        if (handleSprite.rectTransform.localPosition.x < edgeLowX)
+        {
+            handleSprite.rectTransform.localPosition = new Vector3(edgeLowX, handleSprite.rectTransform.localPosition.y, handleSprite.rectTransform.localPosition.z);
+        }
 
-        checkCols(handleSprite.rectTransform.localPosition);
-        checkRows(handleSprite.rectTransform.localPosition);
+        if (handleSprite.rectTransform.localPosition.y > edgeHighY)
+        {
+            handleSprite.rectTransform.localPosition = new Vector3(handleSprite.rectTransform.localPosition.x, edgeHighY, handleSprite.rectTransform.localPosition.z);
+        }
 
-        
+        if (handleSprite.rectTransform.localPosition.y < edgeLowY)
+        {
+            handleSprite.rectTransform.localPosition = new Vector3(handleSprite.rectTransform.localPosition.x, edgeLowY, handleSprite.rectTransform.localPosition.z);
+        }
+
+        CheckCols(handleSprite.rectTransform.localPosition);
+        CheckRows(handleSprite.rectTransform.localPosition);
+
+
     }
 
-    public void checkRows(Vector3 currentPointerPosition)
+    public void CheckRows(Vector3 currentPointerPosition)
     {
-        if (currentPointerPosition.x > (currentRows + 1) * toggleHeight)
+        if (Math.Abs(currentPointerPosition.y) > (currentRows + 0.5) * toggleHeight)
         {
             matrixController.AddRow();
             currentRows++;
         }
 
-        else if (currentPointerPosition.x < (currentRows - 1) * toggleHeight)
+        else if (Math.Abs(currentPointerPosition.y) < (currentRows - 0.5) * toggleHeight)
         {
             matrixController.RemoveRow();
             currentRows--;
         }
     }
 
-    public void checkCols(Vector3 currentPointerPosition)
+    public void CheckCols(Vector3 currentPointerPosition)
     {
-        if (currentPointerPosition.x > (currentRows + 1) * toggleHeight)
+        if (currentPointerPosition.x > (currentCols + 0.5) * toggleHeight)
         {
             matrixController.AddCol();
-            currentRows++;
+            currentCols++;
         }
 
-        else if (currentPointerPosition.x < (currentRows - 1) * toggleHeight)
+        else if (currentPointerPosition.x < (currentCols - 0.5) * toggleHeight)
         {
             matrixController.RemoveCol();
-            currentRows--;
+            currentCols--;
         }
     }
 }

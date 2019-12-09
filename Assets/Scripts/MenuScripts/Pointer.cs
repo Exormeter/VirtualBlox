@@ -1,20 +1,31 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public class Pointer: MonoBehaviour
+public class Pointer : MonoBehaviour
 {
-    public float defaultLenght;
-    //public VRInputModule inputModule;
+    [SerializeField] private float defaultLength = 5.0f;
+    [SerializeField] private GameObject dot = null;
+
+    public Camera Camera;
 
     private LineRenderer lineRenderer = null;
-    // Start is called before the first frame update
+    private VRInputModule inputModule = null;
+
     private void Awake()
     {
+        Camera.enabled = false;
+
         lineRenderer = GetComponent<LineRenderer>();
     }
 
-    // Update is called once per frame
+    private void Start()
+    {
+        // current.currentInputModule does not work
+        inputModule = EventSystem.current.gameObject.GetComponent<VRInputModule>();
+    }
+
     private void Update()
     {
         UpdateLine();
@@ -22,26 +33,34 @@ public class Pointer: MonoBehaviour
 
     private void UpdateLine()
     {
-        float targetLength = defaultLenght;
+        // Use default or distance
+        PointerEventData data = inputModule.Data;
+        RaycastHit hit = CreateRaycast();
 
-        RaycastHit hit = CreateRaycast(targetLength);
+        // If nothing is hit, set do default length
+        float colliderDistance = hit.distance == 0 ? defaultLength : hit.distance;
+        float canvasDistance = data.pointerCurrentRaycast.distance == 0 ? defaultLength : data.pointerCurrentRaycast.distance;
 
+        // Get the closest one
+        float targetLength = Mathf.Min(colliderDistance, canvasDistance);
+
+        // Default
         Vector3 endPosition = transform.position + (transform.forward * targetLength);
 
-        if(hit.collider != null)
-        {
-            endPosition = hit.point;
-        }
+        // Set position of the dot
+        //dot.transform.position = endPosition;
 
+        // Set linerenderer
         lineRenderer.SetPosition(0, transform.position);
         lineRenderer.SetPosition(1, endPosition);
     }
 
-    private RaycastHit CreateRaycast(float length)
+    private RaycastHit CreateRaycast()
     {
         RaycastHit hit;
         Ray ray = new Ray(transform.position, transform.forward);
-        Physics.Raycast(ray, out hit, defaultLenght);
+        Physics.Raycast(ray, out hit, defaultLength);
+
         return hit;
     }
 }

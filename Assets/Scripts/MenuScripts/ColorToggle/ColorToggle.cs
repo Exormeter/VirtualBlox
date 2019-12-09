@@ -1,10 +1,12 @@
 ﻿using System;
+using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
+using UnityEngine.UI;
 using Valve.VR.InteractionSystem;
 
-namespace UnityEngine.UI
+namespace Valve.VR.InteractionSystem
 {
     /// <summary>
     /// A standard toggle that has an on / off state.
@@ -13,7 +15,6 @@ namespace UnityEngine.UI
     /// The toggle component is a Selectable that controls a child graphic which displays the on / off state.
     /// When a toggle event occurs a callback is sent to any registered listeners of UI.Toggle._onValueChanged.
     /// </remarks>
-    [AddComponentMenu("UI/Toggle", 31)]
     [RequireComponent(typeof(RectTransform))]
     public class ColorToggle : Selectable, IPointerClickHandler, ISubmitHandler, ICanvasElement
     {
@@ -67,7 +68,7 @@ namespace UnityEngine.UI
             }
         }
 
-        
+
         public ToggleEvent onValueChanged = new ToggleEvent();
 
         // Whether the toggle is on
@@ -158,7 +159,7 @@ namespace UnityEngine.UI
                 newGroup.NotifyToggleOn(this);
         }
 
-        
+
 
         public bool isOn
         {

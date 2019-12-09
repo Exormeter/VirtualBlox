@@ -12,7 +12,7 @@ namespace Valve.VR.InteractionSystem
     {
         public GameObject CanvasContainer;
         public ColorToggleGroup toggleGroup;
-        public BlockToggleGroup blockToggleGroup;
+        //public BlockToggleGroup blockToggleGroup;
         public MatrixController matrixController;
         public GameObject pointer;
 
@@ -37,7 +37,7 @@ namespace Valve.VR.InteractionSystem
             blockGenerator = GameObject.FindGameObjectWithTag("BlockGenerator").GetComponent<BlockGenerator>();
 
             toggleGroup.OnChange += ColorOnChange;
-            blockToggleGroup.OnChange += BlockOnChange;
+            //blockToggleGroup.OnChange += BlockOnChange;
 
             CanvasContainer.SetActive(false);
 

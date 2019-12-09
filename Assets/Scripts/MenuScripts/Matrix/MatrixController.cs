@@ -58,54 +58,69 @@ namespace Valve.VR.InteractionSystem
 
         public void RemoveRow()
         {
-            matrix[Rows].ForEach(gameObject => gameObject.SetActive(false));
+            matrix[Rows - 1].ForEach(gameObject => gameObject.SetActive(false));
             Rows--;
         }
 
         public void AddRow()
         {
-            Rows++;
-            if(matrix.Count >= Rows)
+            
+            if(matrix.Count > Rows)
             {
-                matrix[Rows].ForEach(gameObject => gameObject.SetActive(true));
+                for(int col = 0; col < Columns; col++)
+                {
+                    matrix[Rows][col].SetActive(true);
+                }
+                
             }
             else
             {
                 List<GameObject> newRow = new List<GameObject>();
-                for (int col = 0; col > Columns; col++)
+                for (int col = 0; col < matrix[0].Count; col++)
                 {
                     GameObject toggle = InstantiateToggle(Rows, col);
+                    if(col >= Columns)
+                    {
+                        toggle.SetActive(false);
+                    }
                     newRow.Add(toggle);
                 }
                 matrix.Add(newRow);
             }
-
+            Rows++;
         }
 
         public void RemoveCol()
         {
-            matrix.ForEach(rows => rows[Columns].SetActive(false));
+            matrix.ForEach(rows => rows[Columns - 1].SetActive(false));
             Columns--;
         }
 
         public void AddCol()
         {
-            Columns++;
-            if(matrix[0].Count >= Columns)
+            
+            if(matrix[0].Count > Columns)
             {
-                for(int row = 0; row < Rows; row++)
+                
+                for (int row = 0; row < Rows; row++)
                 {
                     matrix[row][Columns].SetActive(true);
                 }
             }
             else
             {
-                for (int row = 0; row < Rows; row++)
+                
+                for (int row = 0; row < matrix.Count; row++)
                 {
                     GameObject toggle = InstantiateToggle(row, Columns);
+                    if(row >= Rows)
+                    {
+                        toggle.SetActive(false);
+                    }
                     matrix[row].Add(toggle);
                 }
             }
+            Columns++;
         }
 
         

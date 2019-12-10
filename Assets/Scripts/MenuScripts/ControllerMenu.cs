@@ -12,7 +12,7 @@ namespace Valve.VR.InteractionSystem
     {
         public GameObject CanvasContainer;
         public ColorToggleGroup toggleGroup;
-        //public BlockToggleGroup blockToggleGroup;
+        public BlockToggleGroup blockToggleGroup;
         public MatrixController matrixController;
         public GameObject pointer;
 
@@ -37,7 +37,7 @@ namespace Valve.VR.InteractionSystem
             blockGenerator = GameObject.FindGameObjectWithTag("BlockGenerator").GetComponent<BlockGenerator>();
 
             toggleGroup.OnChange += ColorOnChange;
-            //blockToggleGroup.OnChange += BlockOnChange;
+            blockToggleGroup.OnChange += BlockOnChange;
 
             CanvasContainer.SetActive(false);
 
@@ -59,15 +59,14 @@ namespace Valve.VR.InteractionSystem
                 }
             }
 
-            if (Input.GetKeyUp("space"))
-            {
-                List<BlockStructure> blockStructures = matrixController.GetStructures();
-                foreach (BlockStructure blockStructure in blockStructures)
-                {
-                    blockGenerator.GenerateBlock(blockStructure);
-                }
-
-            }
+            //if (Input.GetKeyUp("space"))
+            //{
+            //    List<BlockStructure> blockStructures = matrixController.GetStructures();
+            //    foreach (BlockStructure blockStructure in blockStructures)
+            //    {
+            //        blockGenerator.GenerateBlock(blockStructure);
+            //    }
+            //}
         }
 
         private IEnumerator AttachNewBlockToHand(GameObject generatedBlock)
@@ -77,7 +76,6 @@ namespace Valve.VR.InteractionSystem
                 {
                     if (i == frameUntilColliderReEvaluation)
                     {
-
                         generatedBlock.transform.position = hand.objectAttachmentPoint.transform.position;
                         generatedBlock.GetComponent<BlockInteractable>().PhysicsAttach(hand, GrabTypes.Grip);
                     }

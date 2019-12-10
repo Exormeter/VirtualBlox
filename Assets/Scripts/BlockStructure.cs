@@ -29,16 +29,31 @@ namespace Valve.VR.InteractionSystem
 
         }
 
-        public BlockStructure(int rows, int columns)
+        public BlockStructure(int rows, int columns, bool fill = false)
         {
             Rows = rows;
             Cols = columns;
             matrix = new BlockPart[rows, columns];
+            if (fill)
+            {
+                FillComplete();
+            }
         }
 
         public void AddNode(BlockPart node, int row, int col)
         {
             matrix[row, col] = node;
+        }
+
+        public void FillComplete()
+        {
+            for(int row = 0; row < Rows; row++)
+            {
+                for(int col = 0; col < Cols; col++)
+                {
+                    matrix[row, col] = new BlockPart(row, col);
+                }
+            }
         }
 
         public BlockPart[,] GetCroppedMatrix()

@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace Valve.VR.InteractionSystem
 {
-    [RequireComponent(typeof(DragHandler))]
+    
     public class MatrixController : MonoBehaviour
     {
         public int Rows;

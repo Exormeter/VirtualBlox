@@ -71,11 +71,7 @@ namespace UnityEngine.UI
 
         protected virtual void DoOnChange(Color blockColor)
         {
-            ChangedEventHandler handler = OnChange;
-            if (handler != null)
-            {
-                handler(blockColor);
-            }
+            OnChange(blockColor);
         }
 
         /// <summary>

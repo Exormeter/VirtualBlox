@@ -33,19 +33,19 @@ namespace Valve.VR
             }
         }
         
-        public virtual SteamVR_Action_Boolean GrabTrigger
+        public virtual SteamVR_Action_Boolean GrabAndSpawn
         {
             get
             {
-                return SteamVR_Actions.default_GrabTrigger;
+                return SteamVR_Actions.default_GrabAndSpawn;
             }
         }
         
-        public virtual SteamVR_Action_Boolean GrabGrip
+        public virtual SteamVR_Action_Boolean Climb
         {
             get
             {
-                return SteamVR_Actions.default_GrabGrip;
+                return SteamVR_Actions.default_Climb;
             }
         }
         

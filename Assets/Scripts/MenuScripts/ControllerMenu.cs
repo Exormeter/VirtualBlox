@@ -11,7 +11,7 @@ namespace Valve.VR.InteractionSystem
     public class ControllerMenu : MonoBehaviour
     {
         public GameObject CanvasContainer;
-        public ColorToggleGroup toggleGroup;
+        public ColorToggleGroup colorToggleGroup;
         public BlockToggleGroup blockToggleGroup;
         public MatrixController matrixController;
         public GameObject pointer;
@@ -23,25 +23,21 @@ namespace Valve.VR.InteractionSystem
 
         private SteamVR_Input_Sources handInput;
         private BLOCKSIZE currentBlocksize = BLOCKSIZE.NORMAL;
-        private Color currentBlockColor = Color.gray;
+        private Color currentBlockColor;
         private BlockGenerator blockGenerator;
         private readonly int frameUntilColliderReEvaluation = 2;
 
         // Start is called before the first frame update
         void Start()
         {
-            
-
             handInput = hand.handType;
-           
+            colorToggleGroup.OnChange += ColorOnChange;
+            blockToggleGroup.OnChange += BlockOnChange;
             blockGenerator = GameObject.FindGameObjectWithTag("BlockGenerator").GetComponent<BlockGenerator>();
 
-            toggleGroup.OnChange += ColorOnChange;
-            blockToggleGroup.OnChange += BlockOnChange;
+           
 
             CanvasContainer.SetActive(false);
-
-            
         }
 
         // Update is called once per frame
@@ -87,6 +83,7 @@ namespace Valve.VR.InteractionSystem
 
         private void ColorOnChange(Color blockColor)
         {
+            Debug.Log(gameObject.name + " " + blockColor.ToString("F5"));
             currentBlockColor = blockColor;
         }
 

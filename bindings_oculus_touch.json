@@ -153,20 +153,6 @@
           }
         },
         {
-          "path": "/user/hand/left/input/grip",
-          "mode": "button",
-          "parameters": {
-            "click_activate_threshold": "0.8",
-            "click_deactivate_threshold": "0.7",
-            "force_input": "force"
-          },
-          "inputs": {
-            "click": {
-              "output": "/actions/default/in/grabgrip"
-            }
-          }
-        },
-        {
           "path": "/user/hand/right/input/trigger",
           "mode": "button",
           "parameters": {},
@@ -183,20 +169,6 @@
           "inputs": {
             "click": {
               "output": "/actions/default/in/teleport"
-            }
-          }
-        },
-        {
-          "path": "/user/hand/right/input/grip",
-          "mode": "button",
-          "parameters": {
-            "click_activate_threshold": "0.8",
-            "click_deactivate_threshold": "0.7",
-            "force_input": "force"
-          },
-          "inputs": {
-            "click": {
-              "output": "/actions/default/in/grabgrip"
             }
           }
         },

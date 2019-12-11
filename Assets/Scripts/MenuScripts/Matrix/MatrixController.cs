@@ -13,6 +13,7 @@ namespace Valve.VR.InteractionSystem
         public int Rows;
         public int Columns;
         public GameObject Toggle;
+        public DragHandler handler;
        
 
         private List<List<GameObject>> matrix = new List<List<GameObject>>();
@@ -154,6 +155,7 @@ namespace Valve.VR.InteractionSystem
                 for (; structure.RowsCropped > Rows;)
                 {
                     AddRow();
+                    handler.UpdateHandlerPosition(Rows, Columns);
                 }
             }
 
@@ -162,9 +164,9 @@ namespace Valve.VR.InteractionSystem
                 for (; structure.ColsCropped > Columns;)
                 {
                     AddCol();
+                    handler.UpdateHandlerPosition(Rows, Columns);
                 }
             }
-
             for (int row = 0; row < structure.RowsCropped; row++)
             {
                 for (int col = 0; col < structure.ColsCropped; col++)

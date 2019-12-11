@@ -32,6 +32,8 @@ public class VRInputModule : BaseInputModule
 
         ExecuteEvents.Execute(Data.pointerPress, Data, ExecuteEvents.pointerDownHandler);
         ExecuteEvents.Execute(Data.pointerDrag, Data, ExecuteEvents.beginDragHandler);
+
+        Data.pressPosition = Data.position;
     }
 
     public void Release()
@@ -46,6 +48,7 @@ public class VRInputModule : BaseInputModule
 
         Data.pointerPress = null;
         Data.pointerDrag = null;
+        Data.pressPosition = Vector2.zero;
 
         Data.pointerCurrentRaycast.Clear();
     }

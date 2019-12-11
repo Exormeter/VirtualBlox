@@ -13,6 +13,7 @@ namespace Valve.VR.InteractionSystem
         private Dictionary<Guid, GameObject> exsitingBlocksInGame = new Dictionary<Guid, GameObject>();
         //private List<Rigidbody> BlockMovement = new List<Rigidbody>();
         public int physicSteps;
+        public bool disableRenderer;
 
         public int simBlocks;
         public int inGameBlocks;
@@ -60,7 +61,11 @@ namespace Valve.VR.InteractionSystem
             }
             foreach (Component component in gameObject.GetComponents(typeof(Component)))
             {
-                if (!(component is BlockScriptSim) && !(component is MeshFilter) && !(component is MeshRenderer) && !(component is Transform) && !(component is Collider) && !(component is Rigidbody) && !(component is BlockGeometryScript))
+                if (!(component is BlockScriptSim) && !(component is MeshFilter) && !(component is MeshFilter) && !(component is Transform) && !(component is Collider) && !(component is Rigidbody) && !(component is BlockGeometryScript))
+                {
+                    Destroy(component);
+                }
+                if(component is MeshRenderer && disableRenderer)
                 {
                     Destroy(component);
                 }

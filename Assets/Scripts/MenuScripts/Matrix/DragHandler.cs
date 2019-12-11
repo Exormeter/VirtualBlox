@@ -111,4 +111,11 @@ public class DragHandler : MonoBehaviour, IDragHandler
             currentCols--;
         }
     }
+
+    public void UpdateHandlerPosition(int rows, int columns)
+    {
+        currentCols = columns;
+        currentRows = rows;
+        handleSprite.rectTransform.localPosition = new Vector3((currentCols - 0.5f) * toggleWidth, -(currentRows - 0.5f) * toggleHeight, 0);
+    }
 }

@@ -9,12 +9,12 @@
       "type": "boolean"
     },
     {
-      "name": "/actions/default/in/GrabTrigger",
+      "name": "/actions/default/in/GrabAndSpawn",
       "type": "boolean",
       "requirement": "suggested"
     },
     {
-      "name": "/actions/default/in/GrabGrip",
+      "name": "/actions/default/in/Climb",
       "type": "boolean"
     },
     {
@@ -143,7 +143,6 @@
   "localization": [
     {
       "language_tag": "en_US",
-      "/actions/default/in/GrabGrip": "Grab Grip",
       "/actions/default/in/HeadsetOnHead": "Headset on head (proximity sensor)",
       "/actions/default/in/InteractUI": "Interact With UI",
       "/actions/default/in/Pose": "Pose",
@@ -151,7 +150,9 @@
       "/actions/default/in/SkeletonRightHand": "Skeleton (Right)",
       "/actions/default/in/Teleport": "Teleport",
       "/actions/default/out/Haptic": "Haptic",
-      "/actions/platformer/in/Jump": "Jump"
+      "/actions/platformer/in/Jump": "Jump",
+      "/actions/default/in/GrabAndSpawn": "Grab And Spawn",
+      "/actions/default/in/Climb": "Climb Blocks"
     }
   ]
 }

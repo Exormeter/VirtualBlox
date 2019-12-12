@@ -23,7 +23,7 @@ namespace Valve.VR.InteractionSystem
 
         private SteamVR_Input_Sources handInput;
         private BLOCKSIZE currentBlocksize = BLOCKSIZE.NORMAL;
-        private Color currentBlockColor;
+        private Color currentBlockColor  = Color.red;
         private BlockGenerator blockGenerator;
         private readonly int frameUntilColliderReEvaluation = 2;
 
@@ -83,7 +83,6 @@ namespace Valve.VR.InteractionSystem
 
         private void ColorOnChange(Color blockColor)
         {
-            Debug.Log(gameObject.name + " " + blockColor.ToString("F5"));
             currentBlockColor = blockColor;
         }
 

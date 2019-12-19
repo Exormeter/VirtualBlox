@@ -1011,7 +1011,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1920829103}
     - target: {fileID: 114295614051445386, guid: 63c2ae9116f7a704b9bc7137e4f9995f,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
@@ -3033,7 +3033,7 @@ MonoBehaviour:
   physicSceneManager: {fileID: 0}
   blockScriptSim: {fileID: 0}
   frameUntilColliderReEvaluation: 2
-  breakForcePerPin: 12
+  breakForcePerPin: 100
 --- !u!114 &385857104
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8932,17 +8932,17 @@ PrefabInstance:
     - target: {fileID: 257168285543960271, guid: 04c0a04a17fb4104687ffb3ee690570d,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.174
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 257168285543960271, guid: 04c0a04a17fb4104687ffb3ee690570d,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.773
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 257168285543960271, guid: 04c0a04a17fb4104687ffb3ee690570d,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.294
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 257168285543960271, guid: 04c0a04a17fb4104687ffb3ee690570d,
         type: 3}
@@ -9010,6 +9010,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 3618188176987479035, guid: 924c2651d6146ce44b407a863079e66c,
         type: 3}
+    - target: {fileID: 257168285543960269, guid: 04c0a04a17fb4104687ffb3ee690570d,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: a9b0cd1d7aa398a4b91b00b52b65003a, type: 2}
     m_RemovedComponents:
     - {fileID: 257168285543960270, guid: 04c0a04a17fb4104687ffb3ee690570d, type: 3}
     - {fileID: 257168285543960278, guid: 04c0a04a17fb4104687ffb3ee690570d, type: 3}

@@ -48,6 +48,10 @@ namespace Valve.VR.InteractionSystem
                 if(hand.currentAttachedObject == null && hand.hoveringInteractable == null)
                 {
                     List<BlockStructure> blockStructures = matrixController.GetStructures();
+                    if(blockStructures.Count == 0)
+                    {
+                        return;
+                    }
                     BlockStructure blockStructure = blockStructures[0];
                     blockStructure.BlockColor = currentBlockColor;
                     blockStructure.BlockSize = currentBlocksize;

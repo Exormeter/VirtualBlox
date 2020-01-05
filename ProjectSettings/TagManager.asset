@@ -19,6 +19,9 @@ TagManager:
   - BlockGenerator
   - ColorChooser
   - DragHandler
+  - LaserPointer
+  - SaveGameManager
+  - Block
   layers:
   - Default
   - TransparentFX

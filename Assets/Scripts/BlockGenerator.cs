@@ -50,6 +50,7 @@ namespace Valve.VR.InteractionSystem
             GameObject newBlock = CombineTileMeshes(container);
             newBlock.AddComponent<BlockGeometryScript>().SetStructure(structure);
             newBlock.transform.position = new Vector3(0, 2, 0);
+            newBlock.tag = "Block";
             AddPrecurserComponents(newBlock);
             return newBlock;
             
@@ -118,8 +119,6 @@ namespace Valve.VR.InteractionSystem
 
         public HashSet<DIRECTION> visitedDirections = new HashSet<DIRECTION>();
         public DIRECTION WallDirection;
-
-        public Vector3 partCenter;
 
         public BlockPart(int row, int col)
         {

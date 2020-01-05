@@ -26,7 +26,15 @@ namespace Valve.VR.InteractionSystem
             matrix = new BlockPart[row, col];
             BlockSize = size;
             BlockColor = color;
+        }
 
+        public BlockStructure(int row, int col, BLOCKSIZE size, Color color, bool[,] serializedMatrix)
+        {
+            Rows = row;
+            Cols = col;
+            matrix = DeserializeMatrix(serializedMatrix);
+            BlockSize = size;
+            BlockColor = color;
         }
 
         public BlockStructure(int rows, int columns, bool fill = false)
@@ -38,6 +46,22 @@ namespace Valve.VR.InteractionSystem
             {
                 FillComplete();
             }
+        }
+
+        private BlockPart[,] DeserializeMatrix(bool[,] serializedMatrix)
+        {
+            BlockPart[,] newMatrix = new BlockPart[Rows, Cols];
+            for (int row = 0; row < Rows; row++)
+            {
+                for (int col = 0; col < Cols; col++)
+                {
+                    if(serializedMatrix[row, col])
+                    {
+                        newMatrix[row, col] = new BlockPart(row, col);
+                    }
+                }
+            }
+            return newMatrix;
         }
 
         public void AddNode(BlockPart node, int row, int col)

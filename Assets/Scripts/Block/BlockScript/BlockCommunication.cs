@@ -11,28 +11,41 @@ namespace Valve.VR.InteractionSystem
         public int connectedBlockCount;
         private List<BlockContainer> connectedBlocks = new List<BlockContainer>();
         public List<BlockContainer> ConnectedBlocks => connectedBlocks;
-        private Guid guid = Guid.NewGuid();
-        public Guid Guid => guid;
-        public PhysicSceneManager physicSceneManager;
+        private Guid _guid = Guid.NewGuid();
+        public Guid Guid
+        {
+            get => _guid;
+            set
+            {
+                blockManager.ChangeGuid(_guid, value, this.gameObject);
+                _guid = value;
+            }
+        }
+        public BlockManager blockManager;
         public BlockScriptSim blockScriptSim;
         public int frameUntilColliderReEvaluation;
         public int breakForcePerPin;
- 
+
+        private void Awake()
+        {
+            blockManager = GameObject.FindGameObjectWithTag("BlockManager").GetComponent<BlockManager>();
+            blockManager.AddBlock(Guid, this.gameObject);
+        }
         void Start()
         {
-            physicSceneManager = GameObject.FindGameObjectWithTag("PhysicManager").GetComponent<PhysicSceneManager>();
-            physicSceneManager.AddGameObjectRefInGame(transform.gameObject);
-            if (!physicSceneManager.AlreadyExisits(Guid))
-            {
+            //physicSceneManager = GameObject.FindGameObjectWithTag("PhysicManager").GetComponent<PhysicSceneManager>();
+            //physicSceneManager.AddGameObjectRefInGame(transform.gameObject);
+            //if (!physicSceneManager.AlreadyExisits(Guid))
+            //{
                 
-                GameObject twinBlock = Instantiate(transform.gameObject);
+            //    GameObject twinBlock = Instantiate(transform.gameObject);
                 
-                twinBlock.AddComponent<BlockScriptSim>();
-                twinBlock.GetComponent<BlockScriptSim>().breakForcePerPin = breakForcePerPin;
-                twinBlock.GetComponent<BlockScriptSim>().guid = Guid;
-                blockScriptSim = twinBlock.GetComponent<BlockScriptSim>();
-                physicSceneManager.AddGameObjectToPhysicScene(twinBlock);
-            }
+            //    twinBlock.AddComponent<BlockScriptSim>();
+            //    twinBlock.GetComponent<BlockScriptSim>().breakForcePerPin = breakForcePerPin;
+            //    twinBlock.GetComponent<BlockScriptSim>().guid = Guid;
+            //    blockScriptSim = twinBlock.GetComponent<BlockScriptSim>();
+            //    physicSceneManager.AddGameObjectToPhysicScene(twinBlock);
+            //}
         }
 
         private void Update()
@@ -135,7 +148,7 @@ namespace Valve.VR.InteractionSystem
 
         
 
-        public void SendMessageToConnectedBlocksBFS(String message)
+        public void SendMessageToConnectedBlocksBFS(string message)
         {
             Queue<GameObject> blocksToVisit = new Queue<GameObject>();
             List<int> visitedBlocks = new List<int>();

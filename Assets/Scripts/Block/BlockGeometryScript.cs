@@ -19,7 +19,7 @@ namespace Valve.VR.InteractionSystem
         private GameObject tapContainer;
         private GameObject groovesContainer;
         private Mesh mesh;
-        private BlockStructure blockStructure;
+        public BlockStructure blockStructure;
         private List<Collider> wallColliderList = new List<Collider>();
 
         [HideInInspector]

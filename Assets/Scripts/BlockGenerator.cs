@@ -53,7 +53,6 @@ namespace Valve.VR.InteractionSystem
             newBlock.tag = "Block";
             AddPrecurserComponents(newBlock);
             return newBlock;
-            
         }
 
         

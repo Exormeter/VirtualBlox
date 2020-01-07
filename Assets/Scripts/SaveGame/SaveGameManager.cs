@@ -2,6 +2,7 @@
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Valve.VR.InteractionSystem
 {
@@ -9,27 +10,57 @@ namespace Valve.VR.InteractionSystem
     {
         public BlockGenerator BlockGenerator;
         public BlockManager BlockManager;
-        
+        public GameObject button;
+        public GameObject ButtonListContent;
+        public GameObject KeyBoard;
+        public Text ChoosenFile;
+
+        private string currentlyChoosenFile;
+        private string newFileName;
+
         void Start()
         {
+            string[] filePaths = Directory.GetFiles(Application.persistentDataPath);
+            foreach(string filePath in filePaths)
+            {
+                if (File.Exists(filePath))
+                {
+                    GameObject newButton = Instantiate(button) as GameObject;
+                    
+                    newButton.GetComponentInChildren<Text>().text = Path.GetFileName(filePath);
+                    newButton.transform.SetParent(ButtonListContent.transform, false);
+                    newButton.GetComponent<Button>().onClick.AddListener(() => GetFileName(filePath));
+                }
+            }
+            KeyBoard.SetActive(false);
+            ChoosenFile.text = "Ausgewählte Datei: ";
+
 
         }
 
-        
-        void Update()
+        public void GetFileName(string filePath)
         {
+            Debug.Log(filePath);
+            string fileName = Path.GetFileName(filePath);
+            currentlyChoosenFile = filePath;
+            ChoosenFile.text += fileName;
+        }
 
+        public void ButtonListen(string button)
+        {
+            newFileName += button;
+            ChoosenFile.text += button;
         }
 
         public void LoadGame()
         {
             
-            if (File.Exists(Application.persistentDataPath + "/gamesave.save"))
+            if (File.Exists(currentlyChoosenFile))
             {
                 
                 
                 BinaryFormatter bf = new BinaryFormatter();
-                FileStream file = File.Open(Application.persistentDataPath + "/gamesave.save", FileMode.Open);
+                FileStream file = File.Open(currentlyChoosenFile, FileMode.Open);
                 SaveGame save = (SaveGame)bf.Deserialize(file);
                 file.Close();
 
@@ -40,15 +71,16 @@ namespace Valve.VR.InteractionSystem
                     restoredBlock.transform.position = blockSave.position;
                     restoredBlock.transform.rotation = blockSave.rotation;
                     restoredBlock.GetComponent<BlockCommunication>().Guid = blockSave.guid;
+                    restoredBlock.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
                 }
 
                 //Connect blocks in the Scene
                 foreach (BlockSave blockSave in save.blockSaves)
                 {
                     GameObject block = BlockManager.GetBlockByGuid(blockSave.guid);
-                    foreach(Guid guid in blockSave.connectedBlocks)
+                    foreach(ConnectedBlockSerialized connection in blockSave.connectedBlocks)
                     {
-                        block.GetComponent<BlockCommunication>().ConnectBlocks(block, BlockManager.GetBlockByGuid(guid), 12, OTHER_BLOCK_IS_CONNECTED_ON.GROOVE);
+                        block.GetComponent<BlockCommunication>().ConnectBlocks(block, BlockManager.GetBlockByGuid(connection.guid), connection.connectedPins, connection.connectedOn);
                     }
                 }
             }
@@ -58,6 +90,24 @@ namespace Valve.VR.InteractionSystem
                 Debug.Log("No game saved!");
             }
         }
+
+        public void NewSave()
+        {
+            KeyBoard.SetActive(true);
+            newFileName = "";
+        }
+
+        public void ChancelNewSaveCreation()
+        {
+            KeyBoard.SetActive(false);
+        }
+
+        public void CreateNewSaveFile()
+        {
+            KeyBoard.SetActive(false);
+
+        }
+
 
         public SaveGame CreateSaveGameObject()
         {
@@ -77,7 +127,7 @@ namespace Valve.VR.InteractionSystem
         {
             SaveGame save = CreateSaveGameObject();
             BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = File.Create(Application.persistentDataPath + "/gamesave.save");
+            FileStream file = File.Create(currentlyChoosenFile);
             bf.Serialize(file, save);
             file.Close();
         }

@@ -11,6 +11,7 @@ namespace Valve.VR.InteractionSystem
     public class ControllerMenu : MonoBehaviour
     {
         public GameObject CanvasContainer;
+        public GameObject SaveGameCanvas;
         public ColorToggleGroup colorToggleGroup;
         public BlockToggleGroup blockToggleGroup;
         public MatrixController matrixController;
@@ -38,6 +39,11 @@ namespace Valve.VR.InteractionSystem
            
 
             CanvasContainer.SetActive(false);
+            if(SaveGameCanvas != null)
+            {
+                SaveGameCanvas.SetActive(false);
+            }
+            
         }
 
         // Update is called once per frame
@@ -103,6 +109,7 @@ namespace Valve.VR.InteractionSystem
         public void CloseMenu(HANDSIDE hand)
         {
             CanvasContainer.SetActive(false);
+            SaveGameCanvas.SetActive(false);
             DeactivatePointer();
         }
 
@@ -138,6 +145,12 @@ namespace Valve.VR.InteractionSystem
             {
                 currentBlocksize = BLOCKSIZE.NORMAL;
             }
+        }
+
+        public void OpenSaveMenu()
+        {
+            SaveGameCanvas.SetActive(true);
+            CanvasContainer.SetActive(false);
         }
 
 

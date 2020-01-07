@@ -24,7 +24,7 @@ namespace Valve.VR.InteractionSystem
             tapHandler = GetComponentInChildren<TapHandler>();
             rigidBody = GetComponent<Rigidbody>();
             blockCommunication = GetComponent<BlockCommunication>();
-            physicSceneManager = GameObject.FindGameObjectWithTag("PhysicManager").GetComponent<PhysicSceneManager>();
+            //physicSceneManager = GameObject.FindGameObjectWithTag("PhysicManager").GetComponent<PhysicSceneManager>();
         }
 
 
@@ -62,27 +62,27 @@ namespace Valve.VR.InteractionSystem
                 {
                     List<GameObject> connectedBlocksBeforeEvaluation = blockCommunication.GetCurrentlyConnectedBlocks();
                     blockCommunication.SendMessageToConnectedBlocks("EvaluateCollider");
-                    SyncronizePhysicBlocks(connectedBlocksBeforeEvaluation);
+                    //SyncronizePhysicBlocks(connectedBlocksBeforeEvaluation);
                     blockCommunication.SendMessageToConnectedBlocks("CheckFreeze");
                     blockCommunication.SendMessageToConnectedBlocks("UnsetKinematic");
-                    physicSceneManager.StartSimulation();
+                    //physicSceneManager.StartSimulation();
                 }
                 yield return new WaitForFixedUpdate();
             }
 
         }
 
-        private void SyncronizePhysicBlocks(List<GameObject> connectedBlocksBeforeEvaluation)
-        {
-            foreach (GameObject connectedBlockInHand in connectedBlocksBeforeEvaluation)
-            {
-                connectedBlockInHand.GetComponent<BlockCommunication>().blockScriptSim.MatchTwinBlock(connectedBlockInHand);
-            }
-            foreach (GameObject connectedBlockInHand in connectedBlocksBeforeEvaluation)
-            {
-                connectedBlockInHand.GetComponent<BlockCommunication>().blockScriptSim.ConnectBlocksAfterMatching(connectedBlockInHand);
-            }
-        }
+        //private void SyncronizePhysicBlocks(List<GameObject> connectedBlocksBeforeEvaluation)
+        //{
+        //    foreach (GameObject connectedBlockInHand in connectedBlocksBeforeEvaluation)
+        //    {
+        //        connectedBlockInHand.GetComponent<BlockCommunication>().blockScriptSim.MatchTwinBlock(connectedBlockInHand);
+        //    }
+        //    foreach (GameObject connectedBlockInHand in connectedBlocksBeforeEvaluation)
+        //    {
+        //        connectedBlockInHand.GetComponent<BlockCommunication>().blockScriptSim.ConnectBlocksAfterMatching(connectedBlockInHand);
+        //    }
+        //}
 
 
 
@@ -167,7 +167,7 @@ namespace Valve.VR.InteractionSystem
         public void UnfreezeBlock()
         {
             rigidBody.constraints = RigidbodyConstraints.None;
-            blockCommunication.blockScriptSim.DisableTwin();
+            //blockCommunication.blockScriptSim.DisableTwin();
             IsFroozen = false;
         }
 

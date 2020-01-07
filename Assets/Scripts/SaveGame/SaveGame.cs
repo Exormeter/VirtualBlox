@@ -12,12 +12,27 @@ namespace Valve.VR.InteractionSystem
         public List<BlockSave> blockSaves = new List<BlockSave>();
     }
 
+    [Serializable]
+    public class ConnectedBlockSerialized
+    {
+        public Guid guid;
+        public int connectedPins;
+        public OTHER_BLOCK_IS_CONNECTED_ON connectedOn;
+
+        public ConnectedBlockSerialized(BlockContainer container)
+        {
+            guid = container.BlockCommunication.Guid;
+            connectedPins = container.ConnectedPinCount;
+            connectedOn = container.ConnectedOn;
+        }
+    }
+
 
     [Serializable]
     public class BlockSave
     {
         public Guid guid;
-        public List<Guid> connectedBlocks;
+        public List<ConnectedBlockSerialized> connectedBlocks;
         public SerializableVector3 position;
         public SerializableQuaternion rotation;
         public SerializableColor color;
@@ -33,18 +48,18 @@ namespace Valve.VR.InteractionSystem
             rotation = block.transform.rotation;
             matrix = ConvertToBoolMatrix(block.GetComponent<BlockGeometryScript>().blockStructure);
             connectedBlocks = GetConnectedBlocks(block.GetComponent<BlockCommunication>());
-            Rows = block.GetComponent<BlockGeometryScript>().blockStructure.Rows;
-            Cols = block.GetComponent<BlockGeometryScript>().blockStructure.Cols;
+            Rows = block.GetComponent<BlockGeometryScript>().blockStructure.RowsCropped;
+            Cols = block.GetComponent<BlockGeometryScript>().blockStructure.ColsCropped;
             color = block.GetComponent<MeshRenderer>().material.color;
             blockSize = block.GetComponent<BlockGeometryScript>().blockStructure.BlockSize;
         }
 
-        private List<Guid> GetConnectedBlocks(BlockCommunication blockCommunication)
+        private List<ConnectedBlockSerialized> GetConnectedBlocks(BlockCommunication blockCommunication)
         {
-            List<Guid> Guids = new List<Guid>();
+            List<ConnectedBlockSerialized> Guids = new List<ConnectedBlockSerialized>();
             foreach(BlockContainer container in blockCommunication.ConnectedBlocks)
             {
-                Guids.Add(container.BlockCommunication.Guid);
+                Guids.Add(new ConnectedBlockSerialized(container));
             }
             return Guids;
         }

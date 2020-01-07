@@ -17,8 +17,10 @@ namespace Valve.VR.InteractionSystem
             get => _guid;
             set
             {
+                blockManager = GameObject.FindGameObjectWithTag("BlockManager").GetComponent<BlockManager>();
                 blockManager.ChangeGuid(_guid, value, this.gameObject);
                 _guid = value;
+                Debug.Log(value.ToString());
             }
         }
         public BlockManager blockManager;

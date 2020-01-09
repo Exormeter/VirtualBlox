@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -35,8 +36,6 @@ namespace Valve.VR.InteractionSystem
             {
                 block.GetComponent<AttachFloorHandler>().GrooveOrTapHit(out List<CollisionObject> currentCollisionObjects, out OTHER_BLOCK_IS_CONNECTED_ON connectedOn);
                 block.GetComponent<AttachFloorHandler>().MatchRotationWithCollidingBlock(currentCollisionObjects, connectedOn);
-                
-                
             }
         }
 
@@ -49,7 +48,9 @@ namespace Valve.VR.InteractionSystem
                 WasReMatchedWithBlock = true;
                 //Richte alle Blöcke nach Plazieren des ersten Blockes korrekt aus, alte Joints müssen vermutlich neu gesetzt werden 
                 blockCommunication.SendMessageToConnectedBlocksBFS("ReMatchConnectedBlock");
-                
+                blockCommunication.SendMessageToConnectedBlocks("AddGuidToHistory");
+
+
                 StartCoroutine(EvaluateColliderAfterMatching());
             }
         }
@@ -84,6 +85,13 @@ namespace Valve.VR.InteractionSystem
         //    }
         //}
 
+        public void AddGuidToHistory()
+        {
+            int timeStamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+            HistoryObject historyObject = new HistoryObject(blockCommunication.Guid, timeStamp);
+
+            GameObject.FindGameObjectWithTag("BlockManager").GetComponent<BlockManager>().AddHistoryEntry(historyObject);
+        }
 
 
         private void EvaluateCollider()

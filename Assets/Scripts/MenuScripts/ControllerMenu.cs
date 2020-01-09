@@ -109,7 +109,10 @@ namespace Valve.VR.InteractionSystem
         public void CloseMenu(HANDSIDE hand)
         {
             CanvasContainer.SetActive(false);
-            SaveGameCanvas.SetActive(false);
+            if(SaveGameCanvas != null)
+            {
+                SaveGameCanvas.SetActive(false);
+            }
             DeactivatePointer();
         }
 

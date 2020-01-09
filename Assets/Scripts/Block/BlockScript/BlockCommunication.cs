@@ -24,7 +24,7 @@ namespace Valve.VR.InteractionSystem
             }
         }
         public BlockManager blockManager;
-        public BlockScriptSim blockScriptSim;
+        //public BlockScriptSim blockScriptSim;
         public int frameUntilColliderReEvaluation;
         public int breakForcePerPin;
 
@@ -74,6 +74,11 @@ namespace Valve.VR.InteractionSystem
             }
 
             return visitedNodes;
+        }
+
+        public void ClearConnectedBlocks()
+        {
+            connectedBlocks.Clear();
         }
 
         public GameObject FindFirstCollidingBlock(List<int> visitedNodes = null)
@@ -325,7 +330,7 @@ namespace Valve.VR.InteractionSystem
 
         }
 
-        public bool TryBlockPull()
+        public bool AttemptToFreeBlock()
         {
             OTHER_BLOCK_IS_CONNECTED_ON otherConnection = ConnectedBlocks[0].ConnectedOn;
             foreach(BlockContainer connectedBlock in ConnectedBlocks)
@@ -335,12 +340,15 @@ namespace Valve.VR.InteractionSystem
                     return false;
                 }
             }
+
             foreach(BlockContainer connectedBlock in ConnectedBlocks)
             {
                 Destroy(connectedBlock.ConnectedJoint);
                 GetComponent<AttachFloorHandler>().UnfreezeBlock();
                 StartCoroutine(EvaluateJoints());
             }
+
+            blockManager.RemoveEntryFromHistory(Guid);
             return true;
         }
     }

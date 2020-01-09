@@ -9,25 +9,68 @@ namespace Valve.VR.InteractionSystem
     public class BlockManager : MonoBehaviour
     {
 
-        private Dictionary<Guid, GameObject> exsitingBlocksInGame = new Dictionary<Guid, GameObject>();
+        private Dictionary<Guid, GameObject> exsistingBlocksInGame = new Dictionary<Guid, GameObject>();
+        public List<HistoryObject> blockPlacingHistory = new List<HistoryObject>();
 
 
         public GameObject GetBlockByGuid(Guid guid)
         {
-            return exsitingBlocksInGame[guid];
+            return exsistingBlocksInGame[guid];
         }
 
         public void AddBlock(Guid guid, GameObject block)
         {
-            exsitingBlocksInGame.Add(guid, block);
+            exsistingBlocksInGame.Add(guid, block);
         }
 
         public void ChangeGuid(Guid oldGuid, Guid newGuid, GameObject block)
         {
-            exsitingBlocksInGame.Remove(oldGuid);
-            exsitingBlocksInGame.Add(newGuid, block);
+            exsistingBlocksInGame.Remove(oldGuid);
+            exsistingBlocksInGame.Add(newGuid, block);
         }
-        
+
+        public void RemoveAllBlocks()
+        {
+            List<Guid> entriesToRemove = new List<Guid>();
+            IDictionaryEnumerator blockEnumerator = exsistingBlocksInGame.GetEnumerator();
+            while (blockEnumerator.MoveNext())
+            {
+                GameObject block = (GameObject)blockEnumerator.Value;
+                if ( block.tag != "Floor")
+                {
+                    Destroy(block);
+                    entriesToRemove.Add((Guid)blockEnumerator.Key);
+                }
+                else if(block.tag == "Floor")
+                {
+                    block.GetComponent<BlockCommunication>().ClearConnectedBlocks();
+                }
+            }
+            entriesToRemove.ForEach(key => exsistingBlocksInGame.Remove(key));
+        }
+
+        public void AddHistoryEntry(HistoryObject historyObject)
+        {
+            blockPlacingHistory.Add(historyObject);
+        }
+
+        public void RemoveEntryFromHistory(Guid guid)
+        {
+            blockPlacingHistory.RemoveAll(historyObject => guid == historyObject.guid);
+        }
+    }
+
+    [Serializable]
+    public class HistoryObject
+    {
+        public Guid guid;
+        public int timeStamp;
+
+        public HistoryObject(Guid guid,int timeStamp)
+        {
+            this.guid = guid;
+            this.timeStamp = timeStamp;
+        }
     }
 }
 

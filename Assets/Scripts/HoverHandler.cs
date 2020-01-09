@@ -9,7 +9,7 @@ namespace Valve.VR.InteractionSystem {
 
         public void OnPointerEnter(PointerEventData pointerEventData)
         {
-            if(!pointerEventData.pressPosition.Equals(Vector2.zero))
+            if(!pointerEventData.pressPosition.Equals(Vector2.zero) && !pointerEventData.dragging )
             {
                 ChangeToggleState();
             }

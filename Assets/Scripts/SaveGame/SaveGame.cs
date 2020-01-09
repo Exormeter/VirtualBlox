@@ -10,6 +10,7 @@ namespace Valve.VR.InteractionSystem
     public class SaveGame
     {
         public List<BlockSave> blockSaves = new List<BlockSave>();
+        public List<HistoryObject> historyObjects = new List<HistoryObject>();
     }
 
     [Serializable]

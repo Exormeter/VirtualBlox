@@ -132,7 +132,7 @@ namespace Valve.VR.InteractionSystem
                 
             if(distanceHandToBlock >= pullDistanceMaximum)
             {
-                GetComponent<BlockCommunication>().TryBlockPull();
+                GetComponent<BlockCommunication>().AttemptToFreeBlock();
                 wasPulled = true;
             }
 

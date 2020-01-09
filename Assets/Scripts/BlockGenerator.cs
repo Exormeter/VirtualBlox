@@ -28,7 +28,9 @@ namespace Valve.VR.InteractionSystem
 
         public GameObject GenerateBlock(BlockStructure structure)
         {
-            material.color = structure.BlockColor;
+
+            Material blockMaterial = new Material(material);
+            blockMaterial.color = structure.BlockColor;
             GameObject container = new GameObject();
             structure.GetCroppedMatrix();
             float rowMiddlePoint = (float) (structure.RowsCropped - 1) / 2;
@@ -49,6 +51,7 @@ namespace Valve.VR.InteractionSystem
             }
             GameObject newBlock = CombineTileMeshes(container);
             newBlock.AddComponent<BlockGeometryScript>().SetStructure(structure);
+            newBlock.GetComponent<MeshRenderer>().material = blockMaterial;
             newBlock.transform.position = new Vector3(0, 2, 0);
             newBlock.tag = "Block";
             AddPrecurserComponents(newBlock);
@@ -76,7 +79,6 @@ namespace Valve.VR.InteractionSystem
             combinedBlock.AddComponent(typeof(MeshRenderer));
             combinedBlock.GetComponent<MeshFilter>().mesh = new Mesh();
             combinedBlock.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
-            combinedBlock.GetComponent<MeshRenderer>().material = material;
 
             Destroy(container);
             return combinedBlock;

@@ -29,7 +29,7 @@ namespace Valve.VR.InteractionSystem
         [SerializeField]
         public PoseEvent OnPoseCloseMenuRight = new PoseEvent();
 
-        private MenuState currentMenuState = MenuState.BOTH_CLOSED;
+        public MenuState CurrentMenuState = MenuState.BOTH_CLOSED;
         
 
         // Start is called before the first frame update
@@ -52,20 +52,20 @@ namespace Valve.VR.InteractionSystem
             {
 
 
-                switch (currentMenuState)
+                switch (CurrentMenuState)
                 {
                     case MenuState.BOTH_CLOSED:
 
                         if (ShouldShowMenu(LeftHandInput, 345, 10, 265, 295))
                         {
                             OnPoseOpenMenuLeft.Invoke(HANDSIDE.HAND_LEFT);
-                            currentMenuState = MenuState.LEFT_OPEN;
+                            CurrentMenuState = MenuState.LEFT_OPEN;
                         }
 
                         else if (ShouldShowMenu(RightHandInput, 345, 10, 60, 95))
                         {
                             OnPoseOpenMenuRight.Invoke(HANDSIDE.HAND_RIGHT);
-                            currentMenuState = MenuState.RIGHT_OPEN;
+                            CurrentMenuState = MenuState.RIGHT_OPEN;
                         }
                         break;
 
@@ -74,7 +74,7 @@ namespace Valve.VR.InteractionSystem
                         if (ShouldCloseMenu(LeftHandInput, 15, 340, 310, 260))
                         {
                             OnPoseCloseMenuLeft.Invoke(HANDSIDE.HAND_LEFT);
-                            currentMenuState = MenuState.BOTH_CLOSED;
+                            CurrentMenuState = MenuState.BOTH_CLOSED;
                         }
                         break;
 
@@ -82,7 +82,7 @@ namespace Valve.VR.InteractionSystem
                         if (ShouldCloseMenu(RightHandInput, 15, 340, 100, 60))
                         {
                             OnPoseCloseMenuRight.Invoke(HANDSIDE.HAND_RIGHT);
-                            currentMenuState = MenuState.BOTH_CLOSED;
+                            CurrentMenuState = MenuState.BOTH_CLOSED;
                         }
                         break;
                 }
@@ -147,6 +147,7 @@ namespace Valve.VR.InteractionSystem
         LEFT_OPEN,
         LEFT_CLOSED,
         RIGHT_OPEN,
-        RIGHT_CLOSED
+        RIGHT_CLOSED,
+        DONT_OPEN
     }
 }

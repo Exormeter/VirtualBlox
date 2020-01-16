@@ -11,6 +11,11 @@ namespace Valve.VR.InteractionSystem
     {
         public List<BlockSave> blockSaves = new List<BlockSave>();
         public List<HistoryObject> historyObjects = new List<HistoryObject>();
+
+        public BlockSave GetBlockSaveByGuid(Guid guid)
+        {
+            return blockSaves.Find(blockSave => blockSave.guid == guid);
+        }
     }
 
     [Serializable]
@@ -41,6 +46,7 @@ namespace Valve.VR.InteractionSystem
         public int Cols;
         public bool[,] matrix;
         public BLOCKSIZE blockSize;
+        public int timeStamp;
 
         public BlockSave(GameObject block)
         {
@@ -53,6 +59,7 @@ namespace Valve.VR.InteractionSystem
             Cols = block.GetComponent<BlockGeometryScript>().blockStructure.ColsCropped;
             color = block.GetComponent<MeshRenderer>().material.color;
             blockSize = block.GetComponent<BlockGeometryScript>().blockStructure.BlockSize;
+            timeStamp = GameObject.FindGameObjectWithTag("BlockManager").GetComponent<BlockManager>().GetTimeStampByGuid(guid);
         }
 
         private List<ConnectedBlockSerialized> GetConnectedBlocks(BlockCommunication blockCommunication)

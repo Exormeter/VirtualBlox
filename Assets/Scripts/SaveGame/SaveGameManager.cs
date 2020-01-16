@@ -70,27 +70,55 @@ namespace Valve.VR.InteractionSystem
 
         IEnumerator LoadBlocks(SaveGame save)
         {
-            foreach (BlockSave blockSave in save.blockSaves)
+            DisableButtons();
+            save.historyObjects.Sort();
+            BlockManager.blockPlacingHistory = save.historyObjects;
+            for (int i = 0; i < save.historyObjects.Count; i++)
             {
-                GameObject restoredBlock = BlockGenerator.GenerateBlock(blockSave.GetBlockStructure());
-                restoredBlock.transform.position = blockSave.position;
-                restoredBlock.transform.rotation = blockSave.rotation;
-                restoredBlock.GetComponent<BlockCommunication>().Guid = blockSave.guid;
-                restoredBlock.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+                LoadBlock(save, save.historyObjects[i]);
+
+                //Load all Block that were placed together
+                while (i + 1 < save.historyObjects.Count && save.historyObjects[i].timeStamp == save.historyObjects[i + 1].timeStamp)
+                {
+                    LoadBlock(save, save.historyObjects[i + 1]);
+                    i++;
+                }
+                
                 yield return new WaitForSeconds(0.5f);
             }
-            ConnectedBlocks(save);
+            EnableButtons();
+            ConnectBlocks(save);
         }
 
-        public void ConnectedBlocks(SaveGame save)
+        public void LoadBlock(SaveGame save, HistoryObject historyObject)
+        {
+            BlockSave blockSave = save.GetBlockSaveByGuid(historyObject.guid);
+            LoadBlock(blockSave);
+        }
+
+        public void LoadBlock(BlockSave blockSave)
+        {
+            GameObject restoredBlock = BlockGenerator.GenerateBlock(blockSave.GetBlockStructure());
+            restoredBlock.transform.position = blockSave.position;
+            restoredBlock.transform.rotation = blockSave.rotation;
+            restoredBlock.GetComponent<BlockCommunication>().Guid = blockSave.guid;
+            restoredBlock.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+        }
+
+        public void ConnectBlocks(SaveGame save)
         {
             foreach (BlockSave blockSave in save.blockSaves)
             {
-                GameObject block = BlockManager.GetBlockByGuid(blockSave.guid);
-                foreach (ConnectedBlockSerialized connection in blockSave.connectedBlocks)
-                {
-                    block.GetComponent<BlockCommunication>().ConnectBlocks(block, BlockManager.GetBlockByGuid(connection.guid), connection.connectedPins, connection.connectedOn);
-                }
+                ConnectBlocks(blockSave);
+            }
+        }
+
+        public void ConnectBlocks(BlockSave blockSave)
+        {
+            GameObject block = BlockManager.GetBlockByGuid(blockSave.guid);
+            foreach (ConnectedBlockSerialized connection in blockSave.connectedBlocks)
+            {
+                block.GetComponent<BlockCommunication>().ConnectBlocks(block, BlockManager.GetBlockByGuid(connection.guid), connection.connectedPins, connection.connectedOn);
             }
         }
 
@@ -121,6 +149,11 @@ namespace Valve.VR.InteractionSystem
             currentlyChoosenFile = Application.persistentDataPath + "/" + newFileName + ".save";
             ChoosenFile.text += ".save";
             EnableButtons();
+        }
+
+        public void ResetGame()
+        {
+            BlockManager.RemoveAllBlocks();
         }
 
         public void DisableButtons()

@@ -90,7 +90,9 @@ namespace Valve.VR.InteractionSystem
             int timeStamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
             HistoryObject historyObject = new HistoryObject(blockCommunication.Guid, timeStamp);
 
-            GameObject.FindGameObjectWithTag("BlockManager").GetComponent<BlockManager>().AddHistoryEntry(historyObject);
+            BlockManager blockManager = GameObject.FindGameObjectWithTag("BlockManager").GetComponent<BlockManager>();
+            blockManager.AddHistoryEntry(historyObject);
+            blockManager.ResetHistoryStack();
         }
 
 

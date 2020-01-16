@@ -30,6 +30,7 @@ namespace Valve.VR.InteractionSystem
 
         private void Awake()
         {
+            
             blockManager = GameObject.FindGameObjectWithTag("BlockManager").GetComponent<BlockManager>();
             blockManager.AddBlock(Guid, this.gameObject);
         }
@@ -107,18 +108,31 @@ namespace Valve.VR.InteractionSystem
 
                 }
             }
-
             return null;
         }
 
-        public void RemoveBlockConnections()
+        public void RemoveAllBlockConnections()
+        {
+            foreach (BlockContainer container in connectedBlocks)
+            {
+                container.BlockCommunication.RemoveBlockByGuid(Guid);
+            }   
+        }
+
+        public void RemoveBlockByGuid(Guid guid)
+        {
+            ConnectedBlocks.RemoveAll(container => container.Guid == guid);
+        }
+
+
+        public void RemoveBlockConnectionsWithoutJoint()
         {
             List<BlockContainer> containerList = SearchDestroyedJoint();
             Debug.Log("Found Destroyed Joints: " + containerList.Count);
             foreach (BlockContainer container in containerList)
             {
                 ConnectedBlocks.Remove(container);
-                container.BlockCommunication.RemoveBlockConnections();
+                container.BlockCommunication.RemoveBlockConnectionsWithoutJoint();
                 BroadcastMessage("OnBlockDetach", container.BlockRootObject, SendMessageOptions.DontRequireReceiver);
                 SendMessageToConnectedBlocks("RemovedConnection");
             }
@@ -323,7 +337,7 @@ namespace Valve.VR.InteractionSystem
             {
                 if (i == frameUntilColliderReEvaluation)
                 {
-                    RemoveBlockConnections();
+                    RemoveBlockConnectionsWithoutJoint();
                 }
                 yield return new WaitForFixedUpdate();
             }
@@ -349,6 +363,7 @@ namespace Valve.VR.InteractionSystem
             }
 
             blockManager.RemoveEntryFromHistory(Guid);
+            blockManager.ResetHistoryStack();
             return true;
         }
     }
@@ -365,6 +380,7 @@ namespace Valve.VR.InteractionSystem
         public AttachHandHandler AttachHandHandler { get; }
         public BlockCommunication BlockCommunication{ get;}
         public int ConnectedPinCount { get; }
+        public Guid Guid { get; }
 
         public BlockContainer(GameObject block, Joint connectedJoint, OTHER_BLOCK_IS_CONNECTED_ON connectedOn, int connectedPin)
         {
@@ -378,6 +394,7 @@ namespace Valve.VR.InteractionSystem
             ConnectedJoint = connectedJoint;
             ConnectedOn = connectedOn;
             ConnectedPinCount = connectedPin;
+            Guid = block.GetComponent<BlockCommunication>().Guid;
         }
 
         public override bool Equals(object obj)

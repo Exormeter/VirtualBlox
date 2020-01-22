@@ -79,7 +79,8 @@ namespace Valve.VR.InteractionSystem
         public bool isDestroying { get; protected set; }
         public bool isHovering { get; protected set; }
         public bool wasHovering { get; protected set; }
-        
+        public bool isMarked { get; protected set; }
+
 
         private void Awake()
         {
@@ -196,7 +197,8 @@ namespace Valve.VR.InteractionSystem
                     highlightSkinned.transform.rotation = existingSkinned.transform.rotation;
                     highlightSkinned.transform.localScale = existingSkinned.transform.lossyScale;
                     highlightSkinned.localBounds = existingSkinned.localBounds;
-                    highlightSkinned.enabled = isHovering && existingSkinned.enabled && existingSkinned.gameObject.activeInHierarchy;
+                    //highlightSkinned.enabled = isHovering && existingSkinned.enabled && existingSkinned.gameObject.activeInHierarchy;
+                    highlightSkinned.enabled = existingSkinned.enabled && existingSkinned.gameObject.activeInHierarchy;
 
                     int blendShapeCount = existingSkinned.sharedMesh.blendShapeCount;
                     for (int blendShapeIndex = 0; blendShapeIndex < blendShapeCount; blendShapeIndex++)
@@ -219,7 +221,8 @@ namespace Valve.VR.InteractionSystem
                     highlightRenderer.transform.position = existingRenderer.transform.position;
                     highlightRenderer.transform.rotation = existingRenderer.transform.rotation;
                     highlightRenderer.transform.localScale = existingRenderer.transform.lossyScale;
-                    highlightRenderer.enabled = isHovering && existingRenderer.enabled && existingRenderer.gameObject.activeInHierarchy;
+                    //highlightRenderer.enabled = isHovering && existingRenderer.enabled && existingRenderer.gameObject.activeInHierarchy;
+                    highlightRenderer.enabled = (isHovering || isMarked) && existingRenderer.enabled && existingRenderer.gameObject.activeInHierarchy;
                 }
                 else if (highlightRenderer != null)
                     highlightRenderer.enabled = false;
@@ -236,13 +239,12 @@ namespace Valve.VR.InteractionSystem
 
             hoveringHand = hand;
 
-            if (highlightOnHover == true)
+            if (highlightOnHover == true && !isMarked)
             {
                 CreateHighlightRenderers();
                 UpdateHighlightRenderers();
             }
         }
-
 
         /// <summary>
         /// Called when a Hand stops hovering over this object
@@ -252,9 +254,27 @@ namespace Valve.VR.InteractionSystem
             wasHovering = isHovering;
             isHovering = false;
 
-            if (highlightOnHover && highlightHolder != null)
+            if (highlightOnHover && highlightHolder != null && !isMarked)
                 Destroy(highlightHolder);
         }
+
+        protected virtual void OnMarkedBegin()
+        {
+            if (!isMarked)
+            {
+                CreateHighlightRenderers();
+                UpdateHighlightRenderers();
+                isMarked = true;
+            }
+            
+        }
+
+        protected virtual void OnMarkedEnd()
+        {
+            Destroy(highlightHolder);
+            isMarked = false;
+        }
+
 
         protected virtual void Update()
         {
@@ -262,7 +282,8 @@ namespace Valve.VR.InteractionSystem
             {
                 UpdateHighlightRenderers();
 
-                if (isHovering == false && highlightHolder != null)
+
+                if (isHovering == false && isMarked == false && highlightHolder != null)
                     Destroy(highlightHolder);
             }
         }

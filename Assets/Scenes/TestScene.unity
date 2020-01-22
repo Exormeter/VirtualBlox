@@ -1605,6 +1605,13 @@ MonoBehaviour:
     needsReinit: 0
   RightHandInput: 2
   LeftHandInput: 1
+  handInput: 0
+  TouchPadPosition:
+    actionPath: /actions/default/in/historyJump
+    needsReinit: 0
+  TouchPadButton:
+    actionPath: /actions/default/in/InteractUI
+    needsReinit: 0
   OnPoseOpenMenuLeft:
     m_PersistentCalls:
       m_Calls:
@@ -1683,7 +1690,48 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  CurrentMenuState: 0
+  OnStartMarkerPull:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1556106291}
+        m_MethodName: MarkerPullingStarted
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnEndMarkerPull:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1556106291}
+        m_MethodName: MarkerPullingEnded
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnMarkerPulling:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1556106291}
+        m_MethodName: MarkerIsPulled
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!4 &188160322
 Transform:
   m_ObjectHideFlags: 0
@@ -3303,14 +3351,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd9eebdd52c892045abf6bb571ffa66f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  handInput: 2
-  touchPadPosition:
-    actionPath: /actions/default/in/historyJump
-    needsReinit: 0
-  touchPadButton:
-    actionPath: /actions/default/in/InteractUI
-    needsReinit: 0
-  BoxDrawer: {fileID: 1556106289}
+  BoxDrawer: {fileID: 0}
+  HandLeft: {fileID: 0}
+  HandRight: {fileID: 0}
+  BlockGenerator: {fileID: 0}
+  BlockManager: {fileID: 0}
+  markedBlocks: []
 --- !u!1 &255809203
 GameObject:
   m_ObjectHideFlags: 0
@@ -3342,14 +3388,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd9eebdd52c892045abf6bb571ffa66f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  handInput: 1
-  touchPadPosition:
-    actionPath: /actions/default/in/historyJump
-    needsReinit: 0
-  touchPadButton:
-    actionPath: /actions/default/in/InteractUI
-    needsReinit: 0
   BoxDrawer: {fileID: 1556106289}
+  HandLeft: {fileID: 255809203}
+  HandRight: {fileID: 255792769}
+  BlockGenerator: {fileID: 0}
+  BlockManager: {fileID: 0}
+  markedBlocks: []
 --- !u!1 &255814845
 GameObject:
   m_ObjectHideFlags: 0
@@ -11271,7 +11315,7 @@ MonoBehaviour:
   connectedBlockCount: 0
   blockManager: {fileID: 0}
   frameUntilColliderReEvaluation: 2
-  breakForcePerPin: 12
+  breakForcePerPin: 10000
 --- !u!114 &1388306728
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12581,9 +12625,10 @@ GameObject:
   m_Component:
   - component: {fileID: 1556106290}
   - component: {fileID: 1556106289}
+  - component: {fileID: 1556106291}
   m_Layer: 0
   m_Name: BlockMarker
-  m_TagString: Untagged
+  m_TagString: BlockMarker
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -12601,7 +12646,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LineMaterial: {fileID: 2100000, guid: a9b0cd1d7aa398a4b91b00b52b65003a, type: 2}
-  MenuManager: {fileID: 188160321}
 --- !u!4 &1556106290
 Transform:
   m_ObjectHideFlags: 0
@@ -12610,12 +12654,30 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1556106288}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.1393107, y: 0.8257651, z: -1.8484917}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1556106291
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1556106288}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd9eebdd52c892045abf6bb571ffa66f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BoxDrawer: {fileID: 1556106289}
+  HandLeft: {fileID: 255809203}
+  HandRight: {fileID: 255792769}
+  BlockGenerator: {fileID: 929960467}
+  BlockManager: {fileID: 1850143302}
+  markedBlocks: []
 --- !u!1 &1584886172
 GameObject:
   m_ObjectHideFlags: 0

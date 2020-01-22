@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,9 +7,6 @@ using UnityEngine;
 namespace Valve.VR.InteractionSystem {
     public class BoxDrawer : MonoBehaviour
     {
-
-        private bool startedPulling = false; 
-
         //Obere Plain
         private Vector3 pointATop;
         private Vector3 pointBTop;
@@ -21,13 +19,10 @@ namespace Valve.VR.InteractionSystem {
         private Vector3 pointCBottom;
         private Vector3 pointDBottom;
 
+        private Vector3 startPosition;
+
         private List<LineRenderer> lineRendererList = new List<LineRenderer>();
-
         public Material LineMaterial;
-
-        [HideInInspector]
-        public BlockMarker CurrentlyUsed = null;
-
 
         void Start()
         {
@@ -42,7 +37,7 @@ namespace Valve.VR.InteractionSystem {
         }
 
 
-        public void DrawCube(Vector3 startPosition, Vector3 endPosition)
+        public void DrawCube(Vector3 endPosition)
         {
 
             Debug.Log("Pulling");
@@ -115,6 +110,31 @@ namespace Valve.VR.InteractionSystem {
             {
                 lineRenderer.enabled = false;
             }
+        }
+
+        public void SetStartPosition(Vector3 position)
+        {
+            startPosition = position;
+        }
+
+        public Collider GetBoxCollider(BoxCollider collider)
+        {
+            Vector3 colliderCenter =  new Vector3();
+            
+            colliderCenter.x = ((pointATop + pointBTop) / 2).x;
+            colliderCenter.y = ((pointATop + pointABottom) / 2).y;
+            colliderCenter.z = ((pointATop + pointDTop) / 2).z;
+            
+
+            collider.center = transform.InverseTransformPoint(colliderCenter);
+
+            Vector3 colliderBounds = new Vector3();
+            colliderBounds.x = Vector3.Distance(pointATop, pointBTop);
+            colliderBounds.y = Vector3.Distance(pointATop, pointABottom);
+            colliderBounds.z = Vector3.Distance(pointATop, pointDTop);
+
+            collider.size = colliderBounds;
+            return collider;
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -13,45 +12,105 @@ namespace Valve.VR.InteractionSystem
         public SteamVR_Input_Sources RightHandInput;
         public SteamVR_Input_Sources LeftHandInput;
 
+        public SteamVR_Input_Sources handInput;
+        public SteamVR_Action_Vector2 TouchPadPosition;
+        public SteamVR_Action_Boolean TouchPadButton;
+
+        private HANDSIDE startedPulling = HANDSIDE.HAND_NONE;
+        private Vector3 startPullPosition;
+
 
         [System.Serializable]
-        public class PoseEvent: UnityEvent<HANDSIDE> { }
+        public class MenuEvent: UnityEvent<HANDSIDE> { }
 
         [SerializeField]
-        public PoseEvent OnPoseOpenMenuLeft = new PoseEvent();
+        public MenuEvent OnPoseOpenMenuLeft = new MenuEvent();
 
         [SerializeField]
-        public PoseEvent OnPoseOpenMenuRight = new PoseEvent();
+        public MenuEvent OnPoseOpenMenuRight = new MenuEvent();
 
         [SerializeField]
-        public PoseEvent OnPoseCloseMenuLeft = new PoseEvent();
+        public MenuEvent OnPoseCloseMenuLeft = new MenuEvent();
 
         [SerializeField]
-        public PoseEvent OnPoseCloseMenuRight = new PoseEvent();
+        public MenuEvent OnPoseCloseMenuRight = new MenuEvent();
 
-        public MenuState CurrentMenuState = MenuState.BOTH_CLOSED;
+        [SerializeField]
+        public MenuEvent OnStartMarkerPull = new MenuEvent();
+
+        [SerializeField]
+        public MenuEvent OnEndMarkerPull = new MenuEvent();
+
+        [SerializeField]
+        public MenuEvent OnMarkerPulling = new MenuEvent();
+
+        private MenuState CurrentMenuState = MenuState.BOTH_CLOSED;
         
 
         // Start is called before the first frame update
         void Start()
         {
             StartCoroutine(ReadPose());
+
+            TouchPadButton.AddOnStateDownListener(LeftPressMarkerDown, LeftHandInput);
+            TouchPadButton.AddOnStateUpListener(LeftPressMarkerUp, LeftHandInput);
+
+            TouchPadButton.AddOnStateDownListener(RightPressMarkerDown, RightHandInput);
+            TouchPadButton.AddOnStateUpListener(RightPressMarkerUp, RightHandInput);
         }
 
         // Update is called once per frame
         void Update()
         {
+            
+            if (startedPulling != HANDSIDE.HAND_NONE)
+            {
+                OnMarkerPulling.Invoke(startedPulling);
+            }
+        }
+
+        private void LeftPressMarkerDown(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
+        {
+            if(CurrentMenuState == MenuState.BOTH_CLOSED)
+            {
+                OnStartMarkerPull.Invoke(HANDSIDE.HAND_LEFT);
+                startedPulling = HANDSIDE.HAND_LEFT;
+                CurrentMenuState = MenuState.DONT_OPEN;
+            }
+            
+        }
+
+        private void RightPressMarkerDown(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
+        {
+            if (CurrentMenuState == MenuState.BOTH_CLOSED)
+            {
+                OnStartMarkerPull.Invoke(HANDSIDE.HAND_RIGHT);
+                startedPulling = HANDSIDE.HAND_RIGHT;
+                CurrentMenuState = MenuState.DONT_OPEN;
+            }
 
         }
 
-        
+        private void LeftPressMarkerUp(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
+        {
+            OnEndMarkerPull.Invoke(HANDSIDE.HAND_LEFT);
+            startedPulling = HANDSIDE.HAND_NONE;
+            CurrentMenuState = MenuState.BOTH_CLOSED;
+        }
+
+        private void RightPressMarkerUp(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
+        {
+            OnEndMarkerPull.Invoke(HANDSIDE.HAND_RIGHT);
+            startedPulling = HANDSIDE.HAND_NONE;
+            CurrentMenuState = MenuState.BOTH_CLOSED;
+        }
+
+
 
         private IEnumerator ReadPose()
         {
             for (; ; )
             {
-
-
                 switch (CurrentMenuState)
                 {
                     case MenuState.BOTH_CLOSED:

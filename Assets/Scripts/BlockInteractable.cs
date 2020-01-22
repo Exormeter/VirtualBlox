@@ -1,11 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 
 namespace Valve.VR.InteractionSystem
 {
-    //-------------------------------------------------------------------------
-    //[RequireComponent(typeof(Interactable))]
-    //[RequireComponent(typeof(BlockGeometryScript))]
     public class BlockInteractable : MonoBehaviour
     {
         public enum AttachMode
@@ -30,13 +28,14 @@ namespace Valve.VR.InteractionSystem
         private GrabTypes pullingGrabType;
         private GrooveHandler grooveHandler;
         private LineRenderer lineRenderer;
-        private float nextPulseTime = 0;
+        //private float nextPulseTime = 0;
 
-        private List<Hand> holdingHands = new List<Hand>();
+        public List<Hand> holdingHands = new List<Hand>();
         private List<Rigidbody> holdingBodies = new List<Rigidbody>();
         private List<Vector3> holdingPoints = new List<Vector3>();
 
         private List<Rigidbody> rigidBodies = new List<Rigidbody>();
+        private int frameUntilColliderReEvaluation = 3;
 
         //-------------------------------------------------
         void Start()
@@ -92,14 +91,25 @@ namespace Valve.VR.InteractionSystem
         private void HandHoverUpdate(Hand hand)
         {
             GrabTypes startingGrabType = hand.GetGrabStarting();
-
-            if (startingGrabType != GrabTypes.None && GetComponent<BlockCommunication>().IsIndirectlyAttachedToFloor())
+            
+            if (startingGrabType != GrabTypes.None && GetComponent<BlockCommunication>().IsIndirectlyAttachedToFloor() && !GetComponent<Interactable>().isMarked)
             {
                 pullingHand = hand;
                 pullingGrabType = startingGrabType;
+                Debug.Log("Attaching To Hand");
             }
+
+            else if (startingGrabType != GrabTypes.None && GetComponent<BlockCommunication>().IsIndirectlyAttachedToFloor() && GetComponent<Interactable>().isMarked)
+            {
+                GameObject block = GameObject.FindGameObjectWithTag("BlockMarker").GetComponent<BlockMarker>().RebuildMarkedStructure(this.gameObject);
+                //block.GetComponent<BlockInteractable>().PhysicsAttach(hand, GrabTypes.Grip);
+                StartCoroutine(AttachNewBlockToHand(block, hand));
+                Debug.Log("Attaching To Hand");
+            }
+
             else if(startingGrabType != GrabTypes.None)
             {
+                Debug.Log("Attaching To Hand");
                 PhysicsAttach(hand, startingGrabType);
             }
         }
@@ -163,6 +173,7 @@ namespace Valve.VR.InteractionSystem
         //-------------------------------------------------
         public void PhysicsAttach(Hand hand, GrabTypes startingGrabType)
         {
+            GetComponentsInChildren(rigidBodies);
             PhysicsDetach(hand);
 
             Rigidbody holdingBody = null;
@@ -295,6 +306,21 @@ namespace Valve.VR.InteractionSystem
             lineRenderer.SetPosition(0, start);
             lineRenderer.SetPosition(1, (start + end) / 2);
             lineRenderer.SetPosition(2, end);
+        }
+
+        private IEnumerator AttachNewBlockToHand(GameObject generatedBlock, Hand hand)
+        {
+            {
+                for (int i = 0; i <= frameUntilColliderReEvaluation; i++)
+                {
+                    if (i == frameUntilColliderReEvaluation)
+                    { 
+                        generatedBlock.GetComponent<BlockInteractable>().PhysicsAttach(hand, GrabTypes.Grip);
+                    }
+                    yield return new WaitForFixedUpdate();
+                }
+
+            }
         }
     }
 }

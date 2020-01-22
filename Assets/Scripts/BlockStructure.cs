@@ -233,6 +233,17 @@ namespace Valve.VR.InteractionSystem
             }
             return croppedMatrix[row, col];
         }
+
+        public void ResetBlockParts()
+        {
+            for (int row = 0; row < RowsCropped; row++)
+            {
+                for (int col = 0; col < ColsCropped; col++)
+                {
+                    croppedMatrix[row, col].ResetVisited();
+                }
+            }
+        }
     }
 }
 

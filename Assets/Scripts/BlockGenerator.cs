@@ -90,6 +90,7 @@ namespace Valve.VR.InteractionSystem
             Component[] components = PrecurserBlock.GetComponents<Component>();
             for (int i = 0; i < components.Length; i++)
             {
+                if(!(components[i] is MeshRenderer) && !(components[i] is Transform) && (components[i] is MeshFilter))
                 CopyComponent(components[i], combinedBlock);
             }
 

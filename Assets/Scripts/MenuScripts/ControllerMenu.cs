@@ -64,15 +64,6 @@ namespace Valve.VR.InteractionSystem
                     StartCoroutine(AttachNewBlockToHand(blockGenerator.GenerateBlock(blockStructure)));
                 }
             }
-
-            //if (Input.GetKeyUp("space"))
-            //{
-            //    List<BlockStructure> blockStructures = matrixController.GetStructures();
-            //    foreach (BlockStructure blockStructure in blockStructures)
-            //    {
-            //        blockGenerator.GenerateBlock(blockStructure);
-            //    }
-            //}
         }
 
         private IEnumerator AttachNewBlockToHand(GameObject generatedBlock)
@@ -162,7 +153,8 @@ namespace Valve.VR.InteractionSystem
     public enum HANDSIDE
     {
         HAND_LEFT,
-        HAND_RIGHT
+        HAND_RIGHT,
+        HAND_NONE
     }
 }
 

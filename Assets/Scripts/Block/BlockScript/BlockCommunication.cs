@@ -202,7 +202,7 @@ namespace Valve.VR.InteractionSystem
             FixedJoint joint = block.AddComponent<FixedJoint>();
             joint.connectedBody = collidedBlock.GetComponent<Rigidbody>();
             joint.breakForce = Mathf.Infinity;
-            joint.breakTorque = breakForcePerPin * connectedPinCount;
+            joint.breakTorque = Mathf.Infinity;
             //ConfigurableJoint joint = SetConfigurableJoint(collidedBlock.GetComponent<Rigidbody>(), blockToTapDict[collidedBlock]);
 
             OTHER_BLOCK_IS_CONNECTED_ON otherConnection;

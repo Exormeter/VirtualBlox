@@ -150,7 +150,8 @@ namespace Valve.VR.InteractionSystem
         }
 
         public void SetStructure(BlockStructure structure)
-        {   
+        {
+            structure.ResetBlockParts();
             this.blockStructure = structure;
             RemoveWallCollider();
             
@@ -165,6 +166,7 @@ namespace Valve.VR.InteractionSystem
             AddTopCollider();
             AddPinTriggerColliderByStructure(BRICK_PIN_HEIGHT_HALF, tapContainer, "Tap");
             AddPinTriggerColliderByStructure(-BRICK_HEIGHT / 1.1f, groovesContainer, "Groove");
+            
 
         }
 
@@ -276,6 +278,7 @@ namespace Valve.VR.InteractionSystem
             {
                 for (int col = 0; col < blockStructure.ColsCropped; col++)
                 {
+                    //Need to reset the visited Status
                     if (blockStructure[row, col] != null && !blockStructure[row, col].WasDirectionVisited(direction))
                     {
                         List<BlockPart> tempList = SearchWallsAtLocation(row, col, direction);
@@ -402,10 +405,10 @@ namespace Valve.VR.InteractionSystem
                     if(blockStructure[row, col] != null)
                     {
                         bool isTrigger = true;
-                        if (tag.Equals("Tap"))
-                        {
-                            isTrigger = false;
-                        }
+                        //if (tag.Equals("Tap"))
+                        //{
+                        //    isTrigger = false;
+                        //}
 
                         float centerX = (rowMiddlePoint - row) * BRICK_LENGTH;
                         float centerY = GetCenterTop().y + heightOffset;
@@ -501,6 +504,11 @@ namespace Valve.VR.InteractionSystem
             Vector3 AB = CornerTopA.transform.position - CornerTopB.transform.position;
             Vector3 AC = CornerTopC.transform.position - CornerTopB.transform.position;
             return Vector3.Cross(AC, AB);
+        }
+
+        public void SetWallColliderTrigger(bool trigger)
+        {
+            wallColliderList.ForEach(collder => collder.isTrigger = trigger);
         }
     }
 }

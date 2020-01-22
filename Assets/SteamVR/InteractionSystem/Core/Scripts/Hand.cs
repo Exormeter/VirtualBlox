@@ -1082,8 +1082,6 @@ namespace Valve.VR.InteractionSystem
         {
             UpdateNoSteamVRFallback();
 
-            
-    
             GameObject attachedObject = currentAttachedObject;
             if (attachedObject != null)
             {

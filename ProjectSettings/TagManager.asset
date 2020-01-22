@@ -22,6 +22,7 @@ TagManager:
   - LaserPointer
   - SaveGameManager
   - Block
+  - BlockMarker
   layers:
   - Default
   - TransparentFX

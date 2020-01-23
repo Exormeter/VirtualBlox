@@ -10,6 +10,7 @@ namespace Valve.VR.InteractionSystem
 
         private Dictionary<IConnectorCollider, CollisionObject> colliderDictionary = new Dictionary<IConnectorCollider, CollisionObject>();
         public GameObject pinHighLight;
+        public bool acceptNewCollisionsAsConnected;
         public int occupiedTaps = 0;
 
         // Start is called before the first frame update
@@ -37,7 +38,7 @@ namespace Valve.VR.InteractionSystem
         public List<CollisionObject> GetOccupiedTaps()
         {
             List<CollisionObject> collisionList = new List<CollisionObject>(colliderDictionary.Values);
-            collisionList.RemoveAll(collision => !collision.IsConnected);
+            collisionList.RemoveAll(collision => collision.IsConnected == false);
             return collisionList;
         }
 
@@ -45,6 +46,13 @@ namespace Valve.VR.InteractionSystem
         //TODO: TapPosition ändern in Groove Poition und anpassen
         public void RegisterCollision(TapCollider snappingCollider, GameObject grooveCollider)
         {
+            
+            if (colliderDictionary[snappingCollider].GroovePosition != null)
+            {
+                return;
+            }
+            colliderDictionary[snappingCollider].IsConnected = acceptNewCollisionsAsConnected;
+
             colliderDictionary[snappingCollider].TapPosition = snappingCollider.gameObject;
             colliderDictionary[snappingCollider].GroovePosition = grooveCollider;
             colliderDictionary[snappingCollider].CollidedBlock = grooveCollider.transform.root.gameObject;
@@ -52,6 +60,11 @@ namespace Valve.VR.InteractionSystem
 
         public void UnregisterCollision(IConnectorCollider snappingCollider, GameObject grooveCollider)
         {
+            if (colliderDictionary[snappingCollider].GroovePosition.GetHashCode() != grooveCollider.GetHashCode())
+            {
+                return;
+            }
+
             colliderDictionary[snappingCollider].ResetObject();
         }
 
@@ -88,8 +101,14 @@ namespace Valve.VR.InteractionSystem
         public List<CollisionObject> GetCollisionObjectsForGameObject(GameObject gameObject)
         {
             List<CollisionObject> collisionList = new List<CollisionObject>(colliderDictionary.Values);
+            collisionList.RemoveAll(block => block.CollidedBlock == null);
             collisionList.RemoveAll(block => block.CollidedBlock.GetHashCode() != gameObject.GetHashCode());
             return collisionList;
+        }
+
+        public void AcceptCollisionsAsConnected(bool shoudlAccept)
+        {
+            acceptNewCollisionsAsConnected = shoudlAccept;
         }
     }
 }

@@ -19,6 +19,8 @@ namespace Valve.VR.InteractionSystem
 
         void OnBlockDetach(GameObject block);
 
+        void AcceptCollisionsAsConnected(bool shoudlAccept);
+
         List<CollisionObject> GetCollisionObjectsForGameObject(GameObject gameObject);
     }
 }

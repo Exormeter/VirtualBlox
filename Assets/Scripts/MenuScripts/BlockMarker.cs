@@ -23,16 +23,12 @@ namespace Valve.VR.InteractionSystem
         {
             currentBoxCollider = gameObject.AddComponent<BoxCollider>();
             currentBoxCollider.enabled = false;
-            currentBoxCollider.isTrigger = false;
+            currentBoxCollider.isTrigger = true;
         }
 
         
         void Update()
         {
-            if (Input.anyKeyDown)
-            {
-                RebuildMarkedStructure(this.gameObject);
-            }
 
         }
 
@@ -87,9 +83,13 @@ namespace Valve.VR.InteractionSystem
 
         private void OnTriggerEnter(Collider other)
         {
-            other.gameObject.SendMessageUpwards("OnMarkedBegin", SendMessageOptions.DontRequireReceiver);
             GameObject block = other.transform.root.gameObject;
-            markedBlocks.Add(block);
+            if (block.tag.Equals("Block"))
+            {
+                other.gameObject.SendMessageUpwards("OnMarkedBegin", SendMessageOptions.DontRequireReceiver);
+                markedBlocks.Add(block);
+            }
+            
         }
 
         private void OnTriggerExit(Collider other)
@@ -114,18 +114,19 @@ namespace Valve.VR.InteractionSystem
         public GameObject RebuildMarkedStructure(GameObject grabbedBlock)
         {
             List<GameObject> distinctBlocks = markedBlocks.Distinct().ToList();
+            List<GameObject> copiedBlocks = new List<GameObject>();
             Dictionary<Guid, Guid> copyToOriginalAssign = new Dictionary<Guid, Guid>();
+
             foreach(GameObject block in distinctBlocks)
             {
                 GameObject copiedBlock = BlockGenerator.GenerateBlock(block.GetComponent<BlockGeometryScript>().blockStructure);
                 copiedBlock.transform.rotation = block.transform.rotation;
                 copiedBlock.transform.position = block.transform.position;
-                //copiedBlock.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
-                copiedBlock.GetComponent<Rigidbody>().useGravity = false;
                 copiedBlock.GetComponent<BlockGeometryScript>().SetWallColliderTrigger(true);
-                //copiedBlock.GetComponent<Interactable>().enabled = false;
-                //copiedBlock.GetComponent<BlockInteractable>().enabled = false;
+                copiedBlock.GetComponent<BlockGeometryScript>().TapContainer.SetActive(false);
+                copiedBlock.GetComponent<BlockGeometryScript>().GroovesContainer.SetActive(false);
                 copyToOriginalAssign.Add(block.GetComponent<BlockCommunication>().Guid, copiedBlock.GetComponent<BlockCommunication>().Guid);
+                copiedBlocks.Add(copiedBlock);
             }
 
             foreach (GameObject block in distinctBlocks)
@@ -141,7 +142,28 @@ namespace Valve.VR.InteractionSystem
                 }
             }
             Guid grabbedBlockGuid = copyToOriginalAssign[grabbedBlock.GetComponent<BlockCommunication>().Guid];
+            StartCoroutine(EnableTapAndGrooveHandler(copiedBlocks));
             return BlockManager.GetBlockByGuid(grabbedBlockGuid);
+        }
+
+        private IEnumerator EnableTapAndGrooveHandler(List<GameObject> copiedBlocks)
+        {
+            foreach(GameObject copiedBlock in copiedBlocks)
+            {
+                copiedBlock.GetComponent<BlockGeometryScript>().TapContainer.SetActive(true);
+                copiedBlock.GetComponent<BlockGeometryScript>().GroovesContainer.SetActive(true);
+                copiedBlock.GetComponentInChildren<TapHandler>().AcceptCollisionsAsConnected(true);
+                copiedBlock.GetComponentInChildren<GrooveHandler>().AcceptCollisionsAsConnected(true);
+                yield return new WaitForSecondsRealtime(1f);
+            }
+
+            foreach (GameObject copiedBlock in copiedBlocks)
+            {
+                copiedBlock.GetComponentInChildren<TapHandler>().AcceptCollisionsAsConnected(false);
+                copiedBlock.GetComponentInChildren<GrooveHandler>().AcceptCollisionsAsConnected(false);
+            }
+
+
         }
     }
 }

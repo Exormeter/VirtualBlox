@@ -102,7 +102,6 @@ namespace Valve.VR.InteractionSystem
             else if (startingGrabType != GrabTypes.None && GetComponent<BlockCommunication>().IsIndirectlyAttachedToFloor() && GetComponent<Interactable>().isMarked)
             {
                 GameObject block = GameObject.FindGameObjectWithTag("BlockMarker").GetComponent<BlockMarker>().RebuildMarkedStructure(this.gameObject);
-                //block.GetComponent<BlockInteractable>().PhysicsAttach(hand, GrabTypes.Grip);
                 StartCoroutine(AttachNewBlockToHand(block, hand));
                 Debug.Log("Attaching To Hand");
             }

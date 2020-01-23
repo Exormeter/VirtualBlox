@@ -8,16 +8,12 @@ namespace Valve.VR.InteractionSystem
     public class AttachHandHandler : MonoBehaviour
     {
         private BlockCommunication blockCommunication;
-        private GrooveHandler grooveHandler;
-        private TapHandler tapHandler;
         private Rigidbody rigidBody;
         private int frameUntilColliderReEvaluation = 2;
         private Hand holdingHand = null;
 
         void Start()
         {
-            grooveHandler = GetComponentInChildren<GrooveHandler>();
-            tapHandler = GetComponentInChildren<TapHandler>();
             rigidBody = GetComponent<Rigidbody>();
             blockCommunication = GetComponent<BlockCommunication>();
         }
@@ -140,16 +136,18 @@ namespace Valve.VR.InteractionSystem
 
         private void GrooveOrTapHit(out List<CollisionObject> collisionList, out OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
         {
-            if (tapHandler.GetCollidingObjects().Count > 0)
+            
+            
+            if (GetComponentInChildren<TapHandler>().GetCollidingObjects().Count > 0)
             {
-                collisionList = tapHandler.GetCollidingObjects();
+                collisionList = GetComponentInChildren<TapHandler>().GetCollidingObjects();
                 connectedOn = OTHER_BLOCK_IS_CONNECTED_ON.TAP;
                 return;
             }
 
-            if (grooveHandler.GetCollidingObjects().Count > 0)
+            if (GetComponentInChildren<GrooveHandler>().GetCollidingObjects().Count > 0)
             {
-                collisionList = grooveHandler.GetCollidingObjects();
+                collisionList = GetComponentInChildren<GrooveHandler>().GetCollidingObjects();
                 connectedOn = OTHER_BLOCK_IS_CONNECTED_ON.GROOVE;
                 return;
             }

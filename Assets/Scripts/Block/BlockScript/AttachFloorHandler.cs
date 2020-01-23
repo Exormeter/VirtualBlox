@@ -9,9 +9,9 @@ namespace Valve.VR.InteractionSystem
     public class AttachFloorHandler : MonoBehaviour
     {
 
-        public PhysicSceneManager physicSceneManager;
-        private GrooveHandler grooveHandler;
-        private TapHandler tapHandler;
+        //public PhysicSceneManager physicSceneManager;
+        //private GrooveHandler grooveHandler;
+        //private TapHandler tapHandler;
         private Rigidbody rigidBody;
         private BlockCommunication blockCommunication;
         public bool WasReMatchedWithBlock;
@@ -21,11 +21,8 @@ namespace Valve.VR.InteractionSystem
 
         void Start()
         {
-            grooveHandler = GetComponentInChildren<GrooveHandler>();
-            tapHandler = GetComponentInChildren<TapHandler>();
             rigidBody = GetComponent<Rigidbody>();
             blockCommunication = GetComponent<BlockCommunication>();
-            //physicSceneManager = GameObject.FindGameObjectWithTag("PhysicManager").GetComponent<PhysicSceneManager>();
         }
 
 
@@ -63,27 +60,15 @@ namespace Valve.VR.InteractionSystem
                 {
                     List<GameObject> connectedBlocksBeforeEvaluation = blockCommunication.GetCurrentlyConnectedBlocks();
                     blockCommunication.SendMessageToConnectedBlocks("EvaluateCollider");
-                    //SyncronizePhysicBlocks(connectedBlocksBeforeEvaluation);
                     blockCommunication.SendMessageToConnectedBlocks("CheckFreeze");
                     blockCommunication.SendMessageToConnectedBlocks("UnsetKinematic");
-                    //physicSceneManager.StartSimulation();
                 }
                 yield return new WaitForFixedUpdate();
             }
 
         }
 
-        //private void SyncronizePhysicBlocks(List<GameObject> connectedBlocksBeforeEvaluation)
-        //{
-        //    foreach (GameObject connectedBlockInHand in connectedBlocksBeforeEvaluation)
-        //    {
-        //        connectedBlockInHand.GetComponent<BlockCommunication>().blockScriptSim.MatchTwinBlock(connectedBlockInHand);
-        //    }
-        //    foreach (GameObject connectedBlockInHand in connectedBlocksBeforeEvaluation)
-        //    {
-        //        connectedBlockInHand.GetComponent<BlockCommunication>().blockScriptSim.ConnectBlocksAfterMatching(connectedBlockInHand);
-        //    }
-        //}
+        
 
         public void AddGuidToHistory()
         {
@@ -186,6 +171,7 @@ namespace Valve.VR.InteractionSystem
             if (blockCommunication.IsIndirectlyAttachedToFloor())
             {
                 FreezeBlock();
+                GetComponent<BlockGeometryScript>().SetWallColliderTrigger(false);
             }
             else
             {
@@ -212,16 +198,16 @@ namespace Valve.VR.InteractionSystem
 
         private void GrooveOrTapHit(out List<CollisionObject> collisionList, out OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
         {
-            if (tapHandler.GetCollidingObjects().Count > 0)
+            if (GetComponentInChildren<TapHandler>().GetCollidingObjects().Count > 0)
             {
-                collisionList = tapHandler.GetCollidingObjects();
+                collisionList = GetComponentInChildren<TapHandler>().GetCollidingObjects();
                 connectedOn = OTHER_BLOCK_IS_CONNECTED_ON.TAP;
                 return;
             }
 
-            if (grooveHandler.GetCollidingObjects().Count > 0)
+            if (GetComponentInChildren<GrooveHandler>().GetCollidingObjects().Count > 0)
             {
-                collisionList = grooveHandler.GetCollidingObjects();
+                collisionList = GetComponentInChildren<GrooveHandler>().GetCollidingObjects();
                 connectedOn = OTHER_BLOCK_IS_CONNECTED_ON.GROOVE;
                 return;
             }

@@ -16,8 +16,8 @@ namespace Valve.VR.InteractionSystem
         private const float BRICK_PIN_DISTANCE = 0.08f;
         private const float BRICK_LENGTH = 0.08f;
         private const float BRICK_PIN_DIAMETER = 0.048f;
-        private GameObject tapContainer;
-        private GameObject groovesContainer;
+        public GameObject TapContainer;
+        public GameObject GroovesContainer;
         private Mesh mesh;
         public BlockStructure blockStructure;
         private List<Collider> wallColliderList = new List<Collider>();
@@ -63,8 +63,8 @@ namespace Valve.VR.InteractionSystem
             grooves.AddComponent<GrooveHandler>();
             grooves.transform.SetParent(this.transform);
             grooves.transform.localPosition = new Vector3(0f, 0f, 0f);
-            tapContainer = taps;
-            groovesContainer = grooves;
+            TapContainer = taps;
+            GroovesContainer = grooves;
 
         }
 
@@ -74,11 +74,23 @@ namespace Valve.VR.InteractionSystem
             if(GetComponents<Collider>().Length == 0)
             {
                 AddWallCollider();
-                AddPinTriggerCollider(BRICK_PIN_HEIGHT_HALF, tapContainer, "Tap");
-                AddPinTriggerCollider(-BRICK_HEIGHT / 1.1f, groovesContainer, "Groove");
+                AddPinTriggerCollider(BRICK_PIN_HEIGHT_HALF, TapContainer, "Tap");
+                AddPinTriggerCollider(-BRICK_HEIGHT / 1.1f, GroovesContainer, "Groove");
+                SetWallColliderTrigger(false);
             }
             
             AddCorners();
+        }
+
+        private void Update()
+        {
+            if (Input.anyKeyDown)
+            {
+                TapContainer.SetActive(true);
+                GroovesContainer.SetActive(true);
+                
+                SetWallColliderTrigger(false);
+            }
         }
 
         private void AddCorners()
@@ -164,8 +176,8 @@ namespace Valve.VR.InteractionSystem
 
             AddWallCollider(allWallsInStrucure);
             AddTopCollider();
-            AddPinTriggerColliderByStructure(BRICK_PIN_HEIGHT_HALF, tapContainer, "Tap");
-            AddPinTriggerColliderByStructure(-BRICK_HEIGHT / 1.1f, groovesContainer, "Groove");
+            AddPinTriggerColliderByStructure(BRICK_PIN_HEIGHT_HALF, TapContainer, "Tap");
+            AddPinTriggerColliderByStructure(-BRICK_HEIGHT / 1.1f, GroovesContainer, "Groove");
             
 
         }

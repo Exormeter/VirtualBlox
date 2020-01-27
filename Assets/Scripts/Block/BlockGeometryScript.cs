@@ -211,7 +211,7 @@ namespace Valve.VR.InteractionSystem
             //a list. 
             List<List<BlockPart>> allWallsInStrucure = new List<List<BlockPart>>();
 
-            //Seatch the blockStructure for walls and add them the the list. Search is carried out
+            //Search the blockStructure for walls and add them the the list. Search is carried out
             //for all four directions
             SearchWallsInStructure(DIRECTION.UP).ForEach(wall => allWallsInStrucure.Add(wall));
             SearchWallsInStructure(DIRECTION.DOWN).ForEach(wall => allWallsInStrucure.Add(wall));

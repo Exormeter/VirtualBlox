@@ -8,18 +8,47 @@ namespace Valve.VR.InteractionSystem
 {
     public class BlockGeometryScript : MonoBehaviour
     {
+
+        //The height of a brick, can be flat (0.032) or normal (0.096)
         private float BRICK_HEIGHT;
+
+        //The height of the pins on the upside of the bricks
         private const float BRICK_PIN_HEIGHT = 0.016f;
+
+        //The height of the pins halfed
         private const float BRICK_PIN_HEIGHT_HALF = BRICK_PIN_HEIGHT / 2;
+
+        //The thickness of the walls of the brick
         private const float BRICK_WALL_WIDTH = 0.008f;
+
+        //The thickness of the brick halfed
         private const float BRICK_WALL_WIDTH_HALF = BRICK_WALL_WIDTH / 2;
+
+        //The distance between to pins on the upside of a brick
         private const float BRICK_PIN_DISTANCE = 0.08f;
+
+        //The lenght of a brick, meassure taken from a 1x1 brick
         private const float BRICK_LENGTH = 0.08f;
+
+        //The diameter of a pin on the upside of a brick
         private const float BRICK_PIN_DIAMETER = 0.048f;
+
+        //A container GameObject that contains all TapCollider as well as the
+        //TapHandler
         public GameObject TapContainer;
+
+        //A container GameObject that contains all GrooveCollider as well as the
+        //GrooveHandler
         public GameObject GroovesContainer;
+
+        //The mesh of the block
         private Mesh mesh;
+
+        //The BlockStructure is containing the color, height and the contoures of the
+        //block in form of a matrix
         public BlockStructure blockStructure;
+
+        //A list that contains all wall colliders of the block
         private List<Collider> wallColliderList = new List<Collider>();
 
         [HideInInspector]
@@ -43,6 +72,7 @@ namespace Valve.VR.InteractionSystem
         {
             this.mesh = GetComponent<MeshFilter>().mesh;
 
+            //Sets the height of the brick to the correct value
             if (mesh.bounds.extents.y < 0.047)
             {
                 BRICK_HEIGHT = 0.032f;
@@ -52,12 +82,14 @@ namespace Valve.VR.InteractionSystem
                 BRICK_HEIGHT = 0.096f;
             }
 
+            //Create the TapContainer and adds the TapHandler to it
             GameObject taps = new GameObject("Taps");
             taps.tag = "Tap";
             taps.AddComponent<TapHandler>();
             taps.transform.SetParent(this.transform);
             taps.transform.localPosition = new Vector3(0f, 0f, 0f);
 
+            //Create the GrooveContainer and adds the GrooveHandler to it
             GameObject grooves = new GameObject("Grooves");
             grooves.tag = "Groove";
             grooves.AddComponent<GrooveHandler>();
@@ -161,21 +193,39 @@ namespace Valve.VR.InteractionSystem
 
         }
 
+        /*
+         *
+         */
         public void SetStructure(BlockStructure structure)
         {
+            //Reset the BlockStructre in case it wasn't done to ensure no BlockPart is marked visited
             structure.ResetBlockParts();
+
+            //Set the new BlockStructure
             this.blockStructure = structure;
+
+            //Delete the WallCollider in case they were already set, walls need to be recalculated
             RemoveWallCollider();
-            
+
+            //List of BlockParts which make up a wall in the Structure, which are collected inside
+            //a list. 
             List<List<BlockPart>> allWallsInStrucure = new List<List<BlockPart>>();
 
+            //Seatch the blockStructure for walls and add them the the list. Search is carried out
+            //for all four directions
             SearchWallsInStructure(DIRECTION.UP).ForEach(wall => allWallsInStrucure.Add(wall));
             SearchWallsInStructure(DIRECTION.DOWN).ForEach(wall => allWallsInStrucure.Add(wall));
             SearchWallsInStructure(DIRECTION.LEFT).ForEach(wall => allWallsInStrucure.Add(wall));
             SearchWallsInStructure(DIRECTION.RIGHT).ForEach(wall => allWallsInStrucure.Add(wall));
 
+            //Convert the found walls to a Collider and add them to the block GameObject
             AddWallCollider(allWallsInStrucure);
+
+            //Add the collider in the Top of the Brick
             AddTopCollider();
+
+            //Add the new Tap and Groove Collider to the Block, as the changed as well with the
+            //new structure
             AddPinTriggerColliderByStructure(BRICK_PIN_HEIGHT_HALF, TapContainer, "Tap");
             AddPinTriggerColliderByStructure(-BRICK_HEIGHT / 1.1f, GroovesContainer, "Groove");
             

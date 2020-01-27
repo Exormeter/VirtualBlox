@@ -3312,7 +3312,6 @@ GameObject:
   - component: {fileID: 255792770}
   - component: {fileID: 261132931}
   - component: {fileID: 114000011907440577}
-  - component: {fileID: 255792771}
   m_Layer: 26
   m_Name: RightHand
   m_TagString: Untagged
@@ -3339,24 +3338,6 @@ Transform:
   m_Father: {fileID: 255520675}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &255792771
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 255792769}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dd9eebdd52c892045abf6bb571ffa66f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  BoxDrawer: {fileID: 0}
-  HandLeft: {fileID: 0}
-  HandRight: {fileID: 0}
-  BlockGenerator: {fileID: 0}
-  BlockManager: {fileID: 0}
-  markedBlocks: []
 --- !u!1 &255809203
 GameObject:
   m_ObjectHideFlags: 0
@@ -3368,7 +3349,6 @@ GameObject:
   - component: {fileID: 255467689}
   - component: {fileID: 261345821}
   - component: {fileID: 114000011526111811}
-  - component: {fileID: 255809204}
   m_Layer: 26
   m_Name: LeftHand
   m_TagString: Untagged
@@ -3376,24 +3356,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &255809204
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 255809203}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dd9eebdd52c892045abf6bb571ffa66f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  BoxDrawer: {fileID: 1556106289}
-  HandLeft: {fileID: 255809203}
-  HandRight: {fileID: 255792769}
-  BlockGenerator: {fileID: 0}
-  BlockManager: {fileID: 0}
-  markedBlocks: []
 --- !u!1 &255814845
 GameObject:
   m_ObjectHideFlags: 0
@@ -3901,12 +3863,12 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   hoverUpdateInterval: 0.1
-  useControllerHoverComponent: 0
+  useControllerHoverComponent: 1
   controllerHoverComponent: tip
   controllerHoverRadius: 0.15
   useFingerJointHover: 1
   fingerJointHover: 10
-  fingerJointHoverRadius: 0.05
+  fingerJointHoverRadius: 0.15
   objectAttachmentPoint: {fileID: 4000011226401817}
   noSteamVRFallbackCamera: {fileID: 0}
   noSteamVRFallbackMaxDistanceNoItem: 10
@@ -4734,6 +4696,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pinHighLight: {fileID: 0}
+  acceptNewCollisionsAsConnected: 0
   occupiedTaps: 0
 --- !u!1 &360871271
 GameObject:
@@ -4888,7 +4851,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed74bb02b8d7144778beee1bc3db0f33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  physicSceneManager: {fileID: 0}
   WasReMatchedWithBlock: 0
   IsFroozen: 0
   frameUntilColliderReEvaluation: 2
@@ -7880,6 +7842,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pinHighLight: {fileID: 0}
+  acceptNewCollisionsAsConnected: 0
   occupiedTaps: 0
 --- !u!1 &871174353
 GameObject:
@@ -8000,7 +7963,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pinHighLight: {fileID: 3618188176987479035, guid: 924c2651d6146ce44b407a863079e66c,
     type: 3}
+  acceptNewCollisionsAsConnected: 0
   occupiedGrooves: 0
+  colliderDictionaryCount: 0
 --- !u!1 &921695132
 GameObject:
   m_ObjectHideFlags: 0
@@ -11117,6 +11082,7 @@ MonoBehaviour:
   pullDistanceMaximum: 0.35
   attachMode: 0
   attachmentFlags: 0
+  holdingHands: []
 --- !u!114 &1388306718
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11196,6 +11162,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fca971ec9aff4d94ba08845a58509c38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  TapContainer: {fileID: 0}
+  GroovesContainer: {fileID: 0}
 --- !u!23 &1388306721
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -11270,7 +11238,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed74bb02b8d7144778beee1bc3db0f33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  physicSceneManager: {fileID: 0}
   WasReMatchedWithBlock: 0
   IsFroozen: 0
   frameUntilColliderReEvaluation: 2
@@ -12677,6 +12644,7 @@ MonoBehaviour:
   HandRight: {fileID: 255792769}
   BlockGenerator: {fileID: 929960467}
   BlockManager: {fileID: 1850143302}
+  distanceBeforeColliderActivation: 0.6
   markedBlocks: []
 --- !u!1 &1584886172
 GameObject:

@@ -204,7 +204,7 @@ namespace Valve.VR.InteractionSystem
                         float centerZ = (colMiddlePoint - col) * BRICK_LENGTH;
                         
                         Vector3 colliderCenter = new Vector3(centerX, centerY, centerZ);
-                        AddBoxCollider(topSideSize, colliderCenter, false, transform.gameObject);
+                        wallColliderList.Add(AddBoxCollider(topSideSize, colliderCenter, false, transform.gameObject));
                     }
                 }
             }
@@ -238,7 +238,7 @@ namespace Valve.VR.InteractionSystem
                             Vector3 size = new Vector3(BRICK_WALL_WIDTH, BRICK_HEIGHT, wallLength);
                             Vector3 centerCollider = new Vector3(centerColliderX - BRICK_WALL_WIDTH_HALF, centerMesh.y - BRICK_PIN_HEIGHT_HALF, centerColliderZ);
 
-                            AddBoxCollider(size, centerCollider, false, transform.gameObject);
+                            wallColliderList.Add(AddBoxCollider(size, centerCollider, false, transform.gameObject));
                             break;
                         }
 
@@ -250,7 +250,7 @@ namespace Valve.VR.InteractionSystem
                             Vector3 size = new Vector3(BRICK_WALL_WIDTH, BRICK_HEIGHT, wallLength);
                             Vector3 centerCollider = new Vector3(centerColliderX + BRICK_WALL_WIDTH_HALF, centerMesh.y - BRICK_PIN_HEIGHT_HALF, centerColliderZ);
 
-                            AddBoxCollider(size, centerCollider, false, transform.gameObject);
+                            wallColliderList.Add(AddBoxCollider(size, centerCollider, false, transform.gameObject));
                             break;
                         }
                         
@@ -263,7 +263,7 @@ namespace Valve.VR.InteractionSystem
                             Vector3 size = new Vector3(wallLength, BRICK_HEIGHT, BRICK_WALL_WIDTH);
                             Vector3 centerCollider = new Vector3(centerColliderX, centerMesh.y - BRICK_PIN_HEIGHT_HALF, centerColliderZ - BRICK_WALL_WIDTH_HALF);
 
-                            AddBoxCollider(size, centerCollider, false, transform.gameObject);
+                            wallColliderList.Add(AddBoxCollider(size, centerCollider, false, transform.gameObject));
                             break;
                         }
                             
@@ -276,7 +276,7 @@ namespace Valve.VR.InteractionSystem
                             Vector3 size = new Vector3(wallLength, BRICK_HEIGHT, BRICK_WALL_WIDTH);
                             Vector3 centerCollider = new Vector3(centerColliderX, centerMesh.y - BRICK_PIN_HEIGHT_HALF, centerColliderZ + BRICK_WALL_WIDTH_HALF);
 
-                            AddBoxCollider(size, centerCollider, false, transform.gameObject);
+                            wallColliderList.Add(AddBoxCollider(size, centerCollider, false, transform.gameObject));
                             break;
                         }
                 }
@@ -354,22 +354,22 @@ namespace Valve.VR.InteractionSystem
             Vector3 longSideSize = new Vector3(size.x, BRICK_HEIGHT, BRICK_WALL_WIDTH);
             Vector3 longSideCenterLeft = new Vector3(center.x, center.y - BRICK_PIN_HEIGHT_HALF, center.z + extends.z - BRICK_WALL_WIDTH_HALF);
             Vector3 longSideCenterRight = new Vector3(center.x, center.y - BRICK_PIN_HEIGHT_HALF, center.z - extends.z + BRICK_WALL_WIDTH_HALF);
-            AddBoxCollider(longSideSize, longSideCenterLeft, false, this.gameObject);
-            AddBoxCollider(longSideSize, longSideCenterRight, false, this.gameObject);
+            wallColliderList.Add(AddBoxCollider(longSideSize, longSideCenterLeft, false, this.gameObject));
+            wallColliderList.Add(AddBoxCollider(longSideSize, longSideCenterRight, false, this.gameObject));
 
 
             //Collider Short Side
             Vector3 shortSide = new Vector3(BRICK_WALL_WIDTH, BRICK_HEIGHT, size.z);
             Vector3 shortSideCenterUp = new Vector3(center.x + extends.x - BRICK_WALL_WIDTH_HALF, center.y - BRICK_PIN_HEIGHT_HALF, center.z);
             Vector3 shortSideCenterDown = new Vector3(center.x - extends.x + BRICK_WALL_WIDTH_HALF, center.y - BRICK_PIN_HEIGHT_HALF, center.z);
-            AddBoxCollider(shortSide, shortSideCenterUp, false, this.gameObject);
-            AddBoxCollider(shortSide, shortSideCenterDown, false, this.gameObject);
+            wallColliderList.Add(AddBoxCollider(shortSide, shortSideCenterUp, false, this.gameObject));
+            wallColliderList.Add(AddBoxCollider(shortSide, shortSideCenterDown, false, this.gameObject));
 
             //Collider Top Side
             Vector3 topSideSize = new Vector3(size.x, BRICK_WALL_WIDTH, size.z);
             Vector3 topSideCenter = GetCenterTop();
             topSideCenter.y = topSideCenter.y - (BRICK_WALL_WIDTH / 2);
-            AddBoxCollider(topSideSize, topSideCenter, false, this.gameObject);
+            wallColliderList.Add(AddBoxCollider(topSideSize, topSideCenter, false, this.gameObject));
         }
 
         private void AddPinTriggerCollider(float heightOffset, GameObject containerObject, String tag)
@@ -466,7 +466,6 @@ namespace Valve.VR.InteractionSystem
             collider.center = center;
             collider.isTrigger = isTrigger;
             collider.material = material;
-            wallColliderList.Add(collider);
             return collider;
         }
 
@@ -476,7 +475,6 @@ namespace Valve.VR.InteractionSystem
             newCollider.size = sizeCollider;
             newCollider.center = centerCollider;
             newCollider.isTrigger = isTrigger;
-            wallColliderList.Add(newCollider);
             return newCollider;
         }
 

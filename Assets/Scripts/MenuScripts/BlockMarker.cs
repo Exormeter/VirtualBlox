@@ -15,6 +15,7 @@ namespace Valve.VR.InteractionSystem
         public GameObject HandRight;
         public BlockGenerator BlockGenerator;
         public BlockManager BlockManager;
+        public float distanceBeforeColliderActivation;
 
         public List<GameObject> markedBlocks = new List<GameObject>();
 
@@ -33,10 +34,9 @@ namespace Valve.VR.InteractionSystem
         }
 
         public void MarkerPullingStarted(HANDSIDE handSide)
-        {
-            currentBoxCollider.enabled = false;
+        { 
             ResetMarker();
-            markedBlocks.Clear();
+            
             switch (handSide)
             {
                 case HANDSIDE.HAND_LEFT:
@@ -65,7 +65,11 @@ namespace Valve.VR.InteractionSystem
 
         public void MarkerIsPulled(HANDSIDE handSide)
         {
-            currentBoxCollider.enabled = true;
+            if (!currentBoxCollider.enabled)
+            {
+                currentBoxCollider.enabled = true;
+            }
+            
             switch (handSide)
             {
                 case HANDSIDE.HAND_LEFT:
@@ -109,42 +113,62 @@ namespace Valve.VR.InteractionSystem
             {
                 block.SendMessageUpwards("OnMarkedEnd", SendMessageOptions.DontRequireReceiver);
             }
+            markedBlocks.Clear();
+            currentBoxCollider.enabled = false;
         }
 
         public GameObject RebuildMarkedStructure(GameObject grabbedBlock)
         {
             List<GameObject> distinctBlocks = markedBlocks.Distinct().ToList();
             List<GameObject> copiedBlocks = new List<GameObject>();
-            Dictionary<Guid, Guid> copyToOriginalAssign = new Dictionary<Guid, Guid>();
-
-            foreach(GameObject block in distinctBlocks)
-            {
-                GameObject copiedBlock = BlockGenerator.GenerateBlock(block.GetComponent<BlockGeometryScript>().blockStructure);
-                copiedBlock.transform.rotation = block.transform.rotation;
-                copiedBlock.transform.position = block.transform.position;
-                copiedBlock.GetComponent<BlockGeometryScript>().SetWallColliderTrigger(true);
-                copiedBlock.GetComponent<BlockGeometryScript>().TapContainer.SetActive(false);
-                copiedBlock.GetComponent<BlockGeometryScript>().GroovesContainer.SetActive(false);
-                copyToOriginalAssign.Add(block.GetComponent<BlockCommunication>().Guid, copiedBlock.GetComponent<BlockCommunication>().Guid);
-                copiedBlocks.Add(copiedBlock);
-            }
+            Dictionary<Guid, Guid> dictionaryCopyByOriginal = new Dictionary<Guid, Guid>();
+            Dictionary<Guid, Guid> dictionaryOriginalByCopy = new Dictionary<Guid, Guid>();
 
             foreach (GameObject block in distinctBlocks)
             {
-                GameObject copiedBlock = BlockManager.GetBlockByGuid(copyToOriginalAssign[block.GetComponent<BlockCommunication>().Guid]);
+                if (grabbedBlock.GetComponent<BlockCommunication>().IsIndirectlyAttachedToBlock(block))
+                {
+                    GameObject copiedBlock = BlockGenerator.GenerateBlock(block.GetComponent<BlockGeometryScript>().blockStructure);
+                    copiedBlock.transform.rotation = block.transform.rotation;
+                    copiedBlock.transform.position = block.transform.position;
+                    copiedBlock.GetComponent<BlockGeometryScript>().SetWallColliderTrigger(true);
+                    copiedBlock.GetComponent<BlockGeometryScript>().TapContainer.SetActive(false);
+                    copiedBlock.GetComponent<BlockGeometryScript>().GroovesContainer.SetActive(false);
+                    dictionaryCopyByOriginal.Add(block.GetComponent<BlockCommunication>().Guid, copiedBlock.GetComponent<BlockCommunication>().Guid);
+                    dictionaryOriginalByCopy.Add(copiedBlock.GetComponent<BlockCommunication>().Guid, block.GetComponent<BlockCommunication>().Guid);
+                    copiedBlocks.Add(copiedBlock);
+                }
+                
+            }
 
-                foreach (BlockContainer blockContainer in block.GetComponent<BlockCommunication>().ConnectedBlocks)
+            foreach (GameObject copiedBlock in copiedBlocks)
+            {
+                GameObject originalBlock = BlockManager.GetBlockByGuid(dictionaryOriginalByCopy[copiedBlock.GetComponent<BlockCommunication>().Guid]);
+
+                foreach (BlockContainer blockContainer in originalBlock.GetComponent<BlockCommunication>().ConnectedBlocks)
                 {
                     if (distinctBlocks.Exists(tempBlock => blockContainer.BlockRootObject.GetHashCode() == tempBlock.GetHashCode())){
-                        Guid copiedBlockGuid = copyToOriginalAssign[blockContainer.Guid];
+                        Guid copiedBlockGuid = dictionaryCopyByOriginal[blockContainer.Guid];
                         copiedBlock.GetComponent<BlockCommunication>().ConnectBlocks(copiedBlock, BlockManager.GetBlockByGuid(copiedBlockGuid), blockContainer.ConnectedPinCount, blockContainer.ConnectedOn);
                     }
                 }
             }
-            Guid grabbedBlockGuid = copyToOriginalAssign[grabbedBlock.GetComponent<BlockCommunication>().Guid];
-            StartCoroutine(EnableTapAndGrooveHandler(copiedBlocks));
-            return BlockManager.GetBlockByGuid(grabbedBlockGuid);
+
+            Guid grabbedBlockGuidCopy = dictionaryCopyByOriginal[grabbedBlock.GetComponent<BlockCommunication>().Guid];
+            StartCoroutine(CheckDistance(copiedBlocks[0], grabbedBlock, copiedBlocks));
+            return BlockManager.GetBlockByGuid(grabbedBlockGuidCopy);
         }
+
+
+        private IEnumerator CheckDistance(GameObject copiedBlock, GameObject grabbedBlock, List<GameObject> copiedBlocks)
+        {
+            while(Vector3.Distance(copiedBlock.transform.position, grabbedBlock.transform.position) < distanceBeforeColliderActivation)
+            {
+                yield return new WaitForEndOfFrame();
+            }
+            yield return EnableTapAndGrooveHandler(copiedBlocks);
+        }
+              
 
         private IEnumerator EnableTapAndGrooveHandler(List<GameObject> copiedBlocks)
         {
@@ -154,13 +178,14 @@ namespace Valve.VR.InteractionSystem
                 copiedBlock.GetComponent<BlockGeometryScript>().GroovesContainer.SetActive(true);
                 copiedBlock.GetComponentInChildren<TapHandler>().AcceptCollisionsAsConnected(true);
                 copiedBlock.GetComponentInChildren<GrooveHandler>().AcceptCollisionsAsConnected(true);
-                yield return new WaitForSecondsRealtime(1f);
+                yield return new WaitForSecondsRealtime(0.2f);
             }
 
             foreach (GameObject copiedBlock in copiedBlocks)
             {
                 copiedBlock.GetComponentInChildren<TapHandler>().AcceptCollisionsAsConnected(false);
                 copiedBlock.GetComponentInChildren<GrooveHandler>().AcceptCollisionsAsConnected(false);
+                copiedBlock.GetComponent<BlockGeometryScript>().SetWallColliderTrigger(false);
             }
 
 

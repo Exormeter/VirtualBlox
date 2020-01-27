@@ -309,6 +309,45 @@ namespace Valve.VR.InteractionSystem
             return false;
         }
 
+        public bool IsDirectlyAttachedToBlock(GameObject block)
+        {
+            foreach(BlockContainer blockContainer in connectedBlocks)
+            {
+                if(block.GetHashCode() == blockContainer.GetHashCode())
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool IsIndirectlyAttachedToBlock(GameObject block, List<int> visitedNodes = null)
+        {
+            if (visitedNodes == null)
+            {
+                visitedNodes = new List<int>();
+            }
+
+            visitedNodes.Add(gameObject.GetHashCode());
+            if (IsDirectlyAttachedToBlock(block))
+            {
+                return true;
+            }
+
+            foreach (BlockContainer blockContainer in ConnectedBlocks)
+            {
+                if (!visitedNodes.Contains(blockContainer.BlockRootObject.GetHashCode()) && !blockContainer.BlockRootObject.tag.Equals("Floor"))
+                {
+                    if (blockContainer.BlockCommunication.IsIndirectlyAttachedToBlock(block, visitedNodes))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
 
 
         public void RemoveJointViaSimulation(Guid connectedBlockGuid)

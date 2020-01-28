@@ -9,46 +9,52 @@ namespace Valve.VR.InteractionSystem
     public class BlockGeometryScript : MonoBehaviour
     {
 
-        //The height of a brick, can be flat (0.032) or normal (0.096)
+        /// <summary>The height of a brick, can be flat (0.032) or normal (0.096)</summary>
         private float BRICK_HEIGHT;
 
-        //The height of the pins on the upside of the bricks
+        /// <summary>The height of the pins on the upside of the bricks</summary>
         private const float BRICK_PIN_HEIGHT = 0.016f;
 
-        //The height of the pins halfed
+        /// <summary>The height of the pins halfed</summary>
         private const float BRICK_PIN_HEIGHT_HALF = BRICK_PIN_HEIGHT / 2;
 
-        //The thickness of the walls of the brick
+        /// <summary>The thickness of the walls of the brick</summary>
         private const float BRICK_WALL_WIDTH = 0.008f;
 
-        //The thickness of the brick halfed
+        /// <summary>The thickness of the brick halfed</summary>
         private const float BRICK_WALL_WIDTH_HALF = BRICK_WALL_WIDTH / 2;
 
-        //The distance between to pins on the upside of a brick
+        /// <summary>The distance between to pins on the upside of a brick</summary>
         private const float BRICK_PIN_DISTANCE = 0.08f;
 
-        //The lenght of a brick, meassure taken from a 1x1 brick
+        /// <summary>The lenght of a brick, meassure taken from a 1x1 brick</summary>
         private const float BRICK_LENGTH = 0.08f;
 
-        //The diameter of a pin on the upside of a brick
+        /// <summary>The diameter of a pin on the upside of a brick</summary>
         private const float BRICK_PIN_DIAMETER = 0.048f;
 
-        //A container GameObject that contains all TapCollider as well as the
-        //TapHandler
+        /// <summary>
+        /// A container GameObject that contains all TapCollider as well as the
+        /// TapHandler
+        /// </summary>
         public GameObject TapContainer;
 
-        //A container GameObject that contains all GrooveCollider as well as the
-        //GrooveHandler
+        /// <summary>
+        /// A container GameObject that contains all GrooveCollider as well as the
+        /// GrooveHandler
+        /// </summary>
         public GameObject GroovesContainer;
 
-        //The mesh of the block
+        /// <summary>The mesh of the block</summary>
         private Mesh mesh;
 
-        //The BlockStructure is containing the color, height and the contoures of the
-        //block in form of a matrix
+        /// <summary>
+        /// The BlockStructure is containing the color, height and the contoures of the
+        /// block in form of a matrix
+        /// </summary>
         public BlockStructure blockStructure;
 
-        //A list that contains all wall colliders of the block
+        /// <summary>A list that contains all wall colliders of the block</summary>
         private List<Collider> wallColliderList = new List<Collider>();
 
         [HideInInspector]
@@ -125,6 +131,10 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
+        /// <summary>
+        /// Takes the bounding box of the mesh and adds the corners points to the class.
+        /// Used do determine the top and bottom plane of the block.
+        /// </summary>
         private void AddCorners()
         {
             Vector3 size = mesh.bounds.size;
@@ -193,9 +203,11 @@ namespace Valve.VR.InteractionSystem
 
         }
 
-        /*
-         *
-         */
+        /// <summary>
+        /// Sets the BlockStructure for the Block, recalculated the Groove and Taps and Collider
+        /// of the walls
+        /// </summary>
+        /// <param name="structure">The BlockStructure to set</param>
         public void SetStructure(BlockStructure structure)
         {
             //Reset the BlockStructre in case it wasn't done to ensure no BlockPart is marked visited
@@ -232,57 +244,94 @@ namespace Valve.VR.InteractionSystem
 
         }
 
+        /// <summary>
+        /// Returnes the current BlockStructure
+        /// </summary>
+        /// <returns>The BlockSturcture of the Block</returns>
         public BlockStructure GetStructure()
         {
             return blockStructure;
         }
 
+        /// <summary>
+        /// Adds the top Collider to the Block, the Collider is calculated by the currently
+        /// setted BlockStructure
+        /// </summary>
         private void AddTopCollider()
         {
+            //Defines the Collider size, based of the 1x1 Block and wall thickness
             Vector3 topSideSize = new Vector3(BRICK_LENGTH, BRICK_WALL_WIDTH, BRICK_LENGTH);
+
+            //MiddlePoint row of the BlockStructure Matrix
             float rowMiddlePoint = (float)(blockStructure.RowsCropped - 1) / 2;
+
+            //MiddlePoint column of the BlockStructure Matrix
             float colMiddlePoint = (float)(blockStructure.ColsCropped - 1) / 2;
 
+            //Loop throught the cropped BlockStructure
             for (int row = 0; row < blockStructure.RowsCropped; row++)
             {
                 for(int col = 0; col < blockStructure.ColsCropped; col++)
                 {
+                    //If a Part inside the Matrix is not null, set a new collider
                     if(blockStructure[row, col] != null)
                     {
+
                         float centerX = (rowMiddlePoint - row) * BRICK_LENGTH;
                         float centerY = GetCenterTop().y - (BRICK_WALL_WIDTH / 2);
                         float centerZ = (colMiddlePoint - col) * BRICK_LENGTH;
-                        
+
+                        //Defines the center of the Collider
                         Vector3 colliderCenter = new Vector3(centerX, centerY, centerZ);
+
+                        //Adda the Collider to the GameObject and to the wallCollider list for caching
                         wallColliderList.Add(AddBoxCollider(topSideSize, colliderCenter, false, transform.gameObject));
                     }
                 }
             }
         }
 
+        /// <summary>
+        /// Adds the Collider for the walls of the Block. Every List with BlockParts inside the List is
+        /// getting converted into a wall Collider
+        /// </summary>
+        /// <param name="allWallsInStructure"> Contains the walls to convert</param>
         public void AddWallCollider(List<List<BlockPart>> allWallsInStructure)
         {
+            //Loop thought every wall
             foreach(List<BlockPart> wall in allWallsInStructure)
             {
+                //Lenght of the wall, depents on the number of BlockParts time the length of a 1x1 brick
                 float wallLength = wall.Count * BRICK_LENGTH;
+
+                //MiddlePoint row of the BlockStructure Matrix
                 float rowMiddlePoint = (float) (blockStructure.RowsCropped - 1) / 2;
+
+                //MiddlePoint column of the BlockStructure Matrix
                 float colMiddlePoint = (float) (blockStructure.ColsCropped - 1) / 2;
 
+
+                //Gets the center of the mesh for positioning of the collider
                 Vector3 centerMesh = GetComponent<MeshFilter>().mesh.bounds.center;
-                float wallCloumnAverage = 0;
-                float wallRowAverage = 0;
+
+                //The middlePoint row for the wall, used to position the collider in the middle of the wall
+                float wallColumnMidPoint = 0;
+
+                //The middlePoint column for the wall, used to position the collider in the middle of the wall
+                float wallRowMidPoint = 0;
                 wall.ForEach(blockPart => {
-                    wallRowAverage += blockPart.Row;
-                    wallCloumnAverage += blockPart.Col;
+                    wallRowMidPoint += blockPart.Row;
+                    wallColumnMidPoint += blockPart.Col;
                 });
-                wallRowAverage /= wall.Count;
-                wallCloumnAverage /= wall.Count;
+                wallRowMidPoint /= wall.Count;
+                wallColumnMidPoint /= wall.Count;
+
 
                 switch (wall[0].WallDirection)
                 {
                     case DIRECTION.UP:
                         {
-                            float centerColliderZ = (colMiddlePoint - wallCloumnAverage) * BRICK_LENGTH;
+                            float centerColliderZ = (colMiddlePoint - wallColumnMidPoint) * BRICK_LENGTH;
                             float centerColliderX = (rowMiddlePoint + 0.5f - wall[0].Row) * BRICK_LENGTH;
 
                             Vector3 size = new Vector3(BRICK_WALL_WIDTH, BRICK_HEIGHT, wallLength);
@@ -294,7 +343,7 @@ namespace Valve.VR.InteractionSystem
 
                     case DIRECTION.DOWN:
                         {
-                            float centerColliderZ = (colMiddlePoint - wallCloumnAverage) * BRICK_LENGTH;
+                            float centerColliderZ = (colMiddlePoint - wallColumnMidPoint) * BRICK_LENGTH;
                             float centerColliderX = (rowMiddlePoint - 0.5f - wall[0].Row) * BRICK_LENGTH;
 
                             Vector3 size = new Vector3(BRICK_WALL_WIDTH, BRICK_HEIGHT, wallLength);
@@ -307,7 +356,7 @@ namespace Valve.VR.InteractionSystem
 
                     case DIRECTION.LEFT:
                         {
-                            float centerColliderX = (rowMiddlePoint - wallRowAverage) * BRICK_LENGTH;
+                            float centerColliderX = (rowMiddlePoint - wallRowMidPoint) * BRICK_LENGTH;
                             float centerColliderZ = (colMiddlePoint + 0.5f - wall[0].Col) * BRICK_LENGTH;
 
                             Vector3 size = new Vector3(wallLength, BRICK_HEIGHT, BRICK_WALL_WIDTH);
@@ -320,7 +369,7 @@ namespace Valve.VR.InteractionSystem
 
                     case DIRECTION.RIGHT:
                         {
-                            float centerColliderX = (rowMiddlePoint - wallRowAverage) * BRICK_LENGTH;
+                            float centerColliderX = (rowMiddlePoint - wallRowMidPoint) * BRICK_LENGTH;
                             float centerColliderZ = (colMiddlePoint - 0.5f - wall[0].Col) * BRICK_LENGTH;
 
                             Vector3 size = new Vector3(wallLength, BRICK_HEIGHT, BRICK_WALL_WIDTH);
@@ -333,17 +382,29 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
+        /// <summary>
+        /// Searches the BockStructure for walls. A wall is defined in that it is missing a neighbor on
+        /// any of it's edges. The method only searches in one direction at a time.
+        /// </summary>
+        /// <param name="direction">The desired search direction</param>
+        /// <returns>The found walls as a List of BlockParts</returns>
         private List<List<BlockPart>> SearchWallsInStructure(DIRECTION direction)
         {
+            //List with List of BlocksParts to return
             List<List<BlockPart>> allWallsInStructure = new List<List<BlockPart>>();
+
+            //Loop thought the cropped BlockStructure Matrix
             for (int row = 0; row < blockStructure.RowsCropped; row++)
             {
                 for (int col = 0; col < blockStructure.ColsCropped; col++)
                 {
-                    //Need to reset the visited Status
+                    //Check if the currently searched Part is not null and wasn't already visited
                     if (blockStructure[row, col] != null && !blockStructure[row, col].WasDirectionVisited(direction))
                     {
+                        //Searches for walls at the given Location recursive
                         List<BlockPart> tempList = SearchWallsAtLocation(row, col, direction);
+
+                        //If the Search was successful, add the List to the List that will returned
                         if(tempList != null && tempList.Count != 0)
                         {
                             allWallsInStructure.Add(tempList);
@@ -355,24 +416,40 @@ namespace Valve.VR.InteractionSystem
             return allWallsInStructure;
         }
 
+        /// <summary>
+        /// Recursivly checks a position if the Block has a neighbor in the searched direction. If it
+        /// does not, the next Block is searched until the wall is completely found
+        /// </summary>
+        /// <param name="row">The row where to search</param>
+        /// <param name="col">The column where to search</param>
+        /// <param name="direction">The direction in which the current search is carried out</param>
+        /// <param name="wallInStructure">The List of found BlockParts, can be null to begin a new search</param>
+        /// <returns>List with BlockParts that make up a wall</returns>
         private List<BlockPart> SearchWallsAtLocation(int row, int col, DIRECTION direction, List<BlockPart> wallInStructure = null)
         {
-            
+            //If search is outside the matrix, return the List
             if(row >= blockStructure.RowsCropped || col >= blockStructure.ColsCropped || row < 0 || col < 0)
             {
                 return wallInStructure;
             }
 
+            //If List was null, create a new list to cache BlockParts
             if (wallInStructure == null)
             {
                 wallInStructure = new List<BlockPart>();
             }
 
+            //If BlockPart has no neighbor in searched direction, part of wall is found
             if (blockStructure[row, col] != null && !blockStructure.HasNeighbour(row, col, direction) )
             {
+                //Remember that this part was search in the direction
                 blockStructure[row, col].DirectionVisited(direction);
+
+                //Add the found BlockPart to the List
                 wallInStructure.Add(new BlockPart(row, col, direction));
-                if(direction == DIRECTION.UP || direction == DIRECTION.DOWN)
+
+                //Continue the search in row respectively column direction
+                if (direction == DIRECTION.UP || direction == DIRECTION.DOWN)
                 {
                     SearchWallsAtLocation(row, col + 1, direction, wallInStructure);
                 }
@@ -386,6 +463,9 @@ namespace Valve.VR.InteractionSystem
             return wallInStructure;
         }
 
+        /// <summary>
+        /// Remove all wall Collider on the GameObject
+        /// </summary>
         private void RemoveWallCollider()
         {
             for(int i = 0; i < wallColliderList.Count; i++)

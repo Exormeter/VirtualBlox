@@ -3,32 +3,90 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TabController : MonoBehaviour
+namespace Valve.VR.InteractionSystem
 {
-    private ToggleGroup tabGroup;
-    void Start()
+    public class TabController : MonoBehaviour
     {
-        tabGroup = GetComponent<ToggleGroup>();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
+        private ToggleGroup tabGroup;
+        private Canvas tabCanvas;
+        private Canvas currentActiveCanvas;
+        public Canvas TabSaveScene;
+        public Canvas TabBlockCreate;
+        public Canvas TabSavePrefab;
+        public GameObject pointer;
+        public GameObject pointerOrigin;
         
-    }
 
-    public void OpenTabBlockCreate()
-    {
+        void Start()
+        {
+            if(TabBlockCreate != null)
+            {
+                TabBlockCreate.enabled = false;
+                TabSavePrefab.enabled = false;
+                TabSaveScene.enabled = false;
+                currentActiveCanvas = TabBlockCreate;
+                tabCanvas = GetComponent<Canvas>();
+                tabGroup = GetComponent<ToggleGroup>();
+                tabCanvas.enabled = false;
+            }
+            
+        }
 
-    }
+        
+        void Update()
+        {
 
-    public void OpenTabSaveScene()
-    {
+        }
 
-    }
+        public void OpenTabBlockCreate()
+        {
+            TabBlockCreate.enabled = true;
+            TabSavePrefab.enabled = false;
+            TabSaveScene.enabled = false;
+            currentActiveCanvas = TabBlockCreate;
+        }
 
-    public void OpenTabSavePrefab()
-    {
+        public void OpenTabSaveScene()
+        {
+            TabBlockCreate.enabled = false;
+            TabSavePrefab.enabled = false;
+            TabSaveScene.enabled = true;
+            currentActiveCanvas = TabSaveScene;
+        }
 
+        public void OpenTabSavePrefab()
+        {
+            TabBlockCreate.enabled = false;
+            TabSavePrefab.enabled = true;
+            TabSaveScene.enabled = false;
+            currentActiveCanvas = TabSavePrefab;
+        }
+
+        public void OpenMenu(HANDSIDE hand)
+        {
+            tabCanvas.enabled = true;
+            currentActiveCanvas.enabled = true;
+        }
+
+        public void CloseMenu(HANDSIDE hand)
+        {
+            tabCanvas.enabled = false;
+            currentActiveCanvas.enabled = false;
+            DeactivatePointer();
+        }
+
+        public void ActivatePointer(HANDSIDE handSide)
+        {
+            pointer.SetActive(true);
+            pointer.transform.SetParent(pointerOrigin.transform);
+            pointer.transform.localPosition = Vector3.zero;
+            pointer.transform.localRotation = Quaternion.identity;
+        }
+
+        public void DeactivatePointer()
+        {
+            pointer.SetActive(false);
+        }
     }
 }
+

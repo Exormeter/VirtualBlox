@@ -321,7 +321,7 @@ namespace Valve.VR.InteractionSystem
             return false;
         }
 
-        public bool IsIndirectlyAttachedToBlock(GameObject block, List<int> visitedNodes = null)
+        public bool IsIndirectlyAttachedToBlockMarked(GameObject block, List<int> visitedNodes = null)
         {
             if (visitedNodes == null)
             {
@@ -336,9 +336,9 @@ namespace Valve.VR.InteractionSystem
 
             foreach (BlockContainer blockContainer in ConnectedBlocks)
             {
-                if (!visitedNodes.Contains(blockContainer.BlockRootObject.GetHashCode()) && !blockContainer.BlockRootObject.tag.Equals("Floor"))
+                if (!visitedNodes.Contains(blockContainer.BlockRootObject.GetHashCode()) && !blockContainer.BlockRootObject.tag.Equals("Floor") && blockContainer.Interactable.isMarked)
                 {
-                    if (blockContainer.BlockCommunication.IsIndirectlyAttachedToBlock(block, visitedNodes))
+                    if (blockContainer.BlockCommunication.IsIndirectlyAttachedToBlockMarked(block, visitedNodes))
                     {
                         return true;
                     }
@@ -418,6 +418,7 @@ namespace Valve.VR.InteractionSystem
         public AttachFloorHandler AttachFloorHandler { get; }
         public AttachHandHandler AttachHandHandler { get; }
         public BlockCommunication BlockCommunication{ get;}
+        public Interactable Interactable { get; }
         public int ConnectedPinCount { get; }
         public Guid Guid { get; }
 
@@ -430,6 +431,7 @@ namespace Valve.VR.InteractionSystem
             BlockCommunication = block.GetComponent<BlockCommunication>();
             AttachHandHandler = block.GetComponent<AttachHandHandler>();
             AttachFloorHandler = block.GetComponent<AttachFloorHandler>();
+            Interactable = block.GetComponent<Interactable>();
             ConnectedJoint = connectedJoint;
             ConnectedOn = connectedOn;
             ConnectedPinCount = connectedPin;

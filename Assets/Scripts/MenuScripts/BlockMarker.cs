@@ -126,7 +126,7 @@ namespace Valve.VR.InteractionSystem
 
             foreach (GameObject block in distinctBlocks)
             {
-                if (grabbedBlock.GetComponent<BlockCommunication>().IsIndirectlyAttachedToBlock(block))
+                if (grabbedBlock.GetComponent<BlockCommunication>().IsIndirectlyAttachedToBlockMarked(block))
                 {
                     GameObject copiedBlock = BlockGenerator.GenerateBlock(block.GetComponent<BlockGeometryScript>().blockStructure);
                     copiedBlock.transform.rotation = block.transform.rotation;

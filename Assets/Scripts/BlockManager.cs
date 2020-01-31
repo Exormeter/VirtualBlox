@@ -80,7 +80,8 @@ namespace Valve.VR.InteractionSystem
                 SaveGameManager.LoadBlock(blockSave);
                 blockPlacingHistory.Add(new HistoryObject(blockSave.guid, blockSave.timeStamp));
             }
-
+            
+            //TODO: Reset the AcceptCollisionAsConnection to false again
             foreach (BlockSave blockSave in blocksToRestore)
             {
                 SaveGameManager.ConnectBlocks(blockSave);

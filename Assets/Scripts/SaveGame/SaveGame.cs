@@ -16,6 +16,21 @@ namespace Valve.VR.InteractionSystem
         {
             return blockSaves.Find(blockSave => blockSave.guid == guid);
         }
+
+        public void ReplaceGuids(Dictionary<Guid, Guid> originalToNewGuid)
+        {
+            foreach(BlockSave blockSave in blockSaves)
+            {
+                blockSave.guid = originalToNewGuid[blockSave.guid];
+                foreach(ConnectedBlockSerialized connectedBlockSerialized in blockSave.connectedBlocks)
+                {
+                    if (originalToNewGuid.ContainsKey(connectedBlockSerialized.guid))
+                    {
+                        connectedBlockSerialized.guid = originalToNewGuid[connectedBlockSerialized.guid];
+                    }
+                }
+            }
+        }
     }
 
     [Serializable]

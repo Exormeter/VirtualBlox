@@ -39,7 +39,7 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
-        private string newFileName;
+        private string newFileName = "";
         private readonly string extension = ".save";
 
         void Start()
@@ -134,7 +134,7 @@ namespace Valve.VR.InteractionSystem
             {
                 return;
             }
-            SaveGameManager.LoadGame(currentlyChoosenFile.FilePath);
+            SaveGameManager.LoadSceneFromFile(currentlyChoosenFile.FilePath);
         }
 
         public SaveGame CreateSaveGameObject()

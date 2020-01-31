@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEngine.UI;
@@ -99,15 +101,19 @@ namespace Valve.VR.InteractionSystem
             {
                 return;
             }
-
+           
             KeyBoard.SetActive(false);
-            SaveGameManager.SaveGame(CreateSaveGameObject(), newFileName);
+
+            SaveFilePath saveFilePath = new SaveFilePath(newFileName, extension);
+
+            SaveGameManager.SaveGame(CreateSaveGameObject(), saveFilePath.FilePath);
+
 
             GameObject newButton = Instantiate(ListButtonPrecurser) as GameObject;
             newButton.GetComponentInChildren<Text>().text = newFileName + extension;
             newButton.transform.SetParent(ButtonListContent.transform, false);
-            newButton.GetComponent<Button>().onClick.AddListener(() => SetCurrentFile(new SaveFilePath(newFileName, extension)));
-            SetCurrentFile(new SaveFilePath(newFileName, extension));
+            newButton.GetComponent<Button>().onClick.AddListener(() => SetCurrentFile(saveFilePath));
+            SetCurrentFile(saveFilePath);
             buttons.Add(newButton.GetComponent<Button>());
             EnableButtons();
         }
@@ -121,11 +127,20 @@ namespace Valve.VR.InteractionSystem
             SaveGameManager.SaveGame(CreateSaveGameObject(), CurrentlyChoosenFile.FilePath);
         }
 
+        public void LoadSavedPrefab()
+        {
+            if(CurrentlyChoosenFile != null)
+            {
+                SaveGameManager.LoadPrefabFromFile(CurrentlyChoosenFile.FilePath);
+            }
+        }
+
 
         public SaveGame CreateSaveGameObject()
         {
             SaveGame newSaveGame = new SaveGame();
-            List<GameObject> blocks = BlockMarker.markedBlocks;
+            List<GameObject> blocks = SearchBiggestConnectedStructure(BlockMarker.markedBlocks.Distinct().ToList());
+
             foreach (GameObject block in blocks)
             {
                 if (block.GetComponent<BlockCommunication>().IsIndirectlyAttachedToFloor())
@@ -148,11 +163,48 @@ namespace Valve.VR.InteractionSystem
 
         public List<GameObject> SearchBiggestConnectedStructure(List<GameObject> markedBlocks)
         {
-            foreach (GameObject block in markedBlocks)
+            if(markedBlocks.Count <= 1)
             {
-
+                return markedBlocks;
             }
 
+            Dictionary<GameObject, int> numberBlockConnections = new Dictionary<GameObject, int>();
+            markedBlocks.ForEach(block => numberBlockConnections.Add(block, 0));
+
+            foreach (GameObject block in markedBlocks)
+            {
+                foreach(GameObject otherBlock in markedBlocks)
+                {
+                    if(block.GetHashCode() != otherBlock.GetHashCode() && block.GetComponent<BlockCommunication>().IsIndirectlyAttachedToBlockMarked(otherBlock))
+                    {
+                        numberBlockConnections[block]++;
+                    }
+                }
+
+                if(numberBlockConnections[block] == markedBlocks.Count - 1)
+                {
+                    return markedBlocks;
+                }
+            }
+
+            int highestNumberConnections = 0;
+            foreach(GameObject block in markedBlocks)
+            {
+                if(numberBlockConnections[block] > highestNumberConnections)
+                {
+                    highestNumberConnections = numberBlockConnections[block];
+                }
+            }
+
+            List<GameObject> biggestStructure = new List<GameObject>();
+            foreach(GameObject block in markedBlocks)
+            {
+                if(numberBlockConnections[block] == highestNumberConnections)
+                {
+                    biggestStructure.Add(block);
+                }
+            }
+            return biggestStructure;
         }
     }
 
@@ -173,7 +225,7 @@ namespace Valve.VR.InteractionSystem
         {
             Extension = extension;
             FileName = fileName;
-            FilePath = Application.persistentDataPath + fileName + Extension;
+            FilePath = Application.persistentDataPath +"/" + fileName + Extension;
             Debug.Log(FilePath);
         }
     }

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -12,20 +13,7 @@ namespace Valve.VR.InteractionSystem
         public BlockManager BlockManager;
         public BlockGenerator BlockGenerator;
 
-        
-        // Start is called before the first frame update
-        void Start()
-        {
-
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
-
-        public void LoadGame(string choosenFilePath)
+        public void LoadSceneFromFile(string choosenFilePath)
         {
 
             if (File.Exists(choosenFilePath))
@@ -38,11 +26,11 @@ namespace Valve.VR.InteractionSystem
                 BlockManager.RemoveAllBlocks();
 
                 //Load Blocks into the Scene
-                StartCoroutine(LoadBlocks(save));
+                StartCoroutine(LoadScene(save));
             }
         }
 
-        IEnumerator LoadBlocks(SaveGame save)
+        IEnumerator LoadScene(SaveGame save)
         {
             save.historyObjects.Sort();
             BlockManager.blockPlacingHistory = save.historyObjects;
@@ -62,28 +50,74 @@ namespace Valve.VR.InteractionSystem
             ConnectBlocks(save);
         }
 
-        public void ConnectBlocks(SaveGame save)
+        public void ConnectBlocks(SaveGame saveGame)
         {
-            foreach (BlockSave blockSave in save.blockSaves)
+            foreach (BlockSave blockSave in saveGame.blockSaves)
             {
-                ConnectBlocks(blockSave);
+                ConnectBlocks(blockSave, saveGame);
             }
         }
 
-        public void ConnectBlocks(BlockSave blockSave)
+        public void ConnectBlocks(BlockSave blockSave, SaveGame saveGame = null)
         {
             GameObject block = BlockManager.GetBlockByGuid(blockSave.guid);
             foreach (ConnectedBlockSerialized connection in blockSave.connectedBlocks)
             {
-                block.GetComponent<BlockCommunication>().ConnectBlocks(block, BlockManager.GetBlockByGuid(connection.guid), connection.connectedPins, connection.connectedOn);
+                block.GetComponentInChildren<TapHandler>().AcceptCollisionsAsConnected(false);
+                block.GetComponentInChildren<GrooveHandler>().AcceptCollisionsAsConnected(false);
+
+                if(saveGame == null || saveGame.GetBlockSaveByGuid(connection.guid) != null)
+                {
+                    block.GetComponent<BlockCommunication>().ConnectBlocks(block, BlockManager.GetBlockByGuid(connection.guid), connection.connectedPins, connection.connectedOn);
+                }
+                
             }
         }
 
+        public void LoadPrefabFromFile(string choosenFilePath)
+        {
+            if (File.Exists(choosenFilePath))
+            {
+                BinaryFormatter bf = new BinaryFormatter();
+                FileStream file = File.Open(choosenFilePath, FileMode.Open);
+                SaveGame save = (SaveGame)bf.Deserialize(file);
+                file.Close();
+
+                //Load Blocks into the Scene
+                StartCoroutine(LoadPrefab(save));
+            }
+        }
+
+        IEnumerator LoadPrefab(SaveGame saveGame)
+        {
+            List<GameObject> loadedBlocks = new List<GameObject>();
+
+            Dictionary<Guid, Guid> originalToNewGuid = new Dictionary<Guid, Guid>();
+
+            foreach(BlockSave blockSave in saveGame.blockSaves)
+            {
+                GameObject loadedBlock = LoadBlockWithNewGuid(blockSave, new Vector3(0, 3, 0));
+                originalToNewGuid.Add(blockSave.guid, loadedBlock.GetComponent<BlockCommunication>().Guid);
+                loadedBlock.GetComponentInChildren<TapHandler>().AcceptCollisionsAsConnected(true);
+                loadedBlock.GetComponentInChildren<GrooveHandler>().AcceptCollisionsAsConnected(true);
+                loadedBlocks.Add(loadedBlock);
+                yield return new WaitForSeconds(0.1f);
+            }
+
+            saveGame.ReplaceGuids(originalToNewGuid);
+
+            ConnectBlocks(saveGame);
+            foreach (GameObject loadedBlock in loadedBlocks)
+            {
+                loadedBlock.GetComponentInChildren<TapHandler>().AcceptCollisionsAsConnected(false);
+                loadedBlock.GetComponentInChildren<GrooveHandler>().AcceptCollisionsAsConnected(false);
+                //loadedBlock.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+            }
+        }
         
 
         public void SaveGame(SaveGame save, string filePath)
         {
-            //SaveGame save = CreateSaveGameObject();
             BinaryFormatter bf = new BinaryFormatter();
             FileStream file = File.Create(filePath);
             bf.Serialize(file, save);
@@ -96,13 +130,23 @@ namespace Valve.VR.InteractionSystem
             LoadBlock(blockSave);
         }
 
-        public void LoadBlock(BlockSave blockSave)
+        public GameObject LoadBlock(BlockSave blockSave, Vector3 offset = new Vector3())
         {
             GameObject restoredBlock = BlockGenerator.GenerateBlock(blockSave.GetBlockStructure());
-            restoredBlock.transform.position = blockSave.position;
+            restoredBlock.transform.position = blockSave.position + offset;
             restoredBlock.transform.rotation = blockSave.rotation;
             restoredBlock.GetComponent<BlockCommunication>().Guid = blockSave.guid;
             restoredBlock.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+            return restoredBlock;
+        }
+
+        public GameObject LoadBlockWithNewGuid(BlockSave blockSave, Vector3 offset = new Vector3())
+        {
+            GameObject restoredBlock = BlockGenerator.GenerateBlock(blockSave.GetBlockStructure());
+            restoredBlock.transform.position = blockSave.position + offset;
+            restoredBlock.transform.rotation = blockSave.rotation;
+            restoredBlock.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+            return restoredBlock;
         }
     }
 

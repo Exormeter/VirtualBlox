@@ -26,7 +26,7 @@ namespace Valve.VR.InteractionSystem
             partSizes.Add(BLOCKSIZE.NORMAL, Block1x1);
         }
 
-        public GameObject GenerateBlock(BlockStructure structure)
+        public GameObject GenerateBlock(BlockStructure structure, Vector3 offset = new Vector3())
         {
 
             Material blockMaterial = new Material(material);

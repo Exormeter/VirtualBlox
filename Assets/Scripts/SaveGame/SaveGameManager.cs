@@ -4,73 +4,34 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Valve.VR.InteractionSystem
 {
+
     public class SaveGameManager : MonoBehaviour
     {
-        public BlockGenerator BlockGenerator;
         public BlockManager BlockManager;
-        public GameObject button;
-        public GameObject ButtonListContent;
-        public GameObject KeyBoard;
-        public Text ChoosenFile;
-        public List<Button> buttons;
+        public BlockGenerator BlockGenerator;
 
-        private string currentlyChoosenFile;
-        private string newFileName;
-
-        void Start()
+        public void LoadSceneFromFile(string choosenFilePath)
         {
-            string[] filePaths = Directory.GetFiles(Application.persistentDataPath);
-            foreach(string filePath in filePaths)
-            {
-                if (File.Exists(filePath))
-                {
-                    GameObject newButton = Instantiate(button) as GameObject;
-                    newButton.GetComponentInChildren<Text>().text = Path.GetFileName(filePath);
-                    newButton.transform.SetParent(ButtonListContent.transform, false);
-                    newButton.GetComponent<Button>().onClick.AddListener(() => GetFileName(filePath));
-                    buttons.Add(newButton.GetComponent<Button>());
-                }
-            }
-            KeyBoard.SetActive(false);
-        }
 
-        public void GetFileName(string filePath)
-        {
-            string fileName = Path.GetFileName(filePath);
-            currentlyChoosenFile = filePath;
-            ChoosenFile.text = fileName;
-        }
-
-        public void ButtonListen(string keyBoardPress)
-        {
-            newFileName += keyBoardPress;
-            ChoosenFile.text += keyBoardPress;
-        }
-
-        public void LoadGame()
-        {
-            
-            if (File.Exists(currentlyChoosenFile))
+            if (File.Exists(choosenFilePath))
             {
                 BinaryFormatter bf = new BinaryFormatter();
-                FileStream file = File.Open(currentlyChoosenFile, FileMode.Open);
+                FileStream file = File.Open(choosenFilePath, FileMode.Open);
                 SaveGame save = (SaveGame)bf.Deserialize(file);
                 file.Close();
 
                 BlockManager.RemoveAllBlocks();
 
                 //Load Blocks into the Scene
-                StartCoroutine(LoadBlocks(save));
+                StartCoroutine(LoadScene(save));
             }
         }
 
-        IEnumerator LoadBlocks(SaveGame save)
+        IEnumerator LoadScene(SaveGame save)
         {
-            DisableButtons();
             save.historyObjects.Sort();
             BlockManager.blockPlacingHistory = save.historyObjects;
             for (int i = 0; i < save.historyObjects.Count; i++)
@@ -83,11 +44,84 @@ namespace Valve.VR.InteractionSystem
                     LoadBlock(save, save.historyObjects[i + 1]);
                     i++;
                 }
-                
+
                 yield return new WaitForSeconds(0.5f);
             }
-            EnableButtons();
             ConnectBlocks(save);
+        }
+
+        public void ConnectBlocks(SaveGame saveGame)
+        {
+            foreach (BlockSave blockSave in saveGame.blockSaves)
+            {
+                ConnectBlocks(blockSave, saveGame);
+            }
+        }
+
+        public void ConnectBlocks(BlockSave blockSave, SaveGame saveGame = null)
+        {
+            GameObject block = BlockManager.GetBlockByGuid(blockSave.guid);
+            foreach (ConnectedBlockSerialized connection in blockSave.connectedBlocks)
+            {
+                block.GetComponentInChildren<TapHandler>().AcceptCollisionsAsConnected(false);
+                block.GetComponentInChildren<GrooveHandler>().AcceptCollisionsAsConnected(false);
+
+                if(saveGame == null || saveGame.GetBlockSaveByGuid(connection.guid) != null)
+                {
+                    block.GetComponent<BlockCommunication>().ConnectBlocks(block, BlockManager.GetBlockByGuid(connection.guid), connection.connectedPins, connection.connectedOn);
+                }
+                
+            }
+        }
+
+        public void LoadPrefabFromFile(string choosenFilePath)
+        {
+            if (File.Exists(choosenFilePath))
+            {
+                BinaryFormatter bf = new BinaryFormatter();
+                FileStream file = File.Open(choosenFilePath, FileMode.Open);
+                SaveGame save = (SaveGame)bf.Deserialize(file);
+                file.Close();
+
+                //Load Blocks into the Scene
+                StartCoroutine(LoadPrefab(save));
+            }
+        }
+
+        IEnumerator LoadPrefab(SaveGame saveGame)
+        {
+            List<GameObject> loadedBlocks = new List<GameObject>();
+
+            Dictionary<Guid, Guid> originalToNewGuid = new Dictionary<Guid, Guid>();
+
+            foreach(BlockSave blockSave in saveGame.blockSaves)
+            {
+                GameObject loadedBlock = LoadBlockWithNewGuid(blockSave, new Vector3(0, 3, 0));
+                originalToNewGuid.Add(blockSave.guid, loadedBlock.GetComponent<BlockCommunication>().Guid);
+                loadedBlock.GetComponentInChildren<TapHandler>().AcceptCollisionsAsConnected(true);
+                loadedBlock.GetComponentInChildren<GrooveHandler>().AcceptCollisionsAsConnected(true);
+                loadedBlocks.Add(loadedBlock);
+                yield return new WaitForSeconds(0.1f);
+            }
+
+            saveGame.ReplaceGuids(originalToNewGuid);
+
+            ConnectBlocks(saveGame);
+            foreach (GameObject loadedBlock in loadedBlocks)
+            {
+                loadedBlock.GetComponentInChildren<TapHandler>().AcceptCollisionsAsConnected(false);
+                loadedBlock.GetComponentInChildren<GrooveHandler>().AcceptCollisionsAsConnected(false);
+                //loadedBlock.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+            }
+        }
+        
+
+        public void SaveGame(SaveGame save, string filePath)
+        {
+            BinaryFormatter bf = new BinaryFormatter();
+            FileStream file = File.Create(filePath);
+            bf.Serialize(file, save);
+            file.Close();
         }
 
         public void LoadBlock(SaveGame save, HistoryObject historyObject)
@@ -96,110 +130,24 @@ namespace Valve.VR.InteractionSystem
             LoadBlock(blockSave);
         }
 
-        public void LoadBlock(BlockSave blockSave)
+        public GameObject LoadBlock(BlockSave blockSave, Vector3 offset = new Vector3())
         {
             GameObject restoredBlock = BlockGenerator.GenerateBlock(blockSave.GetBlockStructure());
-            restoredBlock.transform.position = blockSave.position;
+            restoredBlock.transform.position = blockSave.position + offset;
             restoredBlock.transform.rotation = blockSave.rotation;
             restoredBlock.GetComponent<BlockCommunication>().Guid = blockSave.guid;
             restoredBlock.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+            return restoredBlock;
         }
 
-        public void ConnectBlocks(SaveGame save)
+        public GameObject LoadBlockWithNewGuid(BlockSave blockSave, Vector3 offset = new Vector3())
         {
-            foreach (BlockSave blockSave in save.blockSaves)
-            {
-                ConnectBlocks(blockSave);
-            }
-        }
-
-        public void ConnectBlocks(BlockSave blockSave)
-        {
-            GameObject block = BlockManager.GetBlockByGuid(blockSave.guid);
-            foreach (ConnectedBlockSerialized connection in blockSave.connectedBlocks)
-            {
-                block.GetComponent<BlockCommunication>().ConnectBlocks(block, BlockManager.GetBlockByGuid(connection.guid), connection.connectedPins, connection.connectedOn);
-            }
-        }
-
-        public void NewSave()
-        {
-            KeyBoard.SetActive(true);
-            newFileName = "";
-            ChoosenFile.text = "";
-            DisableButtons();
-        }
-
-        public void ChancelNewSaveCreation()
-        {
-            KeyBoard.SetActive(false);
-            newFileName = "";
-            EnableButtons();
-        }
-
-        public void CreateNewSaveFile()
-        {
-            KeyBoard.SetActive(false);
-            SaveGame(newFileName);
-
-            GameObject newButton = Instantiate(button) as GameObject;
-            newButton.GetComponentInChildren<Text>().text = newFileName + ".save";
-            newButton.transform.SetParent(ButtonListContent.transform, false);
-            newButton.GetComponent<Button>().onClick.AddListener(() => GetFileName(Application.persistentDataPath + "/" + newFileName + ".save"));
-            currentlyChoosenFile = Application.persistentDataPath + "/" + newFileName + ".save";
-            ChoosenFile.text += ".save";
-            EnableButtons();
-        }
-
-        public void ResetGame()
-        {
-            BlockManager.RemoveAllBlocks();
-        }
-
-        public void DisableButtons()
-        {
-            buttons.ForEach(button => button.interactable = false);
-        }
-
-        public void EnableButtons()
-        {
-            buttons.ForEach(button => button.interactable = true);
-        }
-
-
-        public SaveGame CreateSaveGameObject()
-        {
-            SaveGame newSaveGame = new SaveGame();
-            GameObject[] blocks = GameObject.FindGameObjectsWithTag("Block");
-            foreach(GameObject block in blocks)
-            {
-                if (block.GetComponent<BlockCommunication>().IsIndirectlyAttachedToFloor())
-                {
-                    newSaveGame.blockSaves.Add(new BlockSave(block));
-                }
-            }
-            newSaveGame.historyObjects = BlockManager.blockPlacingHistory;
-            return newSaveGame;
-        }
-
-        public void SaveGame()
-        {
-            SaveGame save = CreateSaveGameObject();
-            BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = File.Create(currentlyChoosenFile);
-            bf.Serialize(file, save);
-            file.Close();
-        }
-
-        public void SaveGame(string fileName)
-        {
-            SaveGame save = CreateSaveGameObject();
-            BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = File.Create(Application.persistentDataPath + "/" + fileName + ".save");
-            bf.Serialize(file, save);
-            file.Close();
+            GameObject restoredBlock = BlockGenerator.GenerateBlock(blockSave.GetBlockStructure());
+            restoredBlock.transform.position = blockSave.position + offset;
+            restoredBlock.transform.rotation = blockSave.rotation;
+            restoredBlock.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+            return restoredBlock;
         }
     }
 
-    
 }

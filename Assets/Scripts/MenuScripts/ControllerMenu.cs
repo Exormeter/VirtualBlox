@@ -10,14 +10,9 @@ namespace Valve.VR.InteractionSystem
 {
     public class ControllerMenu : MonoBehaviour
     {
-        public GameObject CanvasContainer;
-        public GameObject SaveGameCanvas;
         public ColorToggleGroup colorToggleGroup;
         public BlockToggleGroup blockToggleGroup;
         public MatrixController matrixController;
-        public GameObject pointer;
-
-        
         public Hand hand;
         
         public SteamVR_Action_Boolean spawnBlockAction = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("SpawnBlock");
@@ -35,15 +30,6 @@ namespace Valve.VR.InteractionSystem
             colorToggleGroup.OnChange += ColorOnChange;
             blockToggleGroup.OnChange += BlockOnChange;
             blockGenerator = GameObject.FindGameObjectWithTag("BlockGenerator").GetComponent<BlockGenerator>();
-
-           
-
-            CanvasContainer.SetActive(false);
-            if(SaveGameCanvas != null)
-            {
-                SaveGameCanvas.SetActive(false);
-            }
-            
         }
 
         // Update is called once per frame
@@ -92,41 +78,7 @@ namespace Valve.VR.InteractionSystem
             matrixController.SetStructure(structure);
         }
 
-        public void OpenMenu(HANDSIDE hand)
-        {
-            CanvasContainer.SetActive(true);
-        }
-
-        public void CloseMenu(HANDSIDE hand)
-        {
-            CanvasContainer.SetActive(false);
-            if(SaveGameCanvas != null)
-            {
-                SaveGameCanvas.SetActive(false);
-            }
-            DeactivatePointer();
-        }
-
-        public void ActivatePointer(HANDSIDE hand)
-        { 
-            pointer.SetActive(true);
-            pointer.transform.SetParent(gameObject.transform);
-
-            if(hand == HANDSIDE.HAND_LEFT)
-            {
-                pointer.transform.localPosition = new Vector3(0.5f, 0, 0);
-            }
-            else
-            {
-                pointer.transform.localPosition = Vector3.zero;
-            }
-            pointer.transform.localRotation = Quaternion.identity;
-        }
-
-        public void DeactivatePointer()
-        {
-            pointer.SetActive(false);
-        }
+        
 
 
         public void ChangeBlockSize()
@@ -140,14 +92,6 @@ namespace Valve.VR.InteractionSystem
                 currentBlocksize = BLOCKSIZE.NORMAL;
             }
         }
-
-        public void OpenSaveMenu()
-        {
-            SaveGameCanvas.SetActive(true);
-            CanvasContainer.SetActive(false);
-        }
-
-
     }
 
     public enum HANDSIDE

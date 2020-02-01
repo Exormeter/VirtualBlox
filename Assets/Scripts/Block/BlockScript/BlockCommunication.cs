@@ -8,23 +8,39 @@ namespace Valve.VR.InteractionSystem
 {
     public class BlockCommunication : MonoBehaviour
     {
+
         public int connectedBlockCount;
+
+        /// <summary>
+        /// The Blocks that are directly connected to this Block
+        /// </summary>
         private List<BlockContainer> connectedBlocks = new List<BlockContainer>();
         public List<BlockContainer> ConnectedBlocks => connectedBlocks;
+
+        /// <summary>
+        /// Guid do identify the Block, unique for every Block
+        /// </summary>
         private Guid _guid = Guid.NewGuid();
         public Guid Guid
         {
             get => _guid;
             set
             {
+                //A new Guid can be set, in this case the new Guid is relayed to the BlockManager, so that
+                //the block can be referenced by the new Guid
                 blockManager = GameObject.FindGameObjectWithTag("BlockManager").GetComponent<BlockManager>();
                 blockManager.ChangeGuid(_guid, value, this.gameObject);
                 _guid = value;
                 Debug.Log(value.ToString());
             }
         }
+
+        /// <summary>
+        /// BlockManager to access all Blocks by Guid
+        /// </summary>
         public BlockManager blockManager;
-        //public BlockScriptSim blockScriptSim;
+
+        
         public int frameUntilColliderReEvaluation;
         public int breakForcePerPin;
 
@@ -56,6 +72,13 @@ namespace Valve.VR.InteractionSystem
             connectedBlockCount = ConnectedBlocks.Count;
         }
 
+        /// <summary>
+        /// Gets all Blocks that are currently directly and indirectly attached to the Block.
+        /// Useful when a Structure of mutiple Blocks is attached to the hand. This function
+        /// is recursive.
+        /// </summary>
+        /// <param name="visitedNodes">Keeps track of visted nodes throu recursion</param>
+        /// <returns>List of all connected GameObjects</returns>
         public List<GameObject> GetCurrentlyConnectedBlocks(List<GameObject> visitedNodes = null)
         {
             if (visitedNodes == null)
@@ -77,11 +100,19 @@ namespace Valve.VR.InteractionSystem
             return visitedNodes;
         }
 
+        
         public void ClearConnectedBlocks()
         {
             connectedBlocks.Clear();
         }
 
+        /// <summary>
+        /// Searches the connected and indirectly connected Blocks for the first Block that is colliding with an
+        /// other Block. Colliding in this case means that the GrooveHandler or TapHandler has CollisionObjects which
+        /// are overlapping with an other Grove- or TapCollider, but are not connected.
+        /// </summary>
+        /// <param name="visitedNodes">Keeps track of visited Blocks</param>
+        /// <returns>The first GameObject that has a unconnected CollisionObject</returns>
         public GameObject FindFirstCollidingBlock(List<int> visitedNodes = null)
         {
             if (visitedNodes == null)
@@ -111,6 +142,10 @@ namespace Valve.VR.InteractionSystem
             return null;
         }
 
+        /// <summary>
+        /// Removes all connections from the other Blocks that have this Block
+        /// in their connectedBlock List
+        /// </summary>
         public void RemoveAllBlockConnections()
         {
             foreach (BlockContainer container in connectedBlocks)
@@ -119,6 +154,10 @@ namespace Valve.VR.InteractionSystem
             }   
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="guid"></param>
         public void RemoveBlockByGuid(Guid guid)
         {
             ConnectedBlocks.RemoveAll(container => container.Guid == guid);

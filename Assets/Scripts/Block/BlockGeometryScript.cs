@@ -475,6 +475,10 @@ namespace Valve.VR.InteractionSystem
             wallColliderList.Clear();
         }
 
+        /// <summary>
+        /// Tries to calculates the walls of the block, only works for rectangle blocks. For
+        /// non-rectangle blocks a BlockStructure is needed
+        /// </summary>
         private void AddWallCollider()
         {
             Vector3 size = mesh.bounds.size;
@@ -502,6 +506,12 @@ namespace Valve.VR.InteractionSystem
             wallColliderList.Add(AddBoxCollider(topSideSize, topSideCenter, false, this.gameObject));
         }
 
+        /// <summary>
+        /// Adds the Collider to the Tap and Groove Container, only for use if no BlockStructure provided
+        /// </summary>
+        /// <param name="heightOffset">If no offset is provided, the collider are inline with bottom edge of the block</param>
+        /// <param name="containerObject">The GameObject which the ColliderContainer GameObject is added to</param>
+        /// <param name="tag">The Tag that will be added to the ColliderContainer</param>
         private void AddPinTriggerCollider(float heightOffset, GameObject containerObject, String tag)
         {
             Vector3 center = mesh.bounds.center;
@@ -530,6 +540,12 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
+        /// <summary>
+        /// Adds the Collider to the Tap and Groove Container, for use with the BlockStructure
+        /// </summary>
+        /// <param name="heightOffset">If no offset is provided, the collider are inline with bottom edge of the block</param>
+        /// <param name="containerObject">The GameObject which the ColliderContainer GameObject is added to</param>
+        /// <param name="tag">The Tag that will be added to the ColliderContainer</param>
         private void AddPinTriggerColliderByStructure(float heightOffset, GameObject containerObject, String tag)
         {
             for (int index = 0; index < containerObject.transform.childCount; index++)
@@ -564,6 +580,14 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
+        /// <summary>
+        /// Adds a single new GameObject with a Collider as well as a GrooveCollider or TapCollider
+        /// component to the Container
+        /// </summary>
+        /// <param name="position">The position of the new GameObject and in term the Collider</param>
+        /// <param name="tag">Changes with offset and if a Tap or GrooveCollider Component is added</param>
+        /// <param name="container">Where the SubContainer is added to</param>
+        /// <param name="isTrigger">Should the Collider be a trigger</param>
         private void AddGameObjectCollider(Vector3 position, String tag, GameObject container, bool isTrigger)
         {
             GameObject colliderObject = new GameObject("Collider");
@@ -589,16 +613,33 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
+        /// <summary>
+        /// Adds a Collider Component to a GameObject with a specific physic material
+        /// </summary>
+        /// <param name="size">Size of the new Collider</param>
+        /// <param name="center">Center of the new Collider</param>
+        /// <param name="isTrigger">Should the Collider be a trigger</param>
+        /// <param name="otherGameObject">Where the Collider is added to</param>
+        /// <param name="material">The material of the collider</param>
+        /// <returns>The newly added Collider</returns>
         private Collider AddBoxCollider(Vector3 size, Vector3 center, bool isTrigger, GameObject otherGameObject, PhysicMaterial material)
         {
-            BoxCollider collider = otherGameObject.AddComponent<BoxCollider>();
-            collider.size = size;
-            collider.center = center;
-            collider.isTrigger = isTrigger;
-            collider.material = material;
-            return collider;
+            BoxCollider newCollider = otherGameObject.AddComponent<BoxCollider>();
+            newCollider.size = size;
+            newCollider.center = center;
+            newCollider.isTrigger = isTrigger;
+            newCollider.material = material;
+            return newCollider;
         }
 
+        /// <summary>
+        /// Adds a Collider Component to a GameObject
+        /// </summary>
+        /// <param name="sizeCollider">Size of the new Collider</param>
+        /// <param name="centerCollider">Center of the new Collider</param>
+        /// <param name="isTrigger">Should the Collider be a trigger</param>
+        /// <param name="otherGameObject">Where the Collider is added to</param>
+        /// <returns>The newly added Collider</returns>
         private Collider AddBoxCollider(Vector3 sizeCollider, Vector3 centerCollider, bool isTrigger, GameObject otherGameObject)
         {
             BoxCollider newCollider = otherGameObject.AddComponent<BoxCollider>();
@@ -608,6 +649,10 @@ namespace Valve.VR.InteractionSystem
             return newCollider;
         }
 
+        /// <summary>
+        /// Gets the center of the Block as local position
+        /// </summary>
+        /// <returns>Center of Block local</returns>
         public Vector3 GetCenterTop()
         {
             Vector3 center = GetComponent<MeshFilter>().mesh.bounds.center;
@@ -617,6 +662,10 @@ namespace Valve.VR.InteractionSystem
 
         }
 
+        /// <summary>
+        /// Gets the center of the Block as world position
+        /// </summary>
+        /// <returns>Center of Block world</returns>
         public Vector3 GetCenterTopWorld()
         {
             Vector3 center = mesh.bounds.center;
@@ -634,10 +683,6 @@ namespace Valve.VR.InteractionSystem
             return center;
         }
 
-        public GameObject GetRootGameObject()
-        {
-            return gameObject;
-        }
 
         public Vector3 GetBlockNormale()
         {

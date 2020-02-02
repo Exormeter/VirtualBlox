@@ -100,7 +100,10 @@ namespace Valve.VR.InteractionSystem
             return visitedNodes;
         }
 
-        
+
+        /// <summary>
+        /// Clears all ConnectedBlocks
+        /// </summary>
         public void ClearConnectedBlocks()
         {
             connectedBlocks.Clear();
@@ -155,15 +158,21 @@ namespace Valve.VR.InteractionSystem
         }
 
         /// <summary>
-        /// 
+        /// Removes a Block with a specific Guid from the connected Blocks
         /// </summary>
-        /// <param name="guid"></param>
-        public void RemoveBlockByGuid(Guid guid)
+        /// <param name="guid">The Guid to Remove</param>
+        private void RemoveBlockByGuid(Guid guid)
         {
             ConnectedBlocks.RemoveAll(container => container.Guid == guid);
         }
 
 
+        /// <summary>
+        /// Removes all Connections where the Joint has broken. This methods also
+        /// removes the Connected Block from the other Block. A CheckFreeze message is
+        /// send to all remaining connected Blocks to check if the Rigidbody Contraints should
+        /// be lifted as a direct or indirect connection to Fllor might be served.
+        /// </summary>
         public void RemoveBlockConnectionsWithoutJoint()
         {
             List<BlockContainer> containerList = SearchDestroyedJoint();
@@ -179,12 +188,23 @@ namespace Valve.VR.InteractionSystem
         }
 
 
-
+        /// <summary>
+        /// Searches the Connected Blocks for a Joint that is null. This would indicate that the two Blocks
+        /// are no longer connected.
+        /// </summary>
+        /// <returns></returns>
         public List<BlockContainer> SearchDestroyedJoint()
         {
             return ConnectedBlocks.FindAll(container => container.ConnectedJoint == null);
         }
 
+        /// <summary>
+        /// Sends a message to all directly and indirectly connected Blocks via a recusive depth search algorithmus.
+        /// Message is received by all Components on the Block and it's childs.
+        /// </summary>
+        /// <param name="message">The Method name to call</param>
+        /// <param name="selfNotification">Should the Block that sends the message message itself</param>
+        /// <param name="visitedNodes">Keeps track of alreadz notified Blocks</param>
         public void SendMessageToConnectedBlocks(string message, bool selfNotification = true, List<int> visitedNodes = null)
         {
             if (visitedNodes == null)
@@ -206,8 +226,13 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
-        
 
+        /// <summary>
+        /// Send a message to all Blocks via a breadth-first search, needed in some caeses like when to algin a Block
+        /// on an Block that has already aligned.
+        /// Message is only reviced by Components in the Block, not the children.
+        /// </summary>
+        /// <param name="message">The Method name to call</param>
         public void SendMessageToConnectedBlocksBFS(string message)
         {
             Queue<GameObject> blocksToVisit = new Queue<GameObject>();
@@ -232,6 +257,15 @@ namespace Valve.VR.InteractionSystem
 
         }
 
+        /// <summary>
+        /// Adds the Block to the List of connected Block, if it isn't alredy in the List. It creates a Joint between both Blocks and keeps track
+        /// if the other Block is connected on a Tap or a Groove and how many Pins connected them. This method is then called for the colliding Block
+        /// where this Block is added to the List. 
+        /// </summary>
+        /// <param name="block">This Block</param>
+        /// <param name="collidedBlock">The other Block</param>
+        /// <param name="connectedPinCount">How many Pins connected them</param>
+        /// <param name="connectedOn">Is the other Block connedted via Grooves or Taps</param>
         public void ConnectBlocks(GameObject block, GameObject collidedBlock, int connectedPinCount, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
         {
             if (ConnectedBlocks.Exists(alreadyConnected => collidedBlock.Equals(alreadyConnected.BlockRootObject))) {
@@ -260,21 +294,32 @@ namespace Valve.VR.InteractionSystem
             collidedBlock.BroadcastMessage("OnBlockAttach", transform.gameObject, SendMessageOptions.DontRequireReceiver);
         }
 
-        public void AddConnectedBlock(GameObject block, Joint connectedJoint, OTHER_BLOCK_IS_CONNECTED_ON connectedOn, int connectedPinCount)
+        /// <summary>
+        /// Adds a BlockContainer to the Connected Block List
+        /// </summary>
+        /// <param name="collidedBlock">The other Block</param>
+        /// <param name="connectedPinCount">How many Pins connected them</param>
+        /// <param name="connectedOn">Is the other Block connedted via Grooves or Taps</param>
+        public void AddConnectedBlock(GameObject collidedBlock, Joint connectedJoint, OTHER_BLOCK_IS_CONNECTED_ON connectedOn, int connectedPinCount)
         {
-            ConnectedBlocks.Add(new BlockContainer(block, connectedJoint, connectedOn, connectedPinCount));
+            ConnectedBlocks.Add(new BlockContainer(collidedBlock, connectedJoint, connectedOn, connectedPinCount));
         }
 
-        public void RemoveConnectedBlock(BlockContainer container)
-        {
-            ConnectedBlocks.Remove(container);
-        }
 
+        /// <summary>
+        /// Returns true if this Block is a Floor plate
+        /// </summary>
+        /// <returns>True if Block is Floor</returns>
         public bool IsFloor()
         {
             return transform.gameObject.tag.Equals("Floor");
         }
 
+        /// <summary>
+        /// Returns true if the Block has a Connection in it's List that is a Floor plate,
+        /// making it directly connected ti the Floor
+        /// </summary>
+        /// <returns>True if directlyAttached to the Floor</returns>
         public bool IsDirectlyAttachedToFloor()
         {
             foreach (BlockContainer blockContainer in ConnectedBlocks)
@@ -287,6 +332,12 @@ namespace Valve.VR.InteractionSystem
             return false;
         }
 
+        /// <summary>
+        /// Returns true if the Block is indirecty connected to the Floor, meaning that there
+        /// is a way from the connectedBlocks to a Floor plate
+        /// </summary>
+        /// <param name="visitedNodes">Keep track of visited Block</param>
+        /// <returns>True if indirectly connected to Floor</returns>
         public bool IsIndirectlyAttachedToFloor(List<int> visitedNodes = null)
         {
             if (visitedNodes == null)
@@ -314,13 +365,21 @@ namespace Valve.VR.InteractionSystem
             return false;
         }
 
-
+        /// <summary>
+        /// Returns true if a Hand is currently holding the Block directly
+        /// </summary>
+        /// <returns>True if directly held</returns>
         public bool IsDirectlyAttachedToHand()
         {
             return GetComponent<AttachHandHandler>().IsAttachedToHand();
         }
 
 
+        /// <summary>
+        /// Returns true if the Block is indirectly connected to a Block that is held by a Hand
+        /// </summary>
+        /// <param name="visitedNodes">Kepp track of visited Block</param>
+        /// <returns>True if indirectly held by Hand</returns>
         public bool IsIndirectlyAttachedToHand(List<int> visitedNodes = null)
         {
             if (visitedNodes == null)
@@ -348,6 +407,11 @@ namespace Valve.VR.InteractionSystem
             return false;
         }
 
+        /// <summary>
+        /// Returns true if a Block is directly connected to an other Block
+        /// </summary>
+        /// <param name="block">The Block to check wherever they are connected</param>
+        /// <returns>True if they are directly connected</returns>
         public bool IsDirectlyAttachedToBlock(GameObject block)
         {
             foreach(BlockContainer blockContainer in connectedBlocks)
@@ -360,6 +424,13 @@ namespace Valve.VR.InteractionSystem
             return false;
         }
 
+        /// <summary>
+        /// Check if a Block is indireclty connected to an other Block and if the connection is made only via marked Block,
+        /// meaning a connection that uses the Floor or an unmarked Block would return false
+        /// </summary>
+        /// <param name="block">The Block to check wherever they are connected</param>
+        /// <param name="visitedNodes">Kepp track of visited Block</param>
+        /// <returns>True if a indirect connection only via marked Blocks can be found</returns>
         public bool IsIndirectlyAttachedToBlockMarked(GameObject block, List<int> visitedNodes = null)
         {
             if (visitedNodes == null)
@@ -389,18 +460,22 @@ namespace Valve.VR.InteractionSystem
 
 
 
-        public void RemoveJointViaSimulation(Guid connectedBlockGuid)
-        {
-            foreach (BlockContainer blockContainer in ConnectedBlocks)
-            {
-                if (blockContainer.BlockCommunication.Guid == connectedBlockGuid)
-                {
-                    Destroy(blockContainer.ConnectedJoint);
-                    StartCoroutine(EvaluateJoints());
-                }
-            }
-        }
+        //public void RemoveJointViaSimulation(Guid connectedBlockGuid)
+        //{
+        //    foreach (BlockContainer blockContainer in ConnectedBlocks)
+        //    {
+        //        if (blockContainer.BlockCommunication.Guid == connectedBlockGuid)
+        //        {
+        //            Destroy(blockContainer.ConnectedJoint);
+        //            StartCoroutine(EvaluateJoints());
+        //        }
+        //    }
+        //}
 
+        /// <summary>
+        /// Starts a Coroutine to check which connection has broken
+        /// </summary>
+        /// <param name="breakForce"></param>
         private void OnJointBreak(float breakForce)
         {
             Debug.Log("Joint Break");
@@ -408,7 +483,10 @@ namespace Valve.VR.InteractionSystem
         }
 
 
-
+        /// <summary>
+        /// Starts the search for the destoryed joints after two Frames
+        /// </summary>
+        /// <returns></returns>
         IEnumerator EvaluateJoints()
         {
             for (int i = 0; i <= frameUntilColliderReEvaluation; i++)
@@ -422,6 +500,17 @@ namespace Valve.VR.InteractionSystem
 
         }
 
+        /// <summary>
+        /// Checks if the Block is only connected on a Tap or a Groove. If it is connected on
+        /// both sides it can be removes to keep the structure in tacked. Otherwise, the holding
+        /// joint is destroyed and the Block unfrozen to allow an attachment to hand. Call removal
+        /// methods here.
+        ///
+        /// Need more work
+        ///
+        /// 
+        /// </summary>
+        /// <returns>True if the Block can be removed</returns>
         public bool AttemptToFreeBlock()
         {
             OTHER_BLOCK_IS_CONNECTED_ON otherConnection = ConnectedBlocks[0].ConnectedOn;
@@ -446,6 +535,10 @@ namespace Valve.VR.InteractionSystem
         }
     }
 
+    /// <summary>
+    /// A container that allows quick access to Components and Variables of the connected Block, otherrides the Equals and GetHashCode
+    /// Methods so they represent the Block
+    /// </summary>
     public class BlockContainer
     {
         public GameObject BlockRootObject { get; }
@@ -497,6 +590,7 @@ namespace Valve.VR.InteractionSystem
         }
     }
 
+    
     public enum OTHER_BLOCK_IS_CONNECTED_ON
     {
         TAP,

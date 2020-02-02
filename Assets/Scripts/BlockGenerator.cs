@@ -6,17 +6,37 @@ using System;
 namespace Valve.VR.InteractionSystem
 {
 
-
+    /// <summary>
+    /// Generate Blocks
+    /// </summary>
     public class BlockGenerator : MonoBehaviour
     {
-
+        /// <summary>
+        /// The Part of a Block to generate, normal height
+        /// </summary>
         public GameObject Block1x1;
+
+        /// <summary>
+        /// The Part of a Block to generate, flat height
+        /// </summary>
         public GameObject Block1x1Flat;
+
+        /// <summary>
+        /// Components of the PrecurserBlock are compied to the generated Blocks
+        /// </summary>
         public GameObject PrecurserBlock;
+
+        /// <summary>
+        /// The materal for the Blocks
+        /// </summary>
         public Material material;
 
 
         private Dictionary<BLOCKSIZE, GameObject> partSizes = new Dictionary<BLOCKSIZE, GameObject>();
+
+        /// <summary>
+        /// Lenght of a 1x1 Block
+        /// </summary>
         private readonly float length = 0.08f;
 
         // Start is called before the first frame update
@@ -26,7 +46,12 @@ namespace Valve.VR.InteractionSystem
             partSizes.Add(BLOCKSIZE.NORMAL, Block1x1);
         }
 
-        public GameObject GenerateBlock(BlockStructure structure, Vector3 offset = new Vector3())
+        /// <summary>
+        /// Generates a new Block from a BlockStructure, places it at (0,2,0)
+        /// </summary>
+        /// <param name="structure">The Structure to generatoe</param>
+        /// <returns>A new Block</returns>
+        public GameObject GenerateBlock(BlockStructure structure)
         {
 
             Material blockMaterial = new Material(material);
@@ -61,7 +86,11 @@ namespace Valve.VR.InteractionSystem
         
 
         
-
+        /// <summary>
+        /// Combines the meshes inside a container into one single mesh
+        /// </summary>
+        /// <param name="container">The meshes to combine</param>
+        /// <returns>A GameObject with a combined Mesh</returns>
         private GameObject CombineTileMeshes(GameObject container)
         {
             MeshFilter[] meshFilters = container.GetComponentsInChildren<MeshFilter>();
@@ -85,25 +114,31 @@ namespace Valve.VR.InteractionSystem
 
         }
 
+        /// <summary>
+        /// Copies the Components in the PrecurserBlock to the handed over Block
+        /// </summary>
+        /// <param name="combinedBlock">Block without Components</param>
         private void AddPrecurserComponents(GameObject combinedBlock)
         {
             Component[] components = PrecurserBlock.GetComponents<Component>();
             for (int i = 0; i < components.Length; i++)
             {
+                //Skip MeshRenderer, Transform and MeshFilter components
                 if(components[i] is MeshRenderer || components[i] is Transform || components[i] is MeshFilter)
                 {
                     continue;
                 }
-                else
-                {
-                    CopyComponent(components[i], combinedBlock);
-                }
-                
-
+                CopyComponent(components[i], combinedBlock);
             }
 
         }
 
+        /// <summary>
+        /// Copies the components with all set variables to the destination GameObject
+        /// </summary>
+        /// <param name="original">The original component</param>
+        /// <param name="destination">Destination GameObject</param>
+        /// <returns></returns>
         private Component CopyComponent(Component original, GameObject destination)
         {
             Type type = original.GetType();
@@ -121,13 +156,29 @@ namespace Valve.VR.InteractionSystem
     }
 
     
-
+    /// <summary>
+    /// Part of the BlockStructure Matrix
+    /// </summary>
     public class BlockPart{
 
+        /// <summary>
+        /// Which Row is the BlockPart inside the Matrix
+        /// </summary>
         public int Row;
+
+        /// <summary>
+        /// Which Column is the BlockPart inside the Matrix
+        /// </summary>
         public int Col;
 
+        /// <summary>
+        /// Which direction has already been visited when searching for walls
+        /// </summary>
         public HashSet<DIRECTION> visitedDirections = new HashSet<DIRECTION>();
+
+        /// <summary>
+        /// Which wall direction represents this BlockPart
+        /// </summary>
         public DIRECTION WallDirection;
 
         public BlockPart(int row, int col)
@@ -143,16 +194,29 @@ namespace Valve.VR.InteractionSystem
             Col = col;
         }
 
+
+        /// <summary>
+        /// Resets the visited List, used when coping Block to reset the search
+        /// </summary>
         public void ResetVisited()
         {
             visitedDirections.Clear();
         }
 
+        /// <summary>
+        /// Adds a direction to keep track of which direction was visited
+        /// </summary>
+        /// <param name="direction"></param>
         public void DirectionVisited(DIRECTION direction)
         {
             visitedDirections.Add(direction);
         }
 
+        /// <summary>
+        /// Was the direction already visited
+        /// </summary>
+        /// <param name="direction">The direction</param>
+        /// <returns>True if the direction was visited</returns>
         public bool WasDirectionVisited(DIRECTION direction)
         {
             return visitedDirections.Contains(direction);

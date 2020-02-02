@@ -8,10 +8,19 @@ namespace Valve.VR.InteractionSystem
 {
     public class BlockManager : MonoBehaviour
     {
-
+        /// <summary>
+        /// Dictonary of all Blocks in Game as Value and identifiable by the Guid
+        /// </summary>
         private Dictionary<Guid, GameObject> exsistingBlocksInGame = new Dictionary<Guid, GameObject>();
+
+        /// <summary>
+        /// Stack of Removed Blocks, the list can represent a Structure or a single Block
+        /// </summary>
         private Stack<List<BlockSave>> RemovedBlockStack = new Stack<List<BlockSave>>();
 
+        /// <summary>
+        /// A History of which Block was placed last, History Object contains a Guid and a Timestamp
+        /// </summary>
         [HideInInspector]
         public List<HistoryObject> blockPlacingHistory = new List<HistoryObject>();
 
@@ -43,44 +52,70 @@ namespace Valve.VR.InteractionSystem
             //}
         }
 
+        /// <summary>
+        /// Removes the newest placed Block or Structure from the scene and saves it in the RemovedBlockStack
+        /// </summary>
         private void RemoveLastPlacedBlock()
         {
+            //Sort after Timestamp
             blockPlacingHistory.Sort();
+
+            //Set index to the last place of the HistoryList
             int index = blockPlacingHistory.Count - 1;
 
+            //No item inside the HistoryList
             if (index < 0)
                 return;
 
+            //Get the newest TimeStamp from the HistoryList
             int lastTimeStamp = blockPlacingHistory[index].timeStamp;
+
+            //List to save HistoryOjects that were placed at the same time as the last HistoryObject in HistoryList
             List<HistoryObject> lastHistoryObjects = new List<HistoryObject>();
-            
+
+            //Search HistoryList for all Objects with same TimeStamp
             while(index >= 0 && blockPlacingHistory[index].timeStamp == lastTimeStamp)
             {
                 lastHistoryObjects.Add(blockPlacingHistory[index]);
                 index--;
             }
 
+            //Get the actual Block by their Guid, save their values und Remove them form the Scene
             List<BlockSave> savedBlocks = new List<BlockSave>();
             foreach(HistoryObject historyObject in lastHistoryObjects)
             {
                 savedBlocks.Add(new BlockSave(GetBlockByGuid(historyObject.guid)));
+
                 RemoveBlock(historyObject.guid);
             }
+
+            //Add the saved Block values to the Stack
             RemovedBlockStack.Push(savedBlocks);
         }
 
+        /// <summary>
+        /// Recover the newest Block inside the RemovedBlockStack
+        /// </summary>
         private void RecoverLastRemovedBlock()
         {
+
+            //Stack is empty, can't restore nonexsiting Blocks
             if (RemovedBlockStack.Count == 0)
                 return;
 
+            //Get the first Block or Structure from the Stack
             List<BlockSave> blocksToRestore = RemovedBlockStack.Pop();
+
+            //Restore the Block or Blocks by loading the BlockSave and add them back to the History
             foreach(BlockSave blockSave in blocksToRestore)
             {
                 SaveGameManager.LoadBlock(blockSave);
                 blockPlacingHistory.Add(new HistoryObject(blockSave.guid, blockSave.timeStamp));
             }
-            
+
+
+
+            //Connect the Blocks back
             //TODO: Reset the AcceptCollisionAsConnection to false again
             foreach (BlockSave blockSave in blocksToRestore)
             {
@@ -88,75 +123,133 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
+        /// <summary>
+        /// Clears the History
+        /// </summary>
         public void ResetHistoryStack()
         {
             RemovedBlockStack.Clear();
         }
 
 
-
+        /// <summary>
+        /// Gets a Block by Guid
+        /// </summary>
+        /// <param name="guid">Guid of the Block</param>
+        /// <returns>The Block if found, otherwise null</returns>
         public GameObject GetBlockByGuid(Guid guid)
         {
             return exsistingBlocksInGame[guid];
         }
 
+        /// <summary>
+        /// Adds a Block to the exsitingBlock Dictionary
+        /// </summary>
+        /// <param name="guid">The guid of the Block</param>
+        /// <param name="block">The GameObject to add</param>
         public void AddBlock(Guid guid, GameObject block)
         {
             exsistingBlocksInGame.Add(guid, block);
         }
 
+        /// <summary>
+        /// Removes a Block by guid from the list and the Scene, clearing everyting
+        /// </summary>
+        /// <param name="guid"></param>
         public void RemoveBlock(Guid guid)
         {
             BlockCommunication blockCommunication = GetBlockByGuid(guid).GetComponent<BlockCommunication>();
+
+            //Clear the connection to other Blocks
             blockCommunication.RemoveAllBlockConnections();
+
+            //Destroies the GameObject
             Destroy(GetBlockByGuid(guid));
+
+            //Removes the Dictonary Entry
             exsistingBlocksInGame.Remove(guid);
+
+            //Removes the History Entry
             RemoveEntryFromHistory(guid);
             
         }
 
+        /// <summary>
+        /// Changes the Guid of an exsiting Block to a new one
+        /// </summary>
+        /// <param name="oldGuid">The old original guid</param>
+        /// <param name="newGuid">The new guid</param>
+        /// <param name="block">The Block to change</param>
         public void ChangeGuid(Guid oldGuid, Guid newGuid, GameObject block)
         {
             exsistingBlocksInGame.Remove(oldGuid);
             exsistingBlocksInGame.Add(newGuid, block);
         }
 
+        /// <summary>
+        /// Removes all Blocks from the Scene except the Floor Plates
+        /// </summary>
         public void RemoveAllBlocks()
         {
+            //Save the Guids to remove
             List<Guid> entriesToRemove = new List<Guid>();
+
+            //Enumerate over the exsiting Block Dictornary
             IDictionaryEnumerator blockEnumerator = exsistingBlocksInGame.GetEnumerator();
             while (blockEnumerator.MoveNext())
             {
                 GameObject block = (GameObject)blockEnumerator.Value;
+
+                //Normal Block, Destroy Block and add to removal list
                 if ( block.tag != "Floor")
                 {
                     Destroy(block);
                     entriesToRemove.Add((Guid)blockEnumerator.Key);
                 }
+
+                //Floor Plate, clear all connections to Blocks on Floor
                 else if(block.tag == "Floor")
                 {
                     block.GetComponent<BlockCommunication>().ClearConnectedBlocks();
                 }
             }
+
+            //Remove the exsiting Block Dictornary entries
             entriesToRemove.ForEach(key => exsistingBlocksInGame.Remove(key));
         }
 
+        /// <summary>
+        /// Adds a HistoryObject to the History
+        /// </summary>
+        /// <param name="historyObject">HistoryObject to add</param>
         public void AddHistoryEntry(HistoryObject historyObject)
         {
             blockPlacingHistory.Add(historyObject);
         }
 
+        /// <summary>
+        /// Removes a Block from the History
+        /// </summary>
+        /// <param name="guid">Guid to remove from History</param>
         public void RemoveEntryFromHistory(Guid guid)
         {
             blockPlacingHistory.RemoveAll(historyObject => guid == historyObject.guid);
         }
 
+        /// <summary>
+        /// Gets a TimeStamp by Guid in History
+        /// </summary>
+        /// <param name="guid">The Guid to search for</param>
+        /// <returns>The searched timestamp or 0 if not found</returns>
         public int GetTimeStampByGuid(Guid guid)
         {
             return blockPlacingHistory.Find(historyObject => historyObject.guid == guid).timeStamp;
         }
     }
 
+    /// <summary>
+    /// A HistoryObject containing a Guid and a TimeStimp, sortable by TimeStamp
+    /// </summary>
     [Serializable]
     public class HistoryObject: IComparable<HistoryObject>
     {

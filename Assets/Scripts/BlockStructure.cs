@@ -134,7 +134,7 @@ namespace Valve.VR.InteractionSystem
         /// <returns>A cropped Matrix</returns>
         public BlockPart[,] GetCroppedMatrix()
         {
-
+            //Return already exsiting CroppedMatrix
             if (croppedMatrix != null)
             {
                 return croppedMatrix;
@@ -143,6 +143,7 @@ namespace Valve.VR.InteractionSystem
             int emptyRows = 0;
             int emptyCols = 0;
 
+            //Find leading empty Rows
             for (int row = 0; row < Rows; row++)
             {
                 if (!IsEmpty(GetRow(matrix, row)))
@@ -152,6 +153,7 @@ namespace Valve.VR.InteractionSystem
                 }
             }
 
+            //Find leading empty Columns
             for (int col = 0; col < Cols; col++)
             {
                 if (!IsEmpty(GetColumn(matrix, col)))
@@ -161,6 +163,7 @@ namespace Valve.VR.InteractionSystem
                 }
             }
 
+            //Create new CroppedMatrix with no leading empty Rows or Columns
             RowsCropped = Rows - emptyRows;
             ColsCropped = Cols - emptyCols;
 
@@ -178,7 +181,7 @@ namespace Valve.VR.InteractionSystem
             }
 
 
-            
+            //Find the trailing empty Rows and set the CroppedRow variable to last occupied Row 
             for (int row = 0; row < RowsCropped; row++)
             {
                 if (IsEmpty(GetRow(croppedMatrix, row)))
@@ -188,6 +191,7 @@ namespace Valve.VR.InteractionSystem
                 }
             }
 
+            //Find the trailing empty Rows and set the CroppedRow variable to last occupied Row
             for (int col = 0; col < ColsCropped; col++)
             {
                 if (IsEmpty(GetColumn(croppedMatrix, col)))
@@ -197,7 +201,7 @@ namespace Valve.VR.InteractionSystem
                 }
             }
 
-            
+            //Return the CroppedMatrix
             return croppedMatrix;
 
 
@@ -205,7 +209,7 @@ namespace Valve.VR.InteractionSystem
 
 
         /// <summary>
-        /// Checks if a Array of BlockParts is empty
+        /// Checks if a Array of BlockParts is empty, as in contains null in every spot
         /// </summary>
         /// <param name="array">The array to check</param>
         /// <returns>True if array is empty, as in contains null in every spot</returns>

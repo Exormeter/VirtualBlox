@@ -16,8 +16,14 @@ namespace Valve.VR.InteractionSystem
         public SteamVR_Action_Vector2 TouchPadPosition;
         public SteamVR_Action_Boolean TouchPadButton;
 
+        public Hand leftHand;
+        public Hand rightHand;
+
+
         private HANDSIDE startedPulling = HANDSIDE.HAND_NONE;
         private Vector3 startPullPosition;
+
+
 
 
         [System.Serializable]
@@ -162,6 +168,11 @@ namespace Valve.VR.InteractionSystem
                 {
                     return false;
                 }
+            }
+
+            if(rightHand.currentAttachedObject != null || rightHand.hoveringInteractable != null || leftHand.currentAttachedObject != null || leftHand.hoveringInteractable != null)
+            {
+                return false;
             }
             return true;
         }

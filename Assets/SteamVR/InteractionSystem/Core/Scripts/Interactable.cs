@@ -62,7 +62,8 @@ namespace Valve.VR.InteractionSystem
         public bool highlightOnHover = true;
         protected MeshRenderer[] highlightRenderers;
         protected MeshRenderer[] existingRenderers;
-        protected GameObject highlightHolder;
+        public GameObject highlightHolder;
+        private List<GameObject> allHighlightHolderRefernences = new List<GameObject>();
         protected SkinnedMeshRenderer[] highlightSkinnedRenderers;
         protected SkinnedMeshRenderer[] existingSkinnedRenderers;
         protected static Material highlightMat;
@@ -76,10 +77,11 @@ namespace Valve.VR.InteractionSystem
         [System.NonSerialized]
         public Hand hoveringHand;
 
-        public bool isDestroying { get; protected set; }
-        public bool isHovering { get; protected set; }
-        public bool wasHovering { get; protected set; }
-        public bool isMarked { get; protected set; }
+        public bool isDestroying;
+        public bool isHovering;
+        public bool wasHovering;
+        [Tooltip("Set whether or not you want this interactible to highlight when hovering over it")]
+        public bool isMarked;
 
 
         private void Awake()
@@ -124,6 +126,7 @@ namespace Valve.VR.InteractionSystem
         {
             existingSkinnedRenderers = this.GetComponentsInChildren<SkinnedMeshRenderer>(true);
             highlightHolder = new GameObject("Highlighter");
+            allHighlightHolderRefernences.Add(highlightHolder);
             highlightSkinnedRenderers = new SkinnedMeshRenderer[existingSkinnedRenderers.Length];
 
             for (int skinnedIndex = 0; skinnedIndex < existingSkinnedRenderers.Length; skinnedIndex++)
@@ -283,8 +286,12 @@ namespace Valve.VR.InteractionSystem
                 UpdateHighlightRenderers();
 
 
-                if (isHovering == false && isMarked == false && highlightHolder != null)
-                    Destroy(highlightHolder);
+                if (isHovering == false && isMarked == false && allHighlightHolderRefernences.Count > 0)
+                {
+                    allHighlightHolderRefernences.ForEach(highLighter => Destroy(highLighter));
+                    allHighlightHolderRefernences.Clear();
+                }
+                    
             }
         }
         
@@ -346,10 +353,10 @@ namespace Valve.VR.InteractionSystem
                 attachedToHand.DetachObject(this.gameObject, false);
                 attachedToHand.skeleton.BlendToSkeleton(0.1f);
             }
-            
-            if (highlightHolder != null)
-                Destroy(highlightHolder);
-            
+
+            allHighlightHolderRefernences.ForEach(highLighter => Destroy(highLighter));
+            allHighlightHolderRefernences.Clear();
+
         }
 
 
@@ -362,8 +369,8 @@ namespace Valve.VR.InteractionSystem
                 attachedToHand.ForceHoverUnlock();
             }
 
-            if (highlightHolder != null)
-                Destroy(highlightHolder);
+            allHighlightHolderRefernences.ForEach(highLighter => Destroy(highLighter));
+            allHighlightHolderRefernences.Clear();
         }
     }
 }

@@ -5,21 +5,28 @@ using Valve.VR.InteractionSystem;
 
 public class MaterialHandler : MonoBehaviour
 {
+    public Material HoldingMaterial;
     private Material standardMaterial;
-    public Material whileHoldingMaterial;
+    private Color blockColor;
+    private Material whileHoldingMaterial;
     private MeshRenderer meshRenderer;
     
     // Start is called before the first frame update
     void Start()
     {
+        whileHoldingMaterial = new Material(HoldingMaterial);
         standardMaterial = transform.GetComponent<MeshRenderer>().material;
         meshRenderer = transform.GetComponent<MeshRenderer>();
+        blockColor = standardMaterial.color;
+        blockColor.a = 1;
+        whileHoldingMaterial.color = blockColor;
     }
 
     // Update is called once per frame
     
     void OnAttachedToHand(Hand hand)
     {
+        Debug.Log("MaterialHandler OnAttachedToHand");
         meshRenderer.material = whileHoldingMaterial;
     }
 
@@ -48,8 +55,6 @@ public class MaterialHandler : MonoBehaviour
 
     void RemovedConnection()
     {
-
-        //Needs IsIndirectlyAttachedToHand
         if (GetComponent<BlockCommunication>().IsIndirectlyAttachedToHand())
         {
             meshRenderer.material = standardMaterial;

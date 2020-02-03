@@ -178,7 +178,7 @@ namespace Valve.VR.InteractionSystem
                 copiedBlock.GetComponent<BlockGeometryScript>().GroovesContainer.SetActive(true);
                 copiedBlock.GetComponentInChildren<TapHandler>().AcceptCollisionsAsConnected(true);
                 copiedBlock.GetComponentInChildren<GrooveHandler>().AcceptCollisionsAsConnected(true);
-                yield return new WaitForSecondsRealtime(0.2f);
+                yield return new WaitForSecondsRealtime(0.02f);
             }
 
             foreach (GameObject copiedBlock in copiedBlocks)

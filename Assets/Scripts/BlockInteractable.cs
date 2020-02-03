@@ -242,8 +242,18 @@ namespace Valve.VR.InteractionSystem
                 }
 
                 Util.FastRemove(holdingHands, i);
-                Util.FastRemove(holdingBodies, i);
-                Util.FastRemove(holdingPoints, i);
+
+                //Quick Fix, probably dirty
+                if(i < holdingBodies.Count)
+                {
+                    Util.FastRemove(holdingBodies, i);
+                }
+
+                if (i < holdingPoints.Count)
+                {
+                    Util.FastRemove(holdingPoints, i);
+                }
+                
 
                 return true;
             }

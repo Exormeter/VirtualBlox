@@ -111,7 +111,11 @@ namespace Valve.VR.InteractionSystem
         {
             foreach(GameObject block in markedBlocks)
             {
-                block.SendMessageUpwards("OnMarkedEnd", SendMessageOptions.DontRequireReceiver);
+                if(block != null)
+                {
+                    block.SendMessageUpwards("OnMarkedEnd", SendMessageOptions.DontRequireReceiver);
+                }
+                
             }
             markedBlocks.Clear();
             currentBoxCollider.enabled = false;

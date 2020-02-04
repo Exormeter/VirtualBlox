@@ -36,11 +36,11 @@ namespace Valve.VR.InteractionSystem
 
         public void UnregisterCollision(IConnectorCollider snappingCollider, GameObject grooveCollider)
         {
-            if (colliderDictionary[snappingCollider].TapPosition == null || colliderDictionary[snappingCollider].GroovePosition.GetHashCode() != grooveCollider.GetHashCode())
+            if (colliderDictionary[snappingCollider].TapPosition == null || colliderDictionary[snappingCollider].GroovePosition.GetHashCode() != grooveCollider.GetHashCode() || colliderDictionary[snappingCollider].IsConnected)
             {
                 return;
             }
-
+            Debug.Log("Tap Unregistered");
             colliderDictionary[snappingCollider].ResetObject();
         }
 

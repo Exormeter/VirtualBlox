@@ -11,7 +11,7 @@ namespace Valve.VR.InteractionSystem
         public SteamVR_Input_Sources leftHand;
         public SteamVR_Input_Sources righthand;
         public SteamVR_Action_Boolean spawnBlockAction = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("SpawnBlock");
-        public PhysicSceneManager manager;
+        //public PhysicSceneManager manager;
 
         public GameObject spawnAble;
         // Start is called before the first frame update

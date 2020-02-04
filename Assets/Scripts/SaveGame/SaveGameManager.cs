@@ -23,6 +23,10 @@ namespace Valve.VR.InteractionSystem
                 SaveGame save = (SaveGame)bf.Deserialize(file);
                 file.Close();
 
+                if(save == null || save.blockSaves.Count == 0)
+                {
+                    return;
+                }
                 BlockManager.RemoveAllBlocks();
 
                 //Load Blocks into the Scene

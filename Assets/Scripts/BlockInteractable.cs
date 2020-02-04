@@ -30,7 +30,7 @@ namespace Valve.VR.InteractionSystem
         private LineRenderer lineRenderer;
         //private float nextPulseTime = 0;
 
-        public List<Hand> holdingHands = new List<Hand>();
+        private List<Hand> holdingHands = new List<Hand>();
         private List<Rigidbody> holdingBodies = new List<Rigidbody>();
         private List<Vector3> holdingPoints = new List<Vector3>();
 
@@ -92,13 +92,15 @@ namespace Valve.VR.InteractionSystem
         {
             GrabTypes startingGrabType = hand.GetGrabStarting();
             
-            if (startingGrabType != GrabTypes.None && GetComponent<BlockCommunication>().IsIndirectlyAttachedToFloor() && !GetComponent<Interactable>().isMarked)
+            //Start Block pulling if the Block is grabbed Block is Indirectly connected to Floor or Hand
+            if (startingGrabType != GrabTypes.None && (GetComponent<BlockCommunication>().IsIndirectlyAttachedToFloor() || GetComponent<BlockCommunication>().IsIndirectlyAttachedToHand()) && !GetComponent<Interactable>().isMarked)
             {
                 pullingHand = hand;
                 pullingGrabType = startingGrabType;
                 Debug.Log("Attaching To Hand");
             }
 
+            //Grabbed a Marked Block so copy the structure and grab the copied Block
             else if (startingGrabType != GrabTypes.None && GetComponent<BlockCommunication>().IsIndirectlyAttachedToFloor() && GetComponent<Interactable>().isMarked)
             {
                 GameObject block = GameObject.FindGameObjectWithTag("BlockMarker").GetComponent<BlockMarker>().RebuildMarkedStructure(this.gameObject);
@@ -106,6 +108,7 @@ namespace Valve.VR.InteractionSystem
                 Debug.Log("Attaching To Hand");
             }
 
+            //Loose Block, can be directly attached to hand
             else if(startingGrabType != GrabTypes.None)
             {
                 Debug.Log("Attaching To Hand");

@@ -24,38 +24,37 @@ namespace Valve.VR.InteractionSystem
         [HideInInspector]
         public List<HistoryObject> blockPlacingHistory = new List<HistoryObject>();
 
-        public SteamVR_Input_Sources handInput = SteamVR_Input_Sources.Any;
-        public SteamVR_Action_Vector2 historyJump;
-        public SteamVR_Action_Boolean confirmAction;
+        //public SteamVR_Input_Sources handInput = SteamVR_Input_Sources.Any;
+        //public SteamVR_Action_Vector2 historyJump;
+        //public SteamVR_Action_Boolean confirmAction;
         public MenuManager MenuManager;
         public SaveGameManager SaveGameManager;
 
 
         public void Start()
         {
-            historyJump.AddOnChangeListener(ManipulateHistory, handInput);
+            
         }
 
-        private void ManipulateHistory(SteamVR_Action_Vector2 fromAction, SteamVR_Input_Sources fromSource, Vector2 axis, Vector2 delta)
-        {
-            //Debug.Log("TouchPad touch" + fromAction.GetAxis(fromSource));
-            //if (MenuManager.CurrentMenuState == MenuState.BOTH_CLOSED && confirmAction.GetStateDown(fromSource))
-            //{
-            //    if (fromAction.GetAxis(handInput).x < -0.7f)
-            //    {
-            //        RemoveLastPlacedBlock();
-            //    }
-            //    else if(fromAction.GetAxis(handInput).x > 0.7f)
-            //    {
-            //        RecoverLastRemovedBlock();
-            //    }
-            //}
-        }
+        //private void ManipulateHistory(SteamVR_Action_Vector2 fromAction, SteamVR_Input_Sources fromSource, Vector2 axis, Vector2 delta)
+        //{
+        //    if (MenuManager.CurrentMenuState == MenuState.BOTH_CLOSED && confirmAction.GetStateDown(fromSource))
+        //    {
+        //        if (fromAction.GetAxis(handInput).x < -0.7f)
+        //        {
+        //            RemoveLastPlacedBlock();
+        //        }
+        //        else if (fromAction.GetAxis(handInput).x > 0.7f)
+        //        {
+        //            RecoverLastRemovedBlock();
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// Removes the newest placed Block or Structure from the scene and saves it in the RemovedBlockStack
         /// </summary>
-        private void RemoveLastPlacedBlock()
+        public void RemoveLastPlacedBlock(HANDSIDE handSide)
         {
             //Sort after Timestamp
             blockPlacingHistory.Sort();
@@ -96,7 +95,7 @@ namespace Valve.VR.InteractionSystem
         /// <summary>
         /// Recover the newest Block inside the RemovedBlockStack
         /// </summary>
-        private void RecoverLastRemovedBlock()
+        public void RecoverLastRemovedBlock(HANDSIDE handSide)
         {
 
             //Stack is empty, can't restore nonexsiting Blocks

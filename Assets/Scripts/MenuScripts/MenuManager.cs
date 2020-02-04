@@ -23,6 +23,9 @@ namespace Valve.VR.InteractionSystem
         private HANDSIDE startedPulling = HANDSIDE.HAND_NONE;
         private Vector3 startPullPosition;
 
+        private readonly float leftArraowActivationThreshold = -0.7f;
+        private readonly float rightArraowActivationThreshold = 0.7f;
+
 
 
 
@@ -50,22 +53,25 @@ namespace Valve.VR.InteractionSystem
         [SerializeField]
         public MenuEvent OnMarkerPulling = new MenuEvent();
 
+        [SerializeField]
+        public MenuEvent OnLeftArrowClick = new MenuEvent();
+
+        [SerializeField]
+        public MenuEvent OnRightArrowClick = new MenuEvent();
+
         private MenuState CurrentMenuState = MenuState.BOTH_CLOSED;
         
-
-        // Start is called before the first frame update
         void Start()
         {
             StartCoroutine(ReadPose());
 
-            TouchPadButton.AddOnStateDownListener(LeftPressMarkerDown, LeftHandInput);
-            TouchPadButton.AddOnStateUpListener(LeftPressMarkerUp, LeftHandInput);
+            TouchPadButton.AddOnStateDownListener(LeftTouchPadDown, LeftHandInput);
+            TouchPadButton.AddOnStateUpListener(LeftTouchPadUp, LeftHandInput);
 
-            TouchPadButton.AddOnStateDownListener(RightPressMarkerDown, RightHandInput);
-            TouchPadButton.AddOnStateUpListener(RightPressMarkerUp, RightHandInput);
+            TouchPadButton.AddOnStateDownListener(RightTouchPadDown, RightHandInput);
+            TouchPadButton.AddOnStateUpListener(RightTouchPadUp, RightHandInput);
         }
 
-        // Update is called once per frame
         void Update()
         {
             
@@ -75,40 +81,74 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
-        private void LeftPressMarkerDown(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
+        private void LeftTouchPadDown(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
         {
-            if(CurrentMenuState == MenuState.BOTH_CLOSED)
+            if (CurrentMenuState != MenuState.BOTH_CLOSED || startedPulling != HANDSIDE.HAND_NONE)
+                return;
+
+            if(TouchPadPosition.GetLastAxis(fromSource).y < 0 && TouchPadPosition.GetLastAxis(fromSource).x > leftArraowActivationThreshold && TouchPadPosition.GetLastAxis(fromSource).x < rightArraowActivationThreshold)
             {
                 OnStartMarkerPull.Invoke(HANDSIDE.HAND_LEFT);
                 startedPulling = HANDSIDE.HAND_LEFT;
                 CurrentMenuState = MenuState.DONT_OPEN;
             }
             
+            
+            
         }
 
-        private void RightPressMarkerDown(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
+        private void RightTouchPadDown(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
         {
-            if (CurrentMenuState == MenuState.BOTH_CLOSED)
+            if (CurrentMenuState != MenuState.BOTH_CLOSED || startedPulling != HANDSIDE.HAND_NONE)
+                return;
+
+            if (TouchPadPosition.GetLastAxis(fromSource).y < 0 && TouchPadPosition.GetLastAxis(fromSource).x > leftArraowActivationThreshold && TouchPadPosition.GetLastAxis(fromSource).x < rightArraowActivationThreshold)
             {
                 OnStartMarkerPull.Invoke(HANDSIDE.HAND_RIGHT);
                 startedPulling = HANDSIDE.HAND_RIGHT;
                 CurrentMenuState = MenuState.DONT_OPEN;
             }
-
         }
 
-        private void LeftPressMarkerUp(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
+        private void LeftTouchPadUp(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
         {
-            OnEndMarkerPull.Invoke(HANDSIDE.HAND_LEFT);
-            startedPulling = HANDSIDE.HAND_NONE;
-            CurrentMenuState = MenuState.BOTH_CLOSED;
+            if (TouchPadPosition.GetLastAxis(fromSource).x < leftArraowActivationThreshold)
+            {
+                OnLeftArrowClick.Invoke(HANDSIDE.HAND_LEFT);
+            }
+
+            else if(TouchPadPosition.GetLastAxis(fromSource).x > rightArraowActivationThreshold)
+            {
+                OnRightArrowClick.Invoke(HANDSIDE.HAND_LEFT);
+            }
+
+            else if(startedPulling == HANDSIDE.HAND_LEFT)
+            {
+                OnEndMarkerPull.Invoke(HANDSIDE.HAND_LEFT);
+                startedPulling = HANDSIDE.HAND_NONE;
+                CurrentMenuState = MenuState.BOTH_CLOSED;
+            }
         }
 
-        private void RightPressMarkerUp(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
+        private void RightTouchPadUp(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
         {
-            OnEndMarkerPull.Invoke(HANDSIDE.HAND_RIGHT);
-            startedPulling = HANDSIDE.HAND_NONE;
-            CurrentMenuState = MenuState.BOTH_CLOSED;
+            if (TouchPadPosition.GetLastAxis(fromSource).x < leftArraowActivationThreshold)
+            {
+                OnLeftArrowClick.Invoke(HANDSIDE.HAND_RIGHT);
+            }
+
+            else if (TouchPadPosition.GetLastAxis(fromSource).x > rightArraowActivationThreshold)
+            {
+                OnRightArrowClick.Invoke(HANDSIDE.HAND_RIGHT);
+            }
+
+            else if(startedPulling == HANDSIDE.HAND_RIGHT)
+            {
+                OnEndMarkerPull.Invoke(HANDSIDE.HAND_RIGHT);
+                startedPulling = HANDSIDE.HAND_NONE;
+                CurrentMenuState = MenuState.BOTH_CLOSED;
+            }
+            
         }
 
 

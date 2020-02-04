@@ -94,13 +94,15 @@ namespace Valve.VR.InteractionSystem
             }
 
             KeyBoard.SetActive(false);
-            SaveGameManager.SaveGame(CreateSaveGameObject(), newFileName);
+            SaveFilePath saveFilePath = new SaveFilePath(newFileName, extension);
+
+            SaveGameManager.SaveGame(CreateSaveGameObject(), saveFilePath.FilePath);
 
             GameObject newButton = Instantiate(ListButtonPrecurser) as GameObject;
             newButton.GetComponentInChildren<Text>().text = newFileName + extension;
             newButton.transform.SetParent(ButtonListContent.transform, false);
-            newButton.GetComponent<Button>().onClick.AddListener(() => SetCurrentFile(new SaveFilePath(newFileName, extension)));
-            SetCurrentFile(new SaveFilePath(newFileName, extension));
+            newButton.GetComponent<Button>().onClick.AddListener(() => SetCurrentFile(saveFilePath));
+            SetCurrentFile(saveFilePath);
             EnableButtons();
         }
 
@@ -120,12 +122,26 @@ namespace Valve.VR.InteractionSystem
 
         public void DisableButtons()
         {
-            buttons.ForEach(button => button.interactable = false);
+            buttons.ForEach(button =>
+            {
+                if (button != null)
+                {
+                    button.interactable = false;
+                }
+            });
+                
+            
         }
 
         public void EnableButtons()
         {
-            buttons.ForEach(button => button.interactable = true);
+            buttons.ForEach(button =>
+            {
+                if (button != null)
+                {
+                    button.interactable = true;
+                }
+            });
         }
 
         public void LoadSaveGame()

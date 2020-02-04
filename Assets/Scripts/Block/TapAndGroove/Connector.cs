@@ -70,12 +70,11 @@ namespace Valve.VR.InteractionSystem
 
         public void OnBlockDetach(GameObject block)
         {
-            Debug.Log("Connector detach Called");
             foreach (CollisionObject collisionObject in colliderDictionary.Values)
             {
                 if (collisionObject.CollidedBlock != null && collisionObject.CollidedBlock.GetHashCode() == block.GetHashCode())
                 {
-                    collisionObject.IsConnected = false;
+                    collisionObject.ResetObject();
                 }
             }
         }

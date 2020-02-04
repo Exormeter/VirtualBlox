@@ -228,12 +228,12 @@ namespace Valve.VR.InteractionSystem
         /// <summary>
         /// Gets a certain Column from a Matrix
         /// </summary>
-        /// <param name="matrixToSearch">Matrix to get the Colum from</param>
+        /// <param name="matrix">Matrix to get the Colum from</param>
         /// <param name="colNumber">The wanted Column number</param>
         /// <returns>Array that represents the Column</returns>
-        private BlockPart[] GetColumn(BlockPart[,] matrixToSearch, int colNumber)
+        private BlockPart[] GetColumn(BlockPart[,] matrix, int colNumber)
         {
-            return Enumerable.Range(0, matrixToSearch.GetLength(0))
+            return Enumerable.Range(0, matrix.GetLength(0))
                     .Select(x => matrix[x, colNumber])
                     .ToArray();
         }
@@ -241,12 +241,12 @@ namespace Valve.VR.InteractionSystem
         /// <summary>
         /// Gets a certain Row from a Matrix
         /// </summary>
-        /// <param name="matrixToSearch">Matrix to get the Row from</param>
+        /// <param name="matrix">Matrix to get the Row from</param>
         /// <param name="rowNumber">The wanted Row number</param>
         /// <returns>Array that represents the Row</returns>
-        private BlockPart[] GetRow(BlockPart[,] matrixToSearch, int rowNumber)
+        private BlockPart[] GetRow(BlockPart[,] matrix, int rowNumber)
         {
-            return Enumerable.Range(0, matrixToSearch.GetLength(1))
+            return Enumerable.Range(0, matrix.GetLength(1))
                     .Select(x => matrix[rowNumber, x])
                     .ToArray();
         }
@@ -336,7 +336,10 @@ namespace Valve.VR.InteractionSystem
             {
                 for (int col = 0; col < ColsCropped; col++)
                 {
-                    croppedMatrix[row, col].ResetVisited();
+                    if(croppedMatrix[row, col] != null)
+                    {
+                        croppedMatrix[row, col].ResetVisited();
+                    }
                 }
             }
         }

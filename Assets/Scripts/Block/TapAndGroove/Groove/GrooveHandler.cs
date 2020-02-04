@@ -49,11 +49,11 @@ namespace Valve.VR.InteractionSystem
 
         public void UnregisterCollision(GrooveCollider snappingCollider, GameObject tapCollider)
         {
-            if(colliderDictionary[snappingCollider].TapPosition == null || colliderDictionary[snappingCollider].TapPosition.GetHashCode() != tapCollider.GetHashCode())
+            if(colliderDictionary[snappingCollider].TapPosition == null || colliderDictionary[snappingCollider].TapPosition.GetHashCode() != tapCollider.GetHashCode() || colliderDictionary[snappingCollider].IsConnected)
             {
                 return;
             }
-
+            Debug.Log("Groove Unregistered");
             RemovePinHighLight(tapCollider);
             colliderDictionary[snappingCollider].ResetObject();
         }

@@ -25,7 +25,6 @@ namespace Valve.VR.InteractionSystem
             blockCommunication = GetComponent<BlockCommunication>();
         }
 
-
         public void AttachToFloor()
         {
             GameObject block = blockCommunication.FindFirstCollidingBlock();

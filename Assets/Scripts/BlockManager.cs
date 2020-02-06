@@ -36,6 +36,11 @@ namespace Valve.VR.InteractionSystem
             
         }
 
+        public bool BlockExists(Guid guid)
+        {
+            return exsistingBlocksInGame.ContainsKey(guid);
+        }
+
         //private void ManipulateHistory(SteamVR_Action_Vector2 fromAction, SteamVR_Input_Sources fromSource, Vector2 axis, Vector2 delta)
         //{
         //    if (MenuManager.CurrentMenuState == MenuState.BOTH_CLOSED && confirmAction.GetStateDown(fromSource))
@@ -218,12 +223,16 @@ namespace Valve.VR.InteractionSystem
         }
 
         /// <summary>
-        /// Adds a HistoryObject to the History
+        /// Adds a HistoryObject to the History if no Object exsists for the Guid
         /// </summary>
         /// <param name="historyObject">HistoryObject to add</param>
         public void AddHistoryEntry(HistoryObject historyObject)
         {
-            blockPlacingHistory.Add(historyObject);
+            if(!blockPlacingHistory.Exists(historyObjectTemp => historyObject.guid == historyObjectTemp.guid))
+            {
+                blockPlacingHistory.Add(historyObject);
+            }
+                
         }
 
         /// <summary>

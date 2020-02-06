@@ -12,6 +12,10 @@ namespace Valve.VR.InteractionSystem
     {
         public BlockManager BlockManager;
         public BlockGenerator BlockGenerator;
+        public GameObject PrefabAttachPoint;
+        public float RotationSpeed;
+
+        private  GameObject currentParentBlock;
 
         public void LoadSceneFromFile(string choosenFilePath)
         {
@@ -34,23 +38,37 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
+        private void Update()
+        {
+            if(PrefabAttachPoint.transform.childCount > 0)
+            {
+                currentParentBlock.transform.Rotate(Vector3.up * (RotationSpeed * Time.deltaTime));
+            }
+        }
+
         IEnumerator LoadScene(SaveGame save)
         {
             save.historyObjects.Sort();
             BlockManager.blockPlacingHistory = save.historyObjects;
+
+
             for (int i = 0; i < save.historyObjects.Count; i++)
             {
-                LoadBlock(save, save.historyObjects[i]);
-
-                //Load all Block that were placed together
-                while (i + 1 < save.historyObjects.Count && save.historyObjects[i].timeStamp == save.historyObjects[i + 1].timeStamp)
+                if(!BlockManager.BlockExists(save.historyObjects[i].guid))
                 {
-                    LoadBlock(save, save.historyObjects[i + 1]);
-                    i++;
+                    LoadBlock(save, save.historyObjects[i]);
+
+                    //Load all Block that were placed together
+                    while (i + 1 < save.historyObjects.Count && save.historyObjects[i].timeStamp == save.historyObjects[i + 1].timeStamp)
+                    {
+                        LoadBlock(save, save.historyObjects[i + 1]);
+                        i++;
+                    }
                 }
 
                 yield return new WaitForSeconds(0.5f);
             }
+
             ConnectBlocks(save);
         }
 
@@ -78,7 +96,7 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
-        public void LoadPrefabFromFile(string choosenFilePath)
+        public void LoadPrefabFromFile(string choosenFilePath, Hand hand)
         {
             if (File.Exists(choosenFilePath))
             {
@@ -88,19 +106,24 @@ namespace Valve.VR.InteractionSystem
                 file.Close();
 
                 //Load Blocks into the Scene
-                StartCoroutine(LoadPrefab(save));
+                StartCoroutine(LoadPrefab(save, hand));
             }
         }
 
-        IEnumerator LoadPrefab(SaveGame saveGame)
+        IEnumerator LoadPrefab(SaveGame saveGame, Hand hand)
         {
+            if (PrefabAttachPoint.transform.childCount > 0)
+            {
+                Destroy(currentParentBlock);
+            }
+
             List<GameObject> loadedBlocks = new List<GameObject>();
 
             Dictionary<Guid, Guid> originalToNewGuid = new Dictionary<Guid, Guid>();
 
             foreach(BlockSave blockSave in saveGame.blockSaves)
             {
-                GameObject loadedBlock = LoadBlockWithNewGuid(blockSave, new Vector3(0, 3, 0));
+                GameObject loadedBlock = LoadBlockWithNewGuid(blockSave, new Vector3(3, 3, 3));
                 originalToNewGuid.Add(blockSave.guid, loadedBlock.GetComponent<BlockCommunication>().Guid);
                 loadedBlock.GetComponentInChildren<TapHandler>().AcceptCollisionsAsConnected(true);
                 loadedBlock.GetComponentInChildren<GrooveHandler>().AcceptCollisionsAsConnected(true);
@@ -111,12 +134,19 @@ namespace Valve.VR.InteractionSystem
             saveGame.ReplaceGuids(originalToNewGuid);
 
             ConnectBlocks(saveGame);
+            GameObject parentBlock = loadedBlocks[0];
             foreach (GameObject loadedBlock in loadedBlocks)
             {
                 loadedBlock.GetComponentInChildren<TapHandler>().AcceptCollisionsAsConnected(false);
                 loadedBlock.GetComponentInChildren<GrooveHandler>().AcceptCollisionsAsConnected(false);
-                //loadedBlock.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+                loadedBlock.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+                loadedBlock.GetComponent<Rigidbody>().isKinematic = true;
+                loadedBlock.transform.SetParent(parentBlock.transform);
             }
+            parentBlock.transform.position = PrefabAttachPoint.transform.position;
+            parentBlock.transform.SetParent(PrefabAttachPoint.transform);
+            
+            currentParentBlock = parentBlock;
         }
         
 

@@ -19,16 +19,16 @@ namespace Valve.VR.InteractionSystem
         }
 
 
-        void Update()
-        {
-
-        }
-
-
         public void OnAttachedToHand(Hand hand)
         {
             holdingHand = hand;
             blockCommunication.SendMessageToConnectedBlocks("OnIndirectAttachedtoHand");
+        }
+
+        public void OnIndirectAttachedtoHand()
+        {
+            GetComponent<Rigidbody>().isKinematic = false;
+            gameObject.transform.SetParent(null);
         }
 
 

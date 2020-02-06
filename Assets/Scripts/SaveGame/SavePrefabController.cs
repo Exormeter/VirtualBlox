@@ -19,6 +19,7 @@ namespace Valve.VR.InteractionSystem
         public GameObject ButtonListContent;
         public Text DisplayedFile;
         public List<Button> buttons;
+        public Hand HandToPrefabAttach;
 
         private SaveFilePath currentlyChoosenFile;
 
@@ -131,7 +132,7 @@ namespace Valve.VR.InteractionSystem
         {
             if(CurrentlyChoosenFile != null)
             {
-                SaveGameManager.LoadPrefabFromFile(CurrentlyChoosenFile.FilePath);
+                SaveGameManager.LoadPrefabFromFile(CurrentlyChoosenFile.FilePath, HandToPrefabAttach);
             }
         }
 

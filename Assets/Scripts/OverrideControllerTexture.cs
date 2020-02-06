@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Runtime.InteropServices;
 using Valve.VR;
+using System.Collections.Generic;
 
 /// <summary>
 /// Override the texture of the Vive controllers, with your own texture, after SteamVR has loaded and applied the original texture.
@@ -9,7 +10,11 @@ public class OverrideControllerTexture : MonoBehaviour
 {
     #region Public variables
     [Header("Variables")]
-    public Texture2D newBodyTexture; //The new texture.
+    public Texture2D TouchPadMenu;
+    public Texture2D TouchPadConfirm;
+
+    private List<SteamVR_RenderModel> controllerRenderModels = new List<SteamVR_RenderModel>();
+
     #endregion
     void OnEnable()
     {
@@ -51,7 +56,28 @@ public class OverrideControllerTexture : MonoBehaviour
     {
         if (success)
         {
-            UpdateControllerTexture(newBodyTexture, renderModel.gameObject.transform);
+            if(!controllerRenderModels.Exists(renderModelTemp => renderModel.GetHashCode() == renderModelTemp.GetHashCode()))
+            {
+                controllerRenderModels.Add(renderModel);
+            }
+            UpdateControllerTexture(TouchPadMenu, renderModel.gameObject.transform);
+        }
+    }
+
+    public void OnMenuOpen()
+    {
+        foreach(SteamVR_RenderModel controllerRenderModel in controllerRenderModels)
+        {
+            UpdateControllerTexture(TouchPadConfirm, controllerRenderModel.gameObject.transform);
+        }
+        
+    }
+
+    public void OnCloseMenu()
+    {
+        foreach (SteamVR_RenderModel controllerRenderModel in controllerRenderModels)
+        {
+            UpdateControllerTexture(TouchPadMenu, controllerRenderModel.gameObject.transform);
         }
     }
 }

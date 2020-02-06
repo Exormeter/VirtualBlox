@@ -10,8 +10,7 @@ public class MaterialHandler : MonoBehaviour
     private Color blockColor;
     private Material whileHoldingMaterial;
     private MeshRenderer meshRenderer;
-    
-    // Start is called before the first frame update
+     
     void Start()
     {
         whileHoldingMaterial = new Material(HoldingMaterial);
@@ -22,17 +21,18 @@ public class MaterialHandler : MonoBehaviour
         whileHoldingMaterial.color = blockColor;
     }
 
-    // Update is called once per frame
-    
+
     void OnAttachedToHand(Hand hand)
     {
-        Debug.Log("MaterialHandler OnAttachedToHand");
         meshRenderer.material = whileHoldingMaterial;
     }
 
     void OnDetachedFromHand(Hand hand)
     {
-        meshRenderer.material = standardMaterial;
+        if (!GetComponent<BlockCommunication>().IsIndirectlyAttachedToHand())
+        {
+            meshRenderer.material = standardMaterial;
+        }
     }
 
     void OnBlockAttach()
@@ -45,7 +45,10 @@ public class MaterialHandler : MonoBehaviour
 
     void OnIndirectDetachedFromHand()
     {
-        meshRenderer.material = standardMaterial;
+        if (!GetComponent<BlockCommunication>().IsIndirectlyAttachedToHand())
+        {
+            meshRenderer.material = standardMaterial;
+        }
     }
 
     void OnIndirectAttachedtoHand()
@@ -55,7 +58,7 @@ public class MaterialHandler : MonoBehaviour
 
     void RemovedConnection()
     {
-        if (GetComponent<BlockCommunication>().IsIndirectlyAttachedToHand())
+        if (!GetComponent<BlockCommunication>().IsIndirectlyAttachedToHand())
         {
             meshRenderer.material = standardMaterial;
         }

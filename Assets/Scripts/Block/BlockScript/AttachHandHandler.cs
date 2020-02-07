@@ -18,13 +18,20 @@ namespace Valve.VR.InteractionSystem
             blockCommunication = GetComponent<BlockCommunication>();
         }
 
-
+        /// <summary>
+        /// Called when the Block is attached to the Hand
+        /// </summary>
+        /// <param name="hand">The Hand the Block was attached to</param>
         public void OnAttachedToHand(Hand hand)
         {
             holdingHand = hand;
+            //Send Message to all connected Blocks that the Structure was picked up
             blockCommunication.SendMessageToConnectedBlocks("OnIndirectAttachedtoHand");
         }
 
+        /// <summary>
+        /// Called when the Block is in a Structure with a Block that was attached to a Hand
+        /// </summary>
         public void OnIndirectAttachedtoHand()
         {
             GetComponent<Rigidbody>().isKinematic = false;
@@ -32,25 +39,37 @@ namespace Valve.VR.InteractionSystem
         }
 
 
-
+        /// <summary>
+        /// Called when the Block was detached from a Hand, check if detachement from Hand inidcates
+        /// an attachment to an other Block 
+        /// </summary>
+        /// <param name="hand"></param>
         public void OnDetachedFromHand(Hand hand)
         {
             holdingHand = null;
+
+            //Send message to Blocks in Structure that Stucture detached from Hand
             blockCommunication.SendMessageToConnectedBlocks("OnIndirectDetachedFromHand");
 
+            //Check if any Block in the Structure is collding with an other Block
             GameObject block = blockCommunication.FindFirstCollidingBlock();
 
+            //no Block is colliding, Structure is free
             if(block == null)
             {
                 return;
             }
 
+            //One of the Block is colliding, check if it collding on the Groove- or Tap
             block.GetComponent<AttachHandHandler>().GrooveOrTapHit(out List<CollisionObject> currentCollisionObjects, out OTHER_BLOCK_IS_CONNECTED_ON connectedOn);
 
+            //The collding Block is NOT indirectly attached to a Floor plate, call the AttachHandHandler of the collding Block
             if (!currentCollisionObjects[0].CollidedBlock.GetComponent<BlockCommunication>().IsIndirectlyAttachedToFloor())
             {
                 block.GetComponent<AttachHandHandler>().MatchRotationWithBlock(currentCollisionObjects, connectedOn);
             }
+
+            //The colliding Block IS indirectly attached to the Floor, call FloorHandler to connect the Structure to the Floor
             else if(currentCollisionObjects[0].CollidedBlock.GetComponent<BlockCommunication>().IsIndirectlyAttachedToFloor())
             {
                 GetComponent<AttachFloorHandler>().AttachToFloor();
@@ -61,17 +80,34 @@ namespace Valve.VR.InteractionSystem
 
 
         
-
+        /// <summary>
+        /// Match the Rotation with the collided Block according to the collision Blocks and start the Coroutine to check the
+        /// Groove- and Tap Collider after matching.
+        /// </summary>
+        /// <param name="currentCollisionObjects">The collisionObject for rotation</param>
+        /// <param name="connectedOn">There is the other Block connected</param>
         public void MatchRotationWithBlock(List<CollisionObject> currentCollisionObjects, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
         {
+            //Work currently only with two or mir CollisionObjects
             if (currentCollisionObjects.Count > 1)
             {
+                //Set all Blocks in Structure to kinematic for rotation
                 blockCommunication.SendMessageToConnectedBlocks("SetKinematic");
+
+                //Rotate the Block
                 GetComponent<BlockRotator>().RotateBlock(currentCollisionObjects, connectedOn);
+
+                //Check which additional Groove or Taps were hit after Rotating
                 StartCoroutine(EvaluateColliderAfterMatching());
             }
         }
 
+        /// <summary>
+        /// Set the Blocks in Structure to non-kinematic again and send them the message to check their 
+        /// Groove- and Tap Handler. This methods waits for two FixedUpdates before sending the message, since the
+        /// Collider positions are not imidiatly updated
+        /// </summary>
+        /// <returns></returns>
         IEnumerator EvaluateColliderAfterMatching()
         {
             for (int i = 0; i <= frameUntilColliderReEvaluation; i++)
@@ -86,11 +122,15 @@ namespace Valve.VR.InteractionSystem
         }
 
 
+        /// <summary>
+        /// Check how many new Blocks are now colliding, which Groove or Tap was hit and connects them together
+        /// </summary>
         private void EvaluateCollider()
         {
-            Debug.Log("Evaluate Collider for Block: " + gameObject.name);
-            Debug.Log("Is Kinematic: " + rigidBody.isKinematic);
+            //Are the new Blocks collided via the Groove or Taps
             GrooveOrTapHit(out List<CollisionObject> currentCollisionObjects, out OTHER_BLOCK_IS_CONNECTED_ON connectedOn);
+
+            //Dictionary to hold which Block has collided with how many Groove or Taps
             Dictionary<GameObject, int> blockToTapDict = new Dictionary<GameObject, int>();
 
             //Wieviele Taps oder Grooves wurden nach dem Rotieren getroffen?
@@ -113,6 +153,9 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
+        /// <summary>
+        /// Sets the Block kinametic if it's not a Floor plate
+        /// </summary>
         public void SetKinematic()
         {
             if (!gameObject.tag.Equals("Floor"))
@@ -121,6 +164,9 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
+        /// <summary>
+        /// Sets the Block non-kinametic if it's not a Floor plate
+        /// </summary>
         public void UnsetKinematic()
         {
             if (!gameObject.tag.Equals("Floor"))
@@ -129,11 +175,20 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
+        /// <summary>
+        /// Is the Block attached to a Hand
+        /// </summary>
+        /// <returns>True if it is Attached to a Hand</returns>
         public bool IsAttachedToHand()
         {
             return holdingHand != null;
         }
 
+        /// <summary>
+        /// Checks if the Groove- or Tap Handler contains CollisionObjects that are not connected
+        /// </summary>
+        /// <param name="collisionList">OUT List with non connected CollisionObjects</param>
+        /// <param name="connectedOn">OUT Other Block connected on</param>
         private void GrooveOrTapHit(out List<CollisionObject> collisionList, out OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
         {
             

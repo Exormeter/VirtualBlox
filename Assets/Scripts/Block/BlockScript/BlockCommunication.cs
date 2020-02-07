@@ -260,7 +260,7 @@ namespace Valve.VR.InteractionSystem
         /// <summary>
         /// Adds the Block to the List of connected Block, if it isn't alredy in the List. It creates a Joint between both Blocks and keeps track
         /// if the other Block is connected on a Tap or a Groove and how many Pins connected them. This method is then called for the colliding Block
-        /// where this Block is added to the List. 
+        /// where this Block is added to the List. Afterwards, both Block have each other in their connected Block list.
         /// </summary>
         /// <param name="block">This Block</param>
         /// <param name="collidedBlock">The other Block</param>

@@ -49,14 +49,28 @@ namespace Valve.VR.InteractionSystem
             return collisionList;
         }
 
+        /// <summary>
+        /// Returns all CollisionObjects where the CollidingBlock is the passed GameObject
+        /// </summary>
+        /// <param name="gameObject">The searched GameObject</param>
+        /// <returns>List of CollisionObjects containing the passed GameObject</returns>
         public List<CollisionObject> GetCollisionObjectsForGameObject(GameObject gameObject)
         {
             List<CollisionObject> collisionList = new List<CollisionObject>(colliderDictionary.Values);
+
+            //Remove all empty CollisionObjects 
             collisionList.RemoveAll(block => block.CollidedBlock == null);
+
+            //Remove all CollisionObjects which don't contain the right collidedBlock
             collisionList.RemoveAll(block => block.CollidedBlock.GetHashCode() != gameObject.GetHashCode());
             return collisionList;
         }
 
+        /// <summary>
+        /// Called when an other Block is connected to this Block. Set all CollisionObjects with the other Block
+        /// to connected
+        /// </summary>
+        /// <param name="block">The newly connected Block</param>
         public virtual void OnBlockAttach(GameObject block)
         {
             foreach (CollisionObject collisionObject in colliderDictionary.Values)
@@ -68,6 +82,11 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
+        /// <summary>
+        /// Called when an other Block is deatched form this Block. Sets all CollisionObject with the other Block
+        /// to empty
+        /// </summary>
+        /// <param name="block">The removed Block</param>
         public void OnBlockDetach(GameObject block)
         {
             foreach (CollisionObject collisionObject in colliderDictionary.Values)
@@ -79,6 +98,9 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
+        /// <summary>
+        /// Called when the Block is Pulled by a Hand. Resets ALL CollisionObjects
+        /// </summary>
         public void OnBlockPulled()
         {
             foreach (CollisionObject collisionObject in colliderDictionary.Values)
@@ -87,6 +109,10 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
+        /// <summary>
+        /// Get all CollisionObjects that are curretly connected
+        /// </summary>
+        /// <returns>List of CollisionObjects that are connected</returns>
         public List<CollisionObject> GetOccupiedCollider()
         {
             List<CollisionObject> collisionList = new List<CollisionObject>(colliderDictionary.Values);

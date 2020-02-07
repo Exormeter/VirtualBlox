@@ -132,7 +132,7 @@ namespace Valve.VR.InteractionSystem
         {
             if(CurrentlyChoosenFile != null)
             {
-                SaveGameManager.LoadPrefabFromFile(CurrentlyChoosenFile.FilePath, HandToPrefabAttach);
+                SaveGameManager.LoadPrefabFromFile(CurrentlyChoosenFile.FilePath);
             }
         }
 

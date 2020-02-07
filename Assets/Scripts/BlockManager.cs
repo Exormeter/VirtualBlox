@@ -27,7 +27,7 @@ namespace Valve.VR.InteractionSystem
         //public SteamVR_Input_Sources handInput = SteamVR_Input_Sources.Any;
         //public SteamVR_Action_Vector2 historyJump;
         //public SteamVR_Action_Boolean confirmAction;
-        public MenuManager MenuManager;
+        public InputManager MenuManager;
         public SaveGameManager SaveGameManager;
 
 

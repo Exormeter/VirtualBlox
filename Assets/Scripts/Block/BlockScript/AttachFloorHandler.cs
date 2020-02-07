@@ -25,40 +25,68 @@ namespace Valve.VR.InteractionSystem
             blockCommunication = GetComponent<BlockCommunication>();
         }
 
+        /// <summary>
+        /// Attach the Block to the Floor plate or Block that is indirectly connected to the Floor plate
+        /// </summary>
         public void AttachToFloor()
         {
+            //Find a Block that is collding
             GameObject block = blockCommunication.FindFirstCollidingBlock();
             if (block != null)
             {
+                //Check if the Block is collding with a Groove or a Tap
                 block.GetComponent<AttachFloorHandler>().GrooveOrTapHit(out List<CollisionObject> currentCollisionObjects, out OTHER_BLOCK_IS_CONNECTED_ON connectedOn);
+
+                //Match the Rotation of the Block with the collding one
                 block.GetComponent<AttachFloorHandler>().MatchRotationWithCollidingBlock(currentCollisionObjects, connectedOn);
             }
         }
 
+        /// <summary>
+        /// Matches the rotation of the Block to the rotation of the colliding Block. Sets the WasReMatchedWithBlock Flag to true to indicate that
+        /// it is now in line with the colliding Block, so that the other Blocks in the Structure can use this Block to rotate themself.
+        /// </summary>
+        /// <param name="currentCollisionObjects"></param>
+        /// <param name="connectedOn"></param>
         public void MatchRotationWithCollidingBlock(List<CollisionObject> currentCollisionObjects, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
         {
             if (currentCollisionObjects.Count > 1)
             {
+                //Send message to Blocks in Structure to set them to kinematic for rotation
                 blockCommunication.SendMessageToConnectedBlocks("SetKinematic");
+
+                //Rotate the Block
                 GetComponent<BlockRotator>().RotateBlock(currentCollisionObjects, connectedOn);
+
+                //Set flag that Block was rotated
                 WasReMatchedWithBlock = true;
-                //Richte alle Blöcke nach Plazieren des ersten Blockes korrekt aus, alte Joints müssen vermutlich neu gesetzt werden 
+                
+                //Send Message to Blocks in Structure to ReMatch their rotation in line with a Block that has
+                //already rotated
                 blockCommunication.SendMessageToConnectedBlocksBFS("ReMatchConnectedBlock");
+
+                //Tell Blocks in Structure to add themself to the History
                 blockCommunication.SendMessageToConnectedBlocks("AddGuidToHistory");
 
-
+                //Check which additional Groove or Taps were hit after Rotating
                 StartCoroutine(EvaluateColliderAfterMatching());
             }
         }
 
+        /// <summary>
+        /// Set the Blocks in Structure to non-kinematic again and send them the message to check their 
+        /// Groove- and Tap Handler. This methods waits for two FixedUpdates before sending the message, since the
+        /// Collider positions are not imidiatly updated
+        /// </summary>
+        /// <returns></returns>
         IEnumerator EvaluateColliderAfterMatching()
         {
             for (int i = 0; i <= frameUntilColliderReEvaluation; i++)
             {
                 if (i == frameUntilColliderReEvaluation)
                 {
-                    List<GameObject> connectedBlocksBeforeEvaluation = blockCommunication.GetCurrentlyConnectedBlocks();
                     blockCommunication.SendMessageToConnectedBlocks("EvaluateCollider");
+                    //Check if all Blocks are connected to Floor and freeze them
                     blockCommunication.SendMessageToConnectedBlocks("CheckFreeze");
                     blockCommunication.SendMessageToConnectedBlocks("UnsetKinematic");
                 }
@@ -68,7 +96,9 @@ namespace Valve.VR.InteractionSystem
         }
 
         
-
+        /// <summary>
+        /// Adds the Block to the History of placed Blocks
+        /// </summary>
         public void AddGuidToHistory()
         {
             int timeStamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
@@ -79,11 +109,11 @@ namespace Valve.VR.InteractionSystem
             blockManager.ResetHistoryStack();
         }
 
-
+        /// <summary>
+        /// Check how many new Blocks are now colliding, which Groove or Tap was hit and connects them together
+        /// </summary>
         private void EvaluateCollider()
         {
-            Debug.Log("Evaluate Collider for Block: " + gameObject.name);
-            Debug.Log("Is Kinematic: " + rigidBody.isKinematic);
             GrooveOrTapHit(out List<CollisionObject> currentCollisionObjects, out OTHER_BLOCK_IS_CONNECTED_ON connectedOn);
             Dictionary<GameObject, int> blockToTapDict = new Dictionary<GameObject, int>();
 
@@ -107,17 +137,18 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
+        /// <summary>
+        /// ReMatches the Blocks rotation based on an other connected Block that was already correctly rotated
+        /// </summary>
         private void ReMatchConnectedBlock()
         {
+            //This Block is already correcty rotated
             if (WasReMatchedWithBlock)
             {
                 return;
             }
-            Debug.Log("Rematched");
+            
             WasReMatchedWithBlock = true;
-
-
-
 
             BlockContainer connectedBlockContainer = null;
             //Durchsuche Verbundene Blöcke nach Block welcher bereits ausgerichtet ist
@@ -152,18 +183,25 @@ namespace Valve.VR.InteractionSystem
             
         }
 
+        /// <summary>
+        /// Contrains the RidigdBody of the Block in all directions
+        /// </summary>
         public void FreezeBlock()
         {
             rigidBody.constraints = RigidbodyConstraints.FreezeAll;
             IsFroozen = true;
         }
 
+        /// <summary>
+        /// Removes all Contrains if the RidigBody 
+        /// </summary>
         public void UnfreezeBlock()
         {
             rigidBody.constraints = RigidbodyConstraints.None;
             //blockCommunication.blockScriptSim.DisableTwin();
             IsFroozen = false;
         }
+
 
         public void CheckFreeze()
         {
@@ -178,6 +216,9 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
+        /// <summary>
+        /// Sets the RidigBody to kinematic if the Block is not a Floor Plate
+        /// </summary>
         public void SetKinematic()
         {
             if (!gameObject.tag.Equals("Floor"))
@@ -186,6 +227,10 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
+        /// <summary>
+        /// Sets the RidigBody to non-kinematic if the Block is not a Floor Plate and resets
+        /// the WasReMatchedWithBlock Flag
+        /// </summary>
         public void UnsetKinematic()
         {
             if (!gameObject.tag.Equals("Floor"))
@@ -195,6 +240,11 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
+        /// <summary>
+        /// Checks if the Groove- or Tap Handler contains CollisionObjects that are not connected
+        /// </summary>
+        /// <param name="collisionList">OUT List with non connected CollisionObjects</param>
+        /// <param name="connectedOn">OUT Other Block connected on</param>
         private void GrooveOrTapHit(out List<CollisionObject> collisionList, out OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
         {
             if (GetComponentInChildren<TapHandler>().GetCollidingObjects().Count > 0)

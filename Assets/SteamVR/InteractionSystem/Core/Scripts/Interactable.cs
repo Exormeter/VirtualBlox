@@ -261,7 +261,7 @@ namespace Valve.VR.InteractionSystem
                 Destroy(highlightHolder);
         }
 
-        protected virtual void OnMarkedBegin()
+        public virtual void OnMarkedBegin()
         {
             if (!isMarked)
             {

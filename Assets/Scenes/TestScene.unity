@@ -3490,6 +3490,9 @@ MonoBehaviour:
   TouchPadButton:
     actionPath: /actions/default/in/InteractUI
     needsReinit: 0
+  GripButton:
+    actionPath: /actions/default/in/Climb
+    needsReinit: 0
   leftHand: {fileID: 261345821}
   rightHand: {fileID: 261132931}
   OnPoseOpenMenuLeft:
@@ -3675,6 +3678,20 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1850143302}
         m_MethodName: RecoverLastRemovedBlock
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnMarkBlock:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1556106291}
+        m_MethodName: MarkSeparateBlock
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

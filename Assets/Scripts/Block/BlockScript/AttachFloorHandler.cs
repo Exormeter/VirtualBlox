@@ -66,7 +66,7 @@ namespace Valve.VR.InteractionSystem
                 blockCommunication.SendMessageToConnectedBlocksBFS("ReMatchConnectedBlock");
 
                 //Tell Blocks in Structure to add themself to the History
-                blockCommunication.SendMessageToConnectedBlocks("AddGuidToHistory");
+                blockCommunication.SendMessageToConnectedBlocks("OnAttachToFloor");
 
                 //Check which additional Groove or Taps were hit after Rotating
                 StartCoroutine(EvaluateColliderAfterMatching());
@@ -95,11 +95,18 @@ namespace Valve.VR.InteractionSystem
 
         }
 
-        
+        /// <summary>
+        /// Called when Block was directly or indirectly attached to the Floor
+        /// </summary>
+        public void OnAttachToFloor()
+        {
+            AddGuidToHistory();
+        }
+
         /// <summary>
         /// Adds the Block to the History of placed Blocks
         /// </summary>
-        public void AddGuidToHistory()
+        private void AddGuidToHistory()
         {
             int timeStamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
             HistoryObject historyObject = new HistoryObject(blockCommunication.Guid, timeStamp);

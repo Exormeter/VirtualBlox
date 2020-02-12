@@ -54,6 +54,11 @@ namespace Valve.VR.InteractionSystem
         /// </summary>
         public BlockStructure blockStructure;
 
+        /// <summary>
+        /// Contains the TopCollider, so that a serperate Raycast Layer can be set for them
+        /// </summary>
+        public GameObject TopColliderContainer;
+
         /// <summary>A list that contains all wall colliders of the block</summary>
         private List<Collider> wallColliderList = new List<Collider>();
 
@@ -259,6 +264,11 @@ namespace Valve.VR.InteractionSystem
         /// </summary>
         private void AddTopCollider()
         {
+            //Adds a container GameObject for the TopCollider, so it can use a own Layer for Raycasting
+            GameObject topColliderContainer = new GameObject("TopColliderContainer");
+            topColliderContainer.transform.SetParent(gameObject.transform);
+            TopColliderContainer = topColliderContainer;
+
             //Defines the Collider size, based of the 1x1 Block and wall thickness
             Vector3 topSideSize = new Vector3(BRICK_LENGTH, BRICK_WALL_WIDTH, BRICK_LENGTH);
 
@@ -285,7 +295,7 @@ namespace Valve.VR.InteractionSystem
                         Vector3 colliderCenter = new Vector3(centerX, centerY, centerZ);
 
                         //Adda the Collider to the GameObject and to the wallCollider list for caching
-                        wallColliderList.Add(AddBoxCollider(topSideSize, colliderCenter, false, transform.gameObject));
+                        wallColliderList.Add(AddBoxCollider(topSideSize, colliderCenter, false, topColliderContainer));
                     }
                 }
             }
@@ -694,6 +704,16 @@ namespace Valve.VR.InteractionSystem
         public void SetWallColliderTrigger(bool trigger)
         {
             wallColliderList.ForEach(collder => collder.isTrigger = trigger);
+        }
+
+        public void OnAttachToFloor()
+        {
+            TopColliderContainer.layer = 8;
+        }
+
+        public void OnAttachToHand()
+        {
+            TopColliderContainer.layer = 0;
         }
     }
 }

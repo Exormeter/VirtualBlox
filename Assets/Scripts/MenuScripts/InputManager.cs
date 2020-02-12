@@ -135,6 +135,18 @@ namespace Valve.VR.InteractionSystem
         public MarkerAddEvent OnMarkBlock = new MarkerAddEvent();
 
         /// <summary>
+        /// Event when Teleport Pointer should appear
+        /// </summary>
+        [SerializeField]
+        public MenuEvent OnTeleportDown = new MenuEvent();
+
+        /// <summary>
+        /// Event when Teleport should happen
+        /// </summary>
+        [SerializeField]
+        public MenuEvent OnTeleportUp = new MenuEvent();
+
+        /// <summary>
         /// Current State of the on Controller Menu
         /// </summary>
         private MenuState CurrentMenuState = MenuState.BOTH_CLOSED;
@@ -167,7 +179,7 @@ namespace Valve.VR.InteractionSystem
         }
 
         /// <summary>
-        /// Callback for when Left TouchPad was clicked, check if the Marker section of TouchPad was pressed
+        /// Callback for when Left TouchPad was clicked, check what section of TouchPad was pressed
         /// </summary>
         /// <param name="fromAction"></param>
         /// <param name="fromSource"></param>
@@ -177,12 +189,18 @@ namespace Valve.VR.InteractionSystem
             if (CurrentMenuState != MenuState.BOTH_CLOSED || startedPulling != HANDSIDE.HAND_NONE)
                 return;
 
-            //check TouchPad position
-            if(TouchPadPosition.GetLastAxis(fromSource).y < 0 && TouchPadPosition.GetLastAxis(fromSource).x > leftArraowActivationThreshold && TouchPadPosition.GetLastAxis(fromSource).x < rightArraowActivationThreshold)
+            //Check if Marker TouchPad position was touched
+            else if(TouchPadPosition.GetLastAxis(fromSource).y < 0 && TouchPadPosition.GetLastAxis(fromSource).x > leftArraowActivationThreshold && TouchPadPosition.GetLastAxis(fromSource).x < rightArraowActivationThreshold)
             {
                 OnStartMarkerPull.Invoke(HANDSIDE.HAND_LEFT);
                 startedPulling = HANDSIDE.HAND_LEFT;
                 CurrentMenuState = MenuState.DONT_OPEN;
+            }
+
+            //Check if Teleport TouchPad position was touched
+            else if(TouchPadPosition.GetLastAxis(fromSource).y > 0 && TouchPadPosition.GetLastAxis(fromSource).x > leftArraowActivationThreshold && TouchPadPosition.GetLastAxis(fromSource).x < rightArraowActivationThreshold)
+            {
+                OnTeleportDown.Invoke(HANDSIDE.HAND_LEFT);
             }
         }
 
@@ -197,12 +215,18 @@ namespace Valve.VR.InteractionSystem
             if (CurrentMenuState != MenuState.BOTH_CLOSED || startedPulling != HANDSIDE.HAND_NONE)
                 return;
 
-            //check TouchPad position
-            if (TouchPadPosition.GetLastAxis(fromSource).y < 0 && TouchPadPosition.GetLastAxis(fromSource).x > leftArraowActivationThreshold && TouchPadPosition.GetLastAxis(fromSource).x < rightArraowActivationThreshold)
+            //Check if Marker TouchPad position was touched
+            else if (TouchPadPosition.GetLastAxis(fromSource).y < 0 && TouchPadPosition.GetLastAxis(fromSource).x > leftArraowActivationThreshold && TouchPadPosition.GetLastAxis(fromSource).x < rightArraowActivationThreshold)
             {
                 OnStartMarkerPull.Invoke(HANDSIDE.HAND_RIGHT);
                 startedPulling = HANDSIDE.HAND_RIGHT;
                 CurrentMenuState = MenuState.DONT_OPEN;
+            }
+
+            //Check if Teleport TouchPad position was touched
+            else if (TouchPadPosition.GetLastAxis(fromSource).y > 0 && TouchPadPosition.GetLastAxis(fromSource).x > leftArraowActivationThreshold && TouchPadPosition.GetLastAxis(fromSource).x < rightArraowActivationThreshold)
+            {
+                OnTeleportDown.Invoke(HANDSIDE.HAND_RIGHT);
             }
         }
 
@@ -213,6 +237,13 @@ namespace Valve.VR.InteractionSystem
         /// <param name="fromSource"></param>
         private void LeftTouchPadUp(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
         {
+
+            //Check if Teleport TouchPad position was touched
+            if (TouchPadPosition.GetLastAxis(fromSource).y > 0 && TouchPadPosition.GetLastAxis(fromSource).x > leftArraowActivationThreshold && TouchPadPosition.GetLastAxis(fromSource).x < rightArraowActivationThreshold)
+            {
+                OnTeleportUp.Invoke(HANDSIDE.HAND_LEFT);
+            }
+
             //Leftside of TouchPad was clicked
             if (TouchPadPosition.GetLastAxis(fromSource).x < leftArraowActivationThreshold)
             {
@@ -241,6 +272,12 @@ namespace Valve.VR.InteractionSystem
         /// <param name="fromSource"></param>
         private void RightTouchPadUp(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
         {
+            //Check if Teleport TouchPad position was touched
+            if (TouchPadPosition.GetLastAxis(fromSource).y > 0 && TouchPadPosition.GetLastAxis(fromSource).x > leftArraowActivationThreshold && TouchPadPosition.GetLastAxis(fromSource).x < rightArraowActivationThreshold)
+            {
+                OnTeleportUp.Invoke(HANDSIDE.HAND_RIGHT);
+            }
+
             //Leftside of TouchPad was clicked
             if (TouchPadPosition.GetLastAxis(fromSource).x < leftArraowActivationThreshold)
             {

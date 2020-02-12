@@ -242,6 +242,7 @@ namespace Valve.VR.InteractionSystem
             restoredBlock.transform.position = blockSave.position + offset;
             restoredBlock.transform.rotation = blockSave.rotation;
             restoredBlock.GetComponent<BlockCommunication>().Guid = blockSave.guid;
+            restoredBlock.GetComponent<BlockGeometryScript>().TopColliderContainer.layer = 8;
             restoredBlock.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
             return restoredBlock;
         }

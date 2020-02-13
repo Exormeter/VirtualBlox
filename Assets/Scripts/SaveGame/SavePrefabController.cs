@@ -19,7 +19,6 @@ namespace Valve.VR.InteractionSystem
         public GameObject ButtonListContent;
         public Text DisplayedFile;
         public List<Button> buttons;
-        public Hand HandToPrefabAttach;
 
         private SaveFilePath currentlyChoosenFile;
 

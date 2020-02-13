@@ -11,14 +11,13 @@ namespace Valve.VR.InteractionSystem
         public GameObject ElevationIndicator;
         public Player Player;
         public Text DebugText;
-
+        public Vector3 boxCastDimensions;
 
         public SteamVR_Action_Boolean headsetOnHead = SteamVR_Input.GetBooleanAction("HeadsetOnHead");
         public float playherHeight = 0;
-        private float[] lastPositions = new float[60];
-        private int lastPositionIndex = 0;
         private Coroutine heightCheck;
         private Plane currentPlane;
+        
         // Start is called before the first frame update
         void Start()
         {
@@ -29,7 +28,12 @@ namespace Valve.VR.InteractionSystem
         void Update()
         {
             DebugText.text = "Größe: " + playherHeight;
-            UpdateElivationIndikator();
+            if (!(GetCurrentPlayerHeight() < playherHeight - 0.4f))
+            {
+                UpdateCurrentPlane();
+                UpdateElivationIndikator();
+            }
+            
             if (headsetOnHead != null && headsetOnHead.GetStateDown(SteamVR_Input_Sources.Head))
             {
                 Invoke("StartCheckPlayerHeightCoroutine", 5);
@@ -64,75 +68,78 @@ namespace Valve.VR.InteractionSystem
 
         }
 
-        private void AddHeightToRingBuffer(float height)
-        {
+        //private void AddHeightToRingBuffer(float height)
+        //{
             
-            lastPositions[lastPositionIndex] = height;
-            lastPositionIndex++;
-            if (lastPositionIndex >= lastPositions.Length)
-            {
-                lastPositionIndex = 0;
-            }
-        }
+        //    lastPositions[lastPositionIndex] = height;
+        //    lastPositionIndex++;
+        //    if (lastPositionIndex >= lastPositions.Length)
+        //    {
+        //        lastPositionIndex = 0;
+        //    }
+        //}
 
-        private float GetMostCommonHeight()
-        {
-            Dictionary<float, int> heightCounters = new Dictionary<float, int>();
-            foreach (float height in lastPositions)
-            {
-                if (heightCounters.ContainsKey(height))
-                {
-                    heightCounters[height]++;
-                }
-                else
-                {
-                    heightCounters.Add(height, 1);
-                }
-            }
+        //private float GetMostCommonHeight()
+        //{
+        //    Dictionary<float, int> heightCounters = new Dictionary<float, int>();
+        //    foreach (float height in lastPositions)
+        //    {
+        //        if (heightCounters.ContainsKey(height))
+        //        {
+        //            heightCounters[height]++;
+        //        }
+        //        else
+        //        {
+        //            heightCounters.Add(height, 1);
+        //        }
+        //    }
 
-            int heightCount = 0;
-            float mostCommonHeight = -1;
+        //    int heightCount = 0;
+        //    float mostCommonHeight = -1;
 
-            foreach (KeyValuePair<float, int> pair in heightCounters)
-            {
-                if (heightCount < pair.Value)
-                {
-                    mostCommonHeight = pair.Key;
-                    heightCount = pair.Value;
-                }
-            }
-            return mostCommonHeight;
+        //    foreach (KeyValuePair<float, int> pair in heightCounters)
+        //    {
+        //        if (heightCount < pair.Value)
+        //        {
+        //            mostCommonHeight = pair.Key;
+        //            heightCount = pair.Value;
+        //        }
+        //    }
+        //    return mostCommonHeight;
 
-        }
+        //}
 
         private void UpdateElivationIndikator()
         {
-            if(GetCurrentPlayerHeight() < playherHeight - 0.4f)
+            Vector3 feetPosition = ApproximatelyFeetPositionXZ();
+            feetPosition.y = GetPlaneHeightFromZero() + 0.001f;
+            ElevationIndicator.transform.position = feetPosition;
+        }
+
+        private void UpdateCurrentPlane()
+        {
+            float newPlaneHeight = 0;
+            Vector3 feetPosition = ApproximatelyFeetPositionXZ();
+            RaycastHit blockHit;
+            if (Physics.BoxCast(feetPosition, boxCastDimensions, transform.TransformDirection(Vector3.down), out blockHit, Quaternion.identity, Mathf.Infinity, 1 << LayerMask.NameToLayer("RaycastOnly")))
+            {
+                newPlaneHeight = blockHit.point.y;
+            }
+
+            if(newPlaneHeight > (GetPlaneHeightFromZero() + BlockGeometryScript.BRICK_HEIGHT_NORMAL + BlockGeometryScript.BRICK_HEIGHT_FLAT))
             {
                 return;
             }
 
-            //Only RaycastLayer
-            RaycastHit blockHit;
-
-            Vector3 bodyDirection = Player.bodyDirectionGuess;
-            Vector3 bodyDirectionTangent = Vector3.Cross(Player.trackingOriginTransform.up, bodyDirection);
-            Vector3 startForward = Player.feetPositionGuess + Player.trackingOriginTransform.up * Player.eyeHeight * 0.75f;
-            Vector3 endForward = startForward + bodyDirection * -0.33f;
-
-            if (Physics.Raycast(endForward, transform.TransformDirection(Vector3.down), out blockHit, Mathf.Infinity, 1 << LayerMask.NameToLayer("RaycastOnly")))
+            else if(newPlaneHeight < (GetPlaneHeightFromZero() - BlockGeometryScript.BRICK_HEIGHT_NORMAL - BlockGeometryScript.BRICK_HEIGHT_FLAT))
             {
-
-                endForward.y = blockHit.point.y + 0.001f;
-                ElevationIndicator.transform.position = endForward;
-                //ElevationIndicator.transform.Translate(Vector3.up * blockHit.point.y, Space.World);
-                AddHeightToRingBuffer(blockHit.collider.transform.position.y);
+                StartCoroutine(SetPlaneFalling(0.3f, newPlaneHeight));
             }
+
             else
             {
-                AddHeightToRingBuffer(0);
+                SetPlaneHeight(newPlaneHeight);
             }
-            SetPlaneHeight(GetMostCommonHeight());
             
         }
 
@@ -153,16 +160,38 @@ namespace Valve.VR.InteractionSystem
         {
             RaycastHit blockHit;
 
+            Vector3 feetPosition = ApproximatelyFeetPositionXZ();
+
+            if(Physics.Raycast(feetPosition, transform.TransformDirection(Vector3.down), out blockHit, Mathf.Infinity, 1 << LayerMask.NameToLayer("RaycastOnly")))
+            {
+                SetPlaneHeight(blockHit.point.y);
+            }
+            
+        }
+
+        public Vector3 ApproximatelyFeetPositionXZ()
+        {
             Vector3 bodyDirection = Player.bodyDirectionGuess;
             Vector3 bodyDirectionTangent = Vector3.Cross(Player.trackingOriginTransform.up, bodyDirection);
             Vector3 startForward = Player.feetPositionGuess + Player.trackingOriginTransform.up * Player.eyeHeight * 0.75f;
-            Vector3 endForward = startForward + bodyDirection * -0.33f;
+            Vector3 feetPosition = startForward + bodyDirection * -0.33f;
 
-            Physics.Raycast(endForward, transform.TransformDirection(Vector3.down), out blockHit, Mathf.Infinity, 1 << LayerMask.NameToLayer("RaycastOnly"));
-            for(int index = 0; index < lastPositions.Length; index++)
-            {
-                lastPositions[index] = blockHit.point.y;
-            }
+            return feetPosition;
+        }
+
+        private float GetPlaneHeightFromZero()
+        {
+            return System.Math.Abs(currentPlane.GetDistanceToPoint(new Vector3(0, 0, 0)));
+        }
+
+        private IEnumerator SetPlaneFalling(float fadeTime, float newPlaneHeight)
+        {
+            SteamVR_Fade.Start(Color.black, fadeTime, true);
+
+            yield return new WaitForSeconds(0.5f);
+            SetPlaneHeight(newPlaneHeight);
+
+            SteamVR_Fade.Start(Color.clear, fadeTime, true);
         }
     }
 }

@@ -7,12 +7,12 @@ namespace Valve.VR.InteractionSystem {
     {
         public GameObject pointer;
         public Player Player;
-        public Material TeleportPossible;
-        public Material TeleportNotPossible;
+        public Material material;
         public CheckPlayerHeight CheckPlayerHeight;
 
         private LineRenderer lineRenderer;
-        private GameObject hittedBlock;
+        private float maxDistanceLine = 5f;
+        private Collider hittedCollider;
         private bool isTeleporting = false;
         private bool teleportedActive = false;
         private float fadeTime = 0.5f;
@@ -24,6 +24,7 @@ namespace Valve.VR.InteractionSystem {
         {
             pointer.SetActive(false);
             lineRenderer = gameObject.AddComponent<LineRenderer>();
+            lineRenderer.material = material;
             lineRenderer.positionCount = 2;
             lineRenderer.startWidth = 0.01f;
             lineRenderer.endWidth = 0.01f;
@@ -46,15 +47,24 @@ namespace Valve.VR.InteractionSystem {
 
             Ray ray = new Ray(transform.position, transform.forward);
             RaycastHit hit;
+            lineRenderer.SetPosition(0, transform.position);
 
-            if(Physics.Raycast(ray, out hit))
+            if (Physics.Raycast(ray, out hit))
             {
-                hittedBlock = hit.collider.gameObject.transform.root.gameObject;
+                hittedCollider = hit.collider;
                 pointer.transform.position = hit.point;
-                lineRenderer.SetPosition(0, transform.position);
                 lineRenderer.SetPosition(1, hit.point);
+                lineRenderer.startColor = Color.green;
+                lineRenderer.endColor = Color.green;
                 return true;
             }
+
+            Vector3 endPosition = transform.position + (transform.forward * maxDistanceLine);
+            pointer.transform.position = endPosition;
+            lineRenderer.SetPosition(1, endPosition);
+            lineRenderer.startColor = Color.red;
+            lineRenderer.endColor = Color.red;
+            
             return false;
         }
 
@@ -64,25 +74,43 @@ namespace Valve.VR.InteractionSystem {
             pointer.SetActive(false);
             lineRenderer.enabled = false;
 
-            if(hittedBlock == null)
+            if(hittedCollider == null || !hasPosition)
             {
                 return;
             }
 
             Transform cameraRig = Player.transform;
-            Vector3 headPosition = Player.hmdTransform.position;
+            Vector3 headPosition = CheckPlayerHeight.ApproximatelyFeetPositionXZ();
             Vector3 groundPositon = new Vector3(headPosition.x, cameraRig.position.y, headPosition.z);
             Vector3 targetPosition = new Vector3();
 
-            if (hittedBlock.tag.Equals("Floor"))
+            //Pointer point to Floor
+            if (hittedCollider.gameObject.transform.root.tag.Equals("Floor"))
             {
                 targetPosition = pointer.transform.position;
             }
-            else if (hittedBlock.tag.Equals("Block"))
+
+            //Pointer pointed on top of Block
+            else if (hittedCollider.tag.Equals("TopColliderContainer"))
             {
-                targetPosition = hittedBlock.transform.position;
+                targetPosition = pointer.transform.position;
                 targetPosition.y += 0.2f;
             }
+
+            //pointer pointed onto side of Block
+            else if (hittedCollider.gameObject.transform.root.tag.Equals("Block"))
+            {
+                GameObject block = hittedCollider.gameObject.transform.root.gameObject;
+                targetPosition = block.transform.position + Vector3.up * 20;
+                Ray ray = new Ray(targetPosition, Vector3.down);
+                RaycastHit hit;
+                if(Physics.Raycast(ray, out hit))
+                {
+                    targetPosition = hit.point;
+                }
+            }
+
+
             else
             {
                 return;

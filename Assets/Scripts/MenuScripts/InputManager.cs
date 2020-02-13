@@ -194,7 +194,7 @@ namespace Valve.VR.InteractionSystem
             {
                 OnStartMarkerPull.Invoke(HANDSIDE.HAND_LEFT);
                 startedPulling = HANDSIDE.HAND_LEFT;
-                CurrentMenuState = MenuState.DONT_OPEN;
+                CurrentMenuState = MenuState.CURRENTLY_PULLING;
             }
 
             //Check if Teleport TouchPad position was touched
@@ -220,7 +220,7 @@ namespace Valve.VR.InteractionSystem
             {
                 OnStartMarkerPull.Invoke(HANDSIDE.HAND_RIGHT);
                 startedPulling = HANDSIDE.HAND_RIGHT;
-                CurrentMenuState = MenuState.DONT_OPEN;
+                CurrentMenuState = MenuState.CURRENTLY_PULLING;
             }
 
             //Check if Teleport TouchPad position was touched
@@ -238,30 +238,44 @@ namespace Valve.VR.InteractionSystem
         private void LeftTouchPadUp(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
         {
 
-            //Check if Teleport TouchPad position was touched
-            if (TouchPadPosition.GetLastAxis(fromSource).y > 0 && TouchPadPosition.GetLastAxis(fromSource).x > leftArraowActivationThreshold && TouchPadPosition.GetLastAxis(fromSource).x < rightArraowActivationThreshold)
+            switch (CurrentMenuState)
             {
-                OnTeleportUp.Invoke(HANDSIDE.HAND_LEFT);
-            }
 
-            //Leftside of TouchPad was clicked
-            if (TouchPadPosition.GetLastAxis(fromSource).x < leftArraowActivationThreshold)
-            {
-                OnLeftArrowClick.Invoke(HANDSIDE.HAND_LEFT);
-            }
+                case MenuState.BOTH_CLOSED:
+                    {
 
-            //Rightside of the TouchPad was clicked
-            else if(TouchPadPosition.GetLastAxis(fromSource).x > rightArraowActivationThreshold)
-            {
-                OnRightArrowClick.Invoke(HANDSIDE.HAND_LEFT);
-            }
+                        //Check if Teleport TouchPad position was touched
+                        if (TouchPadPosition.GetLastAxis(fromSource).y > 0 && TouchPadPosition.GetLastAxis(fromSource).x > leftArraowActivationThreshold && TouchPadPosition.GetLastAxis(fromSource).x < rightArraowActivationThreshold)
+                        {
+                            OnTeleportUp.Invoke(HANDSIDE.HAND_LEFT);
+                        }
 
-            //Stop the pulling of marker
-            else if(startedPulling == HANDSIDE.HAND_LEFT)
-            {
-                OnEndMarkerPull.Invoke(HANDSIDE.HAND_LEFT);
-                startedPulling = HANDSIDE.HAND_NONE;
-                CurrentMenuState = MenuState.BOTH_CLOSED;
+                        //Leftside of TouchPad was clicked
+                        else if (TouchPadPosition.GetLastAxis(fromSource).x < leftArraowActivationThreshold)
+                        {
+                            OnLeftArrowClick.Invoke(HANDSIDE.HAND_LEFT);
+                        }
+
+                        //Rightside of the TouchPad was clicked
+                        else if (TouchPadPosition.GetLastAxis(fromSource).x > rightArraowActivationThreshold)
+                        {
+                            OnRightArrowClick.Invoke(HANDSIDE.HAND_LEFT);
+                        }
+                        break;
+                    }
+
+
+                case MenuState.CURRENTLY_PULLING:
+                    {
+                        //Stop the pulling of marker
+                        if (startedPulling == HANDSIDE.HAND_LEFT)
+                        {
+                            OnEndMarkerPull.Invoke(HANDSIDE.HAND_LEFT);
+                            startedPulling = HANDSIDE.HAND_NONE;
+                            CurrentMenuState = MenuState.BOTH_CLOSED;
+                        }
+                        break;
+                    }
             }
         }
 
@@ -272,32 +286,46 @@ namespace Valve.VR.InteractionSystem
         /// <param name="fromSource"></param>
         private void RightTouchPadUp(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
         {
-            //Check if Teleport TouchPad position was touched
-            if (TouchPadPosition.GetLastAxis(fromSource).y > 0 && TouchPadPosition.GetLastAxis(fromSource).x > leftArraowActivationThreshold && TouchPadPosition.GetLastAxis(fromSource).x < rightArraowActivationThreshold)
+            switch (CurrentMenuState)
             {
-                OnTeleportUp.Invoke(HANDSIDE.HAND_RIGHT);
+
+                case MenuState.BOTH_CLOSED:
+                    {
+
+                        //Check if Teleport TouchPad position was touched
+                        if (TouchPadPosition.GetLastAxis(fromSource).y > 0 && TouchPadPosition.GetLastAxis(fromSource).x > leftArraowActivationThreshold && TouchPadPosition.GetLastAxis(fromSource).x < rightArraowActivationThreshold)
+                        {
+                            OnTeleportUp.Invoke(HANDSIDE.HAND_RIGHT);
+                        }
+
+                        //Leftside of TouchPad was clicked
+                        else if (TouchPadPosition.GetLastAxis(fromSource).x < leftArraowActivationThreshold)
+                        {
+                            OnLeftArrowClick.Invoke(HANDSIDE.HAND_RIGHT);
+                        }
+
+                        //Rightside of the TouchPad was clicked
+                        else if (TouchPadPosition.GetLastAxis(fromSource).x > rightArraowActivationThreshold)
+                        {
+                            OnRightArrowClick.Invoke(HANDSIDE.HAND_RIGHT);
+                        }
+                        break;
+                    }
+
+
+                case MenuState.CURRENTLY_PULLING:
+                    {
+                        //Stop the pulling of marker
+                        if (startedPulling == HANDSIDE.HAND_RIGHT)
+                        {
+                            OnEndMarkerPull.Invoke(HANDSIDE.HAND_RIGHT);
+                            startedPulling = HANDSIDE.HAND_NONE;
+                            CurrentMenuState = MenuState.BOTH_CLOSED;
+                        }
+                        break;
+                    }
             }
 
-            //Leftside of TouchPad was clicked
-            if (TouchPadPosition.GetLastAxis(fromSource).x < leftArraowActivationThreshold)
-            {
-                OnLeftArrowClick.Invoke(HANDSIDE.HAND_RIGHT);
-            }
-
-            //Rightside of the TouchPad was clicked
-            else if (TouchPadPosition.GetLastAxis(fromSource).x > rightArraowActivationThreshold)
-            {
-                OnRightArrowClick.Invoke(HANDSIDE.HAND_RIGHT);
-            }
-
-            //Stop the pulling of marker
-            else if (startedPulling == HANDSIDE.HAND_RIGHT)
-            {
-                OnEndMarkerPull.Invoke(HANDSIDE.HAND_RIGHT);
-                startedPulling = HANDSIDE.HAND_NONE;
-                CurrentMenuState = MenuState.BOTH_CLOSED;
-            }
-            
         }
 
         /// <summary>
@@ -462,6 +490,6 @@ namespace Valve.VR.InteractionSystem
         LEFT_CLOSED,
         RIGHT_OPEN,
         RIGHT_CLOSED,
-        DONT_OPEN
+        CURRENTLY_PULLING
     }
 }

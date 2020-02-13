@@ -23,6 +23,7 @@ TagManager:
   - SaveGameManager
   - Block
   - BlockMarker
+  - TopColliderContainer
   layers:
   - Default
   - TransparentFX

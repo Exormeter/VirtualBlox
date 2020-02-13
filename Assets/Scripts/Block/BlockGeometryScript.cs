@@ -12,6 +12,10 @@ namespace Valve.VR.InteractionSystem
         /// <summary>The height of a brick, can be flat (0.032) or normal (0.096)</summary>
         private float BRICK_HEIGHT;
 
+        public static float BRICK_HEIGHT_NORMAL = 0.096f;
+
+        public static float BRICK_HEIGHT_FLAT = 0.032f;
+
         /// <summary>The height of the pins on the upside of the bricks</summary>
         private const float BRICK_PIN_HEIGHT = 0.016f;
 
@@ -266,6 +270,7 @@ namespace Valve.VR.InteractionSystem
         {
             //Adds a container GameObject for the TopCollider, so it can use a own Layer for Raycasting
             GameObject topColliderContainer = new GameObject("TopColliderContainer");
+            topColliderContainer.tag = "TopColliderContainer";
             topColliderContainer.transform.SetParent(gameObject.transform);
             TopColliderContainer = topColliderContainer;
 

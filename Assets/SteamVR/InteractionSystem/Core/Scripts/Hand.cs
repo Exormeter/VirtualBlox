@@ -885,8 +885,8 @@ namespace Valve.VR.InteractionSystem
 
             int numColliding = Physics.OverlapSphereNonAlloc(hoverPosition, hoverRadius, overlappingColliders, hoverLayerMask.value);
 
-            if (numColliding == ColliderArraySize)
-                Debug.LogWarning("<b>[SteamVR Interaction]</b> This hand is overlapping the max number of colliders: " + ColliderArraySize + ". Some collisions may be missed. Increase ColliderArraySize on Hand.cs");
+            //if (numColliding == ColliderArraySize)
+                //Debug.LogWarning("<b>[SteamVR Interaction]</b> This hand is overlapping the max number of colliders: " + ColliderArraySize + ". Some collisions may be missed. Increase ColliderArraySize on Hand.cs");
 
             // DebugVar
             int iActualColliderCount = 0;

@@ -220,6 +220,7 @@ namespace Valve.VR.InteractionSystem
 
             //Remove the exsiting Block Dictornary entries
             entriesToRemove.ForEach(key => exsistingBlocksInGame.Remove(key));
+            blockPlacingHistory.Clear();
         }
 
         /// <summary>
@@ -252,6 +253,19 @@ namespace Valve.VR.InteractionSystem
         public int GetTimeStampByGuid(Guid guid)
         {
             return blockPlacingHistory.Find(historyObject => historyObject.guid == guid).timeStamp;
+        }
+
+        public List<GameObject> GetFloorBlocks()
+        {
+            List<GameObject> floorBlock = new List<GameObject>();
+            foreach(KeyValuePair<Guid, GameObject> entry in exsistingBlocksInGame)
+            {
+                if (entry.Key.ToString().StartsWith("aaaaaaaa"))
+                {
+                    floorBlock.Add(entry.Value);
+                }
+            }
+            return floorBlock;
         }
     }
 

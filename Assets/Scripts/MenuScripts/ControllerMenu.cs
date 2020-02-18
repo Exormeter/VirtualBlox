@@ -15,41 +15,56 @@ namespace Valve.VR.InteractionSystem
         public MatrixController matrixController;
         public Hand hand;
         
-        public SteamVR_Action_Boolean spawnBlockAction = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("SpawnBlock");
-
         private SteamVR_Input_Sources handInput;
         private BLOCKSIZE currentBlocksize = BLOCKSIZE.NORMAL;
         private Color currentBlockColor  = Color.red;
         private BlockGenerator blockGenerator;
         private readonly int frameUntilColliderReEvaluation = 2;
+        private bool wasInitialized = false;
 
         // Start is called before the first frame update
         void Start()
+        {
+            if (!wasInitialized)
+            {
+                Initialize();
+            }
+        }
+
+        private void Initialize()
         {
             handInput = hand.handType;
             colorToggleGroup.OnChange += ColorOnChange;
             blockToggleGroup.OnChange += BlockOnChange;
             blockGenerator = GameObject.FindGameObjectWithTag("BlockGenerator").GetComponent<BlockGenerator>();
+            wasInitialized = true;
+        }
+
+        private void OnEnable()
+        {
+            if (!wasInitialized)
+            {
+                Initialize();
+            }
         }
 
         // Update is called once per frame
         void Update()
         {
-            if (spawnBlockAction.GetStateDown(handInput))
+            
+        }
+
+        public void SpawnBlock()
+        {
+            List<BlockStructure> blockStructures = matrixController.GetStructures();
+            if (blockStructures.Count == 0)
             {
-                if(hand.currentAttachedObject == null && hand.hoveringInteractable == null)
-                {
-                    List<BlockStructure> blockStructures = matrixController.GetStructures();
-                    if(blockStructures.Count == 0)
-                    {
-                        return;
-                    }
-                    BlockStructure blockStructure = blockStructures[0];
-                    blockStructure.BlockColor = currentBlockColor;
-                    blockStructure.BlockSize = currentBlocksize;
-                    StartCoroutine(AttachNewBlockToHand(blockGenerator.GenerateBlock(blockStructure)));
-                }
+                return;
             }
+            BlockStructure blockStructure = blockStructures[0];
+            blockStructure.BlockColor = currentBlockColor;
+            blockStructure.BlockSize = currentBlocksize;
+            StartCoroutine(AttachNewBlockToHand(blockGenerator.GenerateBlock(blockStructure)));
         }
 
         private IEnumerator AttachNewBlockToHand(GameObject generatedBlock)

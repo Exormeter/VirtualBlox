@@ -24,6 +24,7 @@ namespace Valve.VR.InteractionSystem
         /// </summary>
         public float RotationSpeed;
 
+        public float BlockPlaceInterval;
         /// <summary>
         /// Currently loaded prefab
         /// </summary>
@@ -73,6 +74,14 @@ namespace Valve.VR.InteractionSystem
             save.historyObjects.Sort();
             BlockManager.blockPlacingHistory = save.historyObjects;
 
+            List<GameObject> floorBlocks = BlockManager.GetFloorBlocks();
+            //Prepare Floor Blocks for connection
+            foreach (GameObject floorBlock in floorBlocks)
+            {
+                floorBlock.GetComponentInChildren<TapHandler>().AcceptCollisionsAsConnected(true);
+                floorBlock.GetComponentInChildren<GrooveHandler>().AcceptCollisionsAsConnected(true);
+            }
+
             //Load block in sequen of first placement
             for (int i = 0; i < save.historyObjects.Count; i++)
             {
@@ -90,11 +99,17 @@ namespace Valve.VR.InteractionSystem
                     }
                 }
 
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitForSeconds(BlockPlaceInterval);
             }
 
             //Connect the Blocks together
             ConnectBlocks(save);
+
+            foreach (GameObject floorBlock in floorBlocks)
+            {
+                floorBlock.GetComponentInChildren<TapHandler>().AcceptCollisionsAsConnected(false);
+                floorBlock.GetComponentInChildren<GrooveHandler>().AcceptCollisionsAsConnected(false);
+            }
         }
 
         /// <summary>
@@ -118,15 +133,17 @@ namespace Valve.VR.InteractionSystem
         public void ConnectBlocks(BlockSave blockSave, SaveGame saveGame = null)
         {
             GameObject block = BlockManager.GetBlockByGuid(blockSave.guid);
+
+            //Reset the Groove- and Tap Handler
+            block.GetComponentInChildren<TapHandler>().AcceptCollisionsAsConnected(false);
+            block.GetComponentInChildren<GrooveHandler>().AcceptCollisionsAsConnected(false);
+
             foreach (ConnectedBlockSerialized connection in blockSave.connectedBlocks)
             {
-                //Reset the Groove- and Tap Handler
-                block.GetComponentInChildren<TapHandler>().AcceptCollisionsAsConnected(false);
-                block.GetComponentInChildren<GrooveHandler>().AcceptCollisionsAsConnected(false);
-
                 //Only connect the Block if no SaveGame was provided or if the other Block to connect to is found in the SaveGame.
                 //This is to prevent Prefabs from connecting to non-Prefab Blocks when loaded
-                if(saveGame == null || saveGame.GetBlockSaveByGuid(connection.guid) != null)
+                //Floorplates are not included in the Savegame, so they are check manually by the Guid
+                if(saveGame == null || saveGame.GetBlockSaveByGuid(connection.guid) != null || connection.guid.ToString().StartsWith("aaaaaaaa"))
                 {
                     block.GetComponent<BlockCommunication>().ConnectBlocks(block, BlockManager.GetBlockByGuid(connection.guid), connection.connectedPins, connection.connectedOn);
                 }
@@ -177,8 +194,6 @@ namespace Valve.VR.InteractionSystem
             {
                 GameObject loadedBlock = LoadBlockWithNewGuid(blockSave, new Vector3(3, 3, 3));
                 originalToNewGuid.Add(blockSave.guid, loadedBlock.GetComponent<BlockCommunication>().Guid);
-                loadedBlock.GetComponentInChildren<TapHandler>().AcceptCollisionsAsConnected(true);
-                loadedBlock.GetComponentInChildren<GrooveHandler>().AcceptCollisionsAsConnected(true);
                 loadedBlocks.Add(loadedBlock);
                 yield return new WaitForSeconds(0.1f);
             }
@@ -244,11 +259,13 @@ namespace Valve.VR.InteractionSystem
             restoredBlock.GetComponent<BlockCommunication>().Guid = blockSave.guid;
             restoredBlock.GetComponent<BlockGeometryScript>().TopColliderContainer.layer = 8;
             restoredBlock.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+            restoredBlock.GetComponentInChildren<TapHandler>().AcceptCollisionsAsConnected(true);
+            restoredBlock.GetComponentInChildren<GrooveHandler>().AcceptCollisionsAsConnected(true);
             return restoredBlock;
         }
 
         /// <summary>
-        /// Loaded a Block from an BlockSave, but with a new Guid. Block can be loaded with an offset
+        /// Loaded a Block from an BlockSave, but with a new Guid. Block can be loaded with an offset. Used for loading prefabs
         /// </summary>
         /// <param name="blockSave">The BlockSave to load</param>
         /// <param name="offset">Optional offset</param>
@@ -259,6 +276,8 @@ namespace Valve.VR.InteractionSystem
             restoredBlock.transform.position = blockSave.position + offset;
             restoredBlock.transform.rotation = blockSave.rotation;
             restoredBlock.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+            restoredBlock.GetComponentInChildren<TapHandler>().AcceptCollisionsAsConnected(true);
+            restoredBlock.GetComponentInChildren<GrooveHandler>().AcceptCollisionsAsConnected(true);
             return restoredBlock;
         }
     }

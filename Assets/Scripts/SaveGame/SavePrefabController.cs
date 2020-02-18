@@ -21,6 +21,7 @@ namespace Valve.VR.InteractionSystem
         public List<Button> buttons;
 
         private SaveFilePath currentlyChoosenFile;
+        private bool wasInitialized = false;
 
         public SaveFilePath CurrentlyChoosenFile
         {
@@ -48,6 +49,14 @@ namespace Valve.VR.InteractionSystem
 
         void Start()
         {
+            if (!wasInitialized)
+            {
+                Initialize();
+            }
+        }
+
+        private void Initialize()
+        {
             string[] filePaths = Directory.GetFiles(Application.persistentDataPath);
             foreach (string filePath in filePaths)
             {
@@ -61,6 +70,15 @@ namespace Valve.VR.InteractionSystem
                 }
             }
             KeyBoard.SetActive(false);
+            wasInitialized = true;
+        }
+
+        private void OnEnable()
+        {
+            if (!wasInitialized)
+            {
+                Initialize();
+            }
         }
 
         public void SetCurrentFile(SaveFilePath saveFilePath)

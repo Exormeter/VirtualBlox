@@ -102,7 +102,6 @@ namespace Valve.VR.InteractionSystem
             combinedTile.GetComponent<BlockCommunication>().Guid = CreateNewGuid(floorTiles.Length);
             combinedTile.layer = 8;
             Destroy(container);
-            //combinedTile.transform.SetParent(this.transform);
             transform.gameObject.SetActive(true);
         }
 

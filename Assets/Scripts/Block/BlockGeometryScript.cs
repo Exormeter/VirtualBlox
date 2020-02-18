@@ -541,12 +541,12 @@ namespace Valve.VR.InteractionSystem
 
                 while (mesh.bounds.Contains(currentPinCenterPoint))
                 {
-                    bool isTrigger = true;
-                    if (tag.Equals("Tap"))
-                    {
-                        isTrigger = false;
-                    }
-                    AddGameObjectCollider(currentPinCenterPoint, tag, containerObject, isTrigger);
+                    //bool isTrigger = true;
+                    //if (tag.Equals("Tap"))
+                    //{
+                    //    isTrigger = false;
+                    //}
+                    AddGameObjectCollider(currentPinCenterPoint, tag, containerObject, true);
                     currentPinCenterPoint.z = currentPinCenterPoint.z - BRICK_PIN_DISTANCE;
                 }
                 currentPinCenterPoint.x = currentPinCenterPoint.x - BRICK_PIN_DISTANCE;

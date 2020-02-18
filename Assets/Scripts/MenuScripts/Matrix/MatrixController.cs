@@ -14,20 +14,27 @@ namespace Valve.VR.InteractionSystem
         public int Columns;
         public GameObject Toggle;
         public DragHandler handler;
-       
 
+        public int matrixCount;
+
+        private bool wasInitalized = false;
         private List<List<GameObject>> matrix = new List<List<GameObject>>();
         //private Canvas canvas;
         // Start is called before the first frame update
-        void Start()
+        private void OnEnable()
         {
-            PopulateMatrix();
+            if (!wasInitalized)
+            {
+                PopulateMatrix();
+                wasInitalized = true;
+            }
+            
         }
 
         // Update is called once per frame
         void Update()
         {
-
+            matrixCount = matrix.Count;
         }
 
         private void PopulateMatrix()
@@ -129,6 +136,12 @@ namespace Valve.VR.InteractionSystem
         public List<BlockStructure> GetStructures()
         {
             List<BlockStructure> blockStructures = new List<BlockStructure>();
+
+            if (!wasInitalized)
+            {
+                return blockStructures;
+            }
+
             for (int row = 0; row < Rows; row++)
             {
                 for (int col = 0; col < Columns; col++)

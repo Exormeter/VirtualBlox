@@ -38,6 +38,11 @@ namespace Valve.VR.InteractionSystem
         public SteamVR_Action_Boolean GripButton;
 
         /// <summary>
+        /// Was the TriggerButton presseds
+        /// </summary>
+        public SteamVR_Action_Boolean TriggerButton;
+
+        /// <summary>
         /// Left Hand Script
         /// </summary>
         public Hand leftHand;
@@ -147,27 +152,77 @@ namespace Valve.VR.InteractionSystem
         public MenuEvent OnTeleportUp = new MenuEvent();
 
         /// <summary>
+        /// Event when the Platform should be raised
+        /// </summary>
+        [SerializeField]
+        public MenuEvent OnRaisePlatform = new MenuEvent();
+
+        /// <summary>
+        /// Event when the Platform should be lowered
+        /// </summary>
+        [SerializeField]
+        public MenuEvent OnLowerPlatform = new MenuEvent();
+
+        /// <summary>
+        /// Event when the Platform should be stopped
+        /// </summary>
+        [SerializeField]
+        public MenuEvent OnStopPlatform = new MenuEvent();
+
+        /// <summary>
+        /// Event called when a new Block should be created right
+        /// </summary>
+        [SerializeField]
+        public MenuEvent OnSpawnBlockRight = new MenuEvent();
+
+        /// <summary>
+        /// Event called when a new Block should be created left
+        /// </summary>
+        [SerializeField]
+        public MenuEvent OnSpawnBlockLeft = new MenuEvent();
+
+        /// <summary>
         /// Current State of the on Controller Menu
         /// </summary>
         private MenuState CurrentMenuState = MenuState.BOTH_CLOSED;
-        
+
+        /// <summary>
+        /// Current State of the Platform Player is walking on
+        /// </summary>
+        private PlatformState CurrentPlatformState = PlatformState.PLATFORM_INACTIVE;
+
         void Start()
         {
-            StartCoroutine(ReadPose());
 
+            Invoke("StartPoseCoroutines", 2);
             TouchPadButton.AddOnStateDownListener(LeftTouchPadDown, LeftHandInput);
             TouchPadButton.AddOnStateUpListener(LeftTouchPadUp, LeftHandInput);
 
             TouchPadButton.AddOnStateDownListener(RightTouchPadDown, RightHandInput);
             TouchPadButton.AddOnStateUpListener(RightTouchPadUp, RightHandInput);
 
-            GripButton.AddOnStateDownListener(PushGripButtonLeft, LeftHandInput);
-            GripButton.AddOnStateDownListener(PushGripButtonRight, RightHandInput);
+            GripButton.AddOnStateDownListener(PressGripButtonLeft, LeftHandInput);
+            GripButton.AddOnStateDownListener(PressGripButtonRight, RightHandInput);
 
-
+            TriggerButton.AddOnStateDownListener(PressTriggerButtonLeft, LeftHandInput);
+            TriggerButton.AddOnStateDownListener(PressTriggerButtonRight, LeftHandInput);
         }
 
-        
+        private void PressTriggerButtonRight(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
+        {
+            if (rightHand.currentAttachedObject == null && rightHand.hoveringInteractable == null)
+            {
+                OnSpawnBlockRight.Invoke(HANDSIDE.HAND_RIGHT);
+            }
+        }
+
+        private void PressTriggerButtonLeft(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
+        {
+            if (leftHand.currentAttachedObject == null && leftHand.hoveringInteractable == null)
+            {
+                OnSpawnBlockLeft.Invoke(HANDSIDE.HAND_LEFT);
+            }
+        }
 
         void Update()
         {
@@ -176,6 +231,12 @@ namespace Valve.VR.InteractionSystem
             {
                 OnMarkerPulling.Invoke(startedPulling);
             }
+        }
+
+        private void StartPoseCoroutines()
+        {
+            StartCoroutine(ReadPoseMenu());
+            StartCoroutine(ReadPosePlatform());
         }
 
         /// <summary>
@@ -333,7 +394,7 @@ namespace Valve.VR.InteractionSystem
         /// </summary>
         /// <param name="fromAction"></param>
         /// <param name="fromSource"></param>
-        private void PushGripButtonLeft(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
+        private void PressGripButtonLeft(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
         {
             //Mark the currently hovered Block
             if(leftHand.hoveringInteractable != null)
@@ -347,7 +408,7 @@ namespace Valve.VR.InteractionSystem
         /// </summary>
         /// <param name="fromAction"></param>
         /// <param name="fromSource"></param>
-        private void PushGripButtonRight(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
+        private void PressGripButtonRight(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
         {
             //Mark the currently hovered Block
             if (rightHand.hoveringInteractable != null)
@@ -360,7 +421,7 @@ namespace Valve.VR.InteractionSystem
         /// Reads the pose of the Controller three times a second and checks if the Menu should be shown
         /// </summary>
         /// <returns></returns>
-        private IEnumerator ReadPose()
+        private IEnumerator ReadPoseMenu()
         {
             for (; ; )
             {
@@ -391,6 +452,7 @@ namespace Valve.VR.InteractionSystem
                         break;
 
                     case MenuState.RIGHT_OPEN:
+
                         if (ShouldCloseMenu(RightHandInput, 15, 340, 100, 60))
                         {
                             OnPoseCloseMenuRight.Invoke(HANDSIDE.HAND_RIGHT);
@@ -399,6 +461,54 @@ namespace Valve.VR.InteractionSystem
                         break;
                 }
                 
+                yield return new WaitForSeconds(0.3f);
+            }
+        }
+
+        private IEnumerator ReadPosePlatform()
+        {
+            for(; ; )
+            {
+                switch (CurrentPlatformState)
+                {
+                    case PlatformState.PLATFORM_INACTIVE:
+
+                        if (ReadControllerXValue(LeftHandInput, 270, 300) && ReadControllerXValue(RightHandInput, 270, 300))
+                        {
+                            Debug.Log("Raise Platform");
+                            OnRaisePlatform.Invoke(HANDSIDE.HAND_NONE);
+                            CurrentPlatformState = PlatformState.PLATFORM_RAISING;
+                        }
+
+                        else if (ReadControllerXValue(LeftHandInput, 73, 85) && ReadControllerXValue(RightHandInput, 73, 85))
+                        {
+                            Debug.Log("Lower Platform");
+                            OnLowerPlatform.Invoke(HANDSIDE.HAND_NONE);
+                            CurrentPlatformState = PlatformState.PLATFORM_LOWERING;
+                        }
+                        break;
+                        
+
+                    case PlatformState.PLATFORM_RAISING:
+
+                        if (ReadControllerXValue(LeftHandInput, 300, 270) && ReadControllerXValue(RightHandInput, 300, 270))
+                        {
+                            Debug.Log("Stop Raising");
+                            OnStopPlatform.Invoke(HANDSIDE.HAND_NONE);
+                            CurrentPlatformState = PlatformState.PLATFORM_INACTIVE;
+                        }
+                        break;
+
+                    case PlatformState.PLATFORM_LOWERING:
+
+                        if (ReadControllerXValue(LeftHandInput, 85, 73) && ReadControllerXValue(RightHandInput, 85, 73))
+                        {
+                            Debug.Log("Stop Lowering");
+                            OnStopPlatform.Invoke(HANDSIDE.HAND_NONE);
+                            CurrentPlatformState = PlatformState.PLATFORM_INACTIVE;
+                        }
+                        break;
+                }
                 yield return new WaitForSeconds(0.3f);
             }
         }
@@ -458,6 +568,65 @@ namespace Valve.VR.InteractionSystem
             return true;
         }
 
+        private bool ReadControllerXValue(SteamVR_Input_Sources hand, float minX, float maxX)
+        {
+            for (int i = 0; i < 5; i++)
+            {
+
+                Pose.GetPoseAtTimeOffset(hand, (float)i / 5, out Vector3 position, out Quaternion rotation, out Vector3 velocity, out Vector3 angularVelocity);
+                if (!IsBetween(minX, maxX, rotation.eulerAngles.x))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        //private bool ShoudlRaisePlatformEnd()
+        //{
+        //    for (int i = 0; i < 5; i++)
+        //    {
+
+        //        Pose.GetPoseAtTimeOffset(hand, (float)i / 5, out Vector3 position, out Quaternion rotation, out Vector3 velocity, out Vector3 angularVelocity);
+
+        //        if (!IsBetween(minX, maxX, rotation.eulerAngles.x) || !IsBetween(minZ, maxZ, rotation.eulerAngles.z))
+        //        {
+        //            return false;
+        //        }
+        //    }
+        //    return true;
+        //}
+
+        //private bool ShouldLowerPlatformStart()
+        //{
+        //    for (int i = 0; i < 5; i++)
+        //    {
+
+        //        Pose.GetPoseAtTimeOffset(hand, (float)i / 5, out Vector3 position, out Quaternion rotation, out Vector3 velocity, out Vector3 angularVelocity);
+
+        //        if (!IsBetween(minX, maxX, rotation.eulerAngles.x) || !IsBetween(minZ, maxZ, rotation.eulerAngles.z))
+        //        {
+        //            return false;
+        //        }
+        //    }
+        //    return true;
+        //}
+
+        //private bool ShouldLowerPlatformEnd()
+        //{
+        //    for (int i = 0; i < 5; i++)
+        //    {
+
+        //        Pose.GetPoseAtTimeOffset(hand, (float)i / 5, out Vector3 position, out Quaternion rotation, out Vector3 velocity, out Vector3 angularVelocity);
+
+        //        if (!IsBetween(minX, maxX, rotation.eulerAngles.x) || !IsBetween(minZ, maxZ, rotation.eulerAngles.z))
+        //        {
+        //            return false;
+        //        }
+        //    }
+        //    return true;
+        //}
         /// <summary>
         /// Helper method to determen if a angle is between to values
         /// </summary>
@@ -491,5 +660,12 @@ namespace Valve.VR.InteractionSystem
         RIGHT_OPEN,
         RIGHT_CLOSED,
         CURRENTLY_PULLING
+    }
+
+    public enum PlatformState
+    {
+        PLATFORM_RAISING,
+        PLATFORM_LOWERING,
+        PLATFORM_INACTIVE
     }
 }

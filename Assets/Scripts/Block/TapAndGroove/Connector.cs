@@ -8,7 +8,7 @@ namespace Valve.VR.InteractionSystem
     {
         public bool acceptNewCollisionsAsConnected;
         protected Dictionary<IConnectorCollider, CollisionObject> colliderDictionary = new Dictionary<IConnectorCollider, CollisionObject>();
-        public int occupiedTaps = 0;
+        //public int occupiedTaps = 0;
 
         public virtual void Start()
         {
@@ -18,7 +18,7 @@ namespace Valve.VR.InteractionSystem
         // Update is called once per frame
         public virtual void Update()
         {
-            occupiedTaps = GetOccupiedCollider().Count;
+            //occupiedTaps = GetOccupiedCollider().Count;
         }
 
         public void AcceptCollisionsAsConnected(bool shouldAccept)

@@ -49,7 +49,9 @@ namespace Valve.VR.InteractionSystem {
             RaycastHit hit;
             lineRenderer.SetPosition(0, transform.position);
 
-            if (Physics.Raycast(ray, out hit))
+            int layerMask = ~(1 << 9);
+
+            if (Physics.Raycast(ray, out hit, maxDistanceLine, layerMask))
             {
                 hittedCollider = hit.collider;
                 pointer.transform.position = hit.point;

@@ -12,102 +12,29 @@ namespace Valve.VR.InteractionSystem
         public Player Player;
         public Text DebugText;
         public Vector3 boxCastDimensions;
+        public GameObject WalkablePlatform;
 
         public SteamVR_Action_Boolean headsetOnHead = SteamVR_Input.GetBooleanAction("HeadsetOnHead");
-        public float playherHeight = 0;
-        private Coroutine heightCheck;
         private Plane currentPlane;
+        private Coroutine MovePlatformCoroutine;
+        private Vector3 neutralPosition;
+        private bool platformIsCurrentlyMoving = false;
         
         // Start is called before the first frame update
         void Start()
         {
+            neutralPosition = WalkablePlatform.transform.position;
             currentPlane = new Plane(new Vector3(0, 1, 0), gameObject.transform.position);
         }
 
         // Update is called once per frame
         void Update()
         {
-            DebugText.text = "Größe: " + playherHeight;
-            if (!(GetCurrentPlayerHeight() < playherHeight - 0.4f))
-            {
-                UpdateCurrentPlane();
-                UpdateElivationIndikator();
-            }
-            
-            if (headsetOnHead != null && headsetOnHead.GetStateDown(SteamVR_Input_Sources.Head))
-            {
-                Invoke("StartCheckPlayerHeightCoroutine", 5);
-            }
-
-            else if (headsetOnHead != null && headsetOnHead.GetStateUp(SteamVR_Input_Sources.Head))
-            {
-                playherHeight = 0;
-                if(heightCheck != null)
-                {
-                    StopCoroutine(heightCheck);
-                }
-                
-            }
+            UpdateCurrentPlane();
+            UpdateElivationIndikator();
         }
 
-        private void StartCheckPlayerHeightCoroutine()
-        {
-            heightCheck = StartCoroutine(CheckPlayerHeightCoroutine());
-        }
 
-        IEnumerator CheckPlayerHeightCoroutine()
-        {
-            for (; ; )
-            {
-                if (GetCurrentPlayerHeight() > playherHeight)
-                {
-                    playherHeight = GetCurrentPlayerHeight();
-                }
-                yield return new WaitForSeconds(0.5f);
-            }
-
-        }
-
-        //private void AddHeightToRingBuffer(float height)
-        //{
-            
-        //    lastPositions[lastPositionIndex] = height;
-        //    lastPositionIndex++;
-        //    if (lastPositionIndex >= lastPositions.Length)
-        //    {
-        //        lastPositionIndex = 0;
-        //    }
-        //}
-
-        //private float GetMostCommonHeight()
-        //{
-        //    Dictionary<float, int> heightCounters = new Dictionary<float, int>();
-        //    foreach (float height in lastPositions)
-        //    {
-        //        if (heightCounters.ContainsKey(height))
-        //        {
-        //            heightCounters[height]++;
-        //        }
-        //        else
-        //        {
-        //            heightCounters.Add(height, 1);
-        //        }
-        //    }
-
-        //    int heightCount = 0;
-        //    float mostCommonHeight = -1;
-
-        //    foreach (KeyValuePair<float, int> pair in heightCounters)
-        //    {
-        //        if (heightCount < pair.Value)
-        //        {
-        //            mostCommonHeight = pair.Key;
-        //            heightCount = pair.Value;
-        //        }
-        //    }
-        //    return mostCommonHeight;
-
-        //}
 
         private void UpdateElivationIndikator()
         {
@@ -121,7 +48,10 @@ namespace Valve.VR.InteractionSystem
             float newPlaneHeight = 0;
             Vector3 feetPosition = ApproximatelyFeetPositionXZ();
             RaycastHit blockHit;
-            if (Physics.BoxCast(feetPosition, boxCastDimensions, transform.TransformDirection(Vector3.down), out blockHit, Quaternion.identity, Mathf.Infinity, 1 << LayerMask.NameToLayer("RaycastOnly")))
+            int layermaskBlockWalk = 1 << LayerMask.NameToLayer("WalkableBlock");
+            int layermaskPlatfromWalk = 1 << LayerMask.NameToLayer("WalkablePlatform");
+
+            if (Physics.BoxCast(feetPosition, boxCastDimensions, transform.TransformDirection(Vector3.down), out blockHit, Quaternion.identity, Mathf.Infinity, layermaskBlockWalk | layermaskPlatfromWalk))
             {
                 newPlaneHeight = blockHit.point.y;
             }
@@ -129,11 +59,6 @@ namespace Valve.VR.InteractionSystem
             if(newPlaneHeight > (GetPlaneHeightFromZero() + BlockGeometryScript.BRICK_HEIGHT_NORMAL + BlockGeometryScript.BRICK_HEIGHT_FLAT))
             {
                 return;
-            }
-
-            else if(newPlaneHeight < (GetPlaneHeightFromZero() - BlockGeometryScript.BRICK_HEIGHT_NORMAL - BlockGeometryScript.BRICK_HEIGHT_FLAT))
-            {
-                StartCoroutine(SetPlaneFalling(0.3f, newPlaneHeight));
             }
 
             else
@@ -150,9 +75,19 @@ namespace Valve.VR.InteractionSystem
 
         public void SetPlaneHeight(float height)
         {
-            Vector3 newHeightPosition = gameObject.transform.position;
-            newHeightPosition.y = height;
-            gameObject.transform.position = newHeightPosition;
+            Vector3 playerHeightPosition = gameObject.transform.position;
+            Vector3 walkablePlatformPosition = WalkablePlatform.transform.position;
+
+            walkablePlatformPosition.y = height;
+            playerHeightPosition.y = height;
+
+            gameObject.transform.position = playerHeightPosition;
+
+            if (!platformIsCurrentlyMoving)
+            {
+                WalkablePlatform.transform.position = walkablePlatformPosition;
+            }
+            
             currentPlane = new Plane(new Vector3(0, 1, 0), gameObject.transform.position);
         }
 
@@ -162,7 +97,7 @@ namespace Valve.VR.InteractionSystem
 
             Vector3 feetPosition = ApproximatelyFeetPositionXZ();
 
-            if(Physics.Raycast(feetPosition, transform.TransformDirection(Vector3.down), out blockHit, Mathf.Infinity, 1 << LayerMask.NameToLayer("RaycastOnly")))
+            if(Physics.Raycast(feetPosition, transform.TransformDirection(Vector3.down), out blockHit, Mathf.Infinity, 1 << LayerMask.NameToLayer("WalkableBlock")))
             {
                 SetPlaneHeight(blockHit.point.y);
             }
@@ -192,6 +127,44 @@ namespace Valve.VR.InteractionSystem
             SetPlaneHeight(newPlaneHeight);
 
             SteamVR_Fade.Start(Color.clear, fadeTime, true);
+        }
+
+        public void RaiseWalkablePlatform()
+        {
+            if (MovePlatformCoroutine != null)
+            {
+                StopCoroutine(MovePlatformCoroutine);
+            }
+            MovePlatformCoroutine = StartCoroutine(MovePlatform(0.5f));
+            platformIsCurrentlyMoving = true;
+        }
+
+        public void LowerWalkablePlatform()
+        {
+            if (MovePlatformCoroutine != null)
+            {
+                StopCoroutine(MovePlatformCoroutine);
+            }
+            MovePlatformCoroutine = StartCoroutine(MovePlatform(-0.5f));
+            platformIsCurrentlyMoving = true;
+        }
+
+        public void StopMovingPlatform()
+        {
+            if(MovePlatformCoroutine != null)
+            {
+                StopCoroutine(MovePlatformCoroutine);
+            }
+            platformIsCurrentlyMoving = false;
+        }
+
+        public IEnumerator MovePlatform(float direction)
+        {
+            for(; ; )
+            {
+                WalkablePlatform.transform.Translate(neutralPosition + (Vector3.up * Time.deltaTime * direction));
+                yield return new WaitForEndOfFrame();
+            }
         }
     }
 }

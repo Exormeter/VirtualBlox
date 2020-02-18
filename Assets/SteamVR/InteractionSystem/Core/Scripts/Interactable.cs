@@ -272,7 +272,7 @@ namespace Valve.VR.InteractionSystem
             
         }
 
-        protected virtual void OnMarkedEnd()
+        public virtual void OnMarkedEnd()
         {
             Destroy(highlightHolder);
             isMarked = false;

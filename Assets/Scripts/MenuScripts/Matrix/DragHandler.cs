@@ -22,23 +22,25 @@ public class DragHandler : MonoBehaviour, IDragHandler
     private int currentCols;
     private float toggleHeight;
     private float toggleWidth;
-    
+    private bool wasInitialized = false;
 
-    void Awake()
-    {
-        matrixController = GetComponentInParent<MatrixController>();
-        startingRows = matrixController.Rows;
-        startingCols = matrixController.Columns;
-        currentCols = startingCols;
-        currentRows = startingRows;
-        toggleWidth = matrixController.Toggle.GetComponent<RectTransform>().sizeDelta.x;
-        toggleHeight = matrixController.Toggle.GetComponent<RectTransform>().sizeDelta.y;
 
-    }
+
     // Start is called before the first frame update
-    void Start()
+    private void OnEnable()
     {
-        handleSprite.rectTransform.localPosition = new Vector3((startingCols - 0.5f) * toggleWidth, -(startingRows - 0.5f) * toggleHeight, 0);
+        if (!wasInitialized)
+        {
+            matrixController = GetComponentInParent<MatrixController>();
+            startingRows = matrixController.Rows;
+            startingCols = matrixController.Columns;
+            currentCols = startingCols;
+            currentRows = startingRows;
+            toggleWidth = matrixController.Toggle.GetComponent<RectTransform>().sizeDelta.x;
+            toggleHeight = matrixController.Toggle.GetComponent<RectTransform>().sizeDelta.y;
+            handleSprite.rectTransform.localPosition = new Vector3((startingCols - 0.5f) * toggleWidth, -(startingRows - 0.5f) * toggleHeight, 0);
+            wasInitialized = true;
+        }
     }
 
     // Update is called once per frame

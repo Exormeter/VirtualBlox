@@ -158,13 +158,23 @@ namespace Valve.VR.InteractionSystem
         }
 
         /// <summary>
-        /// Add a Block to the List that is not inside the Marker
+        /// Adds or Removes a Block to/from the List
         /// </summary>
         /// <param name="interactable"></param>
         public void MarkSeparateBlock(Interactable interactable)
         {
-            interactable.OnMarkedBegin();
-            markedBlocks.Add(interactable.transform.gameObject);
+            if(interactable.isMarked)
+            {
+                markedBlocks.RemoveAll(tempBlock => tempBlock.GetHashCode() == interactable.transform.gameObject.GetHashCode());
+                interactable.OnMarkedEnd();
+            }
+
+            else
+            {
+                interactable.OnMarkedBegin();
+                markedBlocks.Add(interactable.transform.gameObject);
+            }
+            
         }
 
         /// <summary>

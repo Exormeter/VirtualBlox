@@ -23,6 +23,7 @@ namespace Valve.VR.InteractionSystem {
 
         private List<LineRenderer> lineRendererList = new List<LineRenderer>();
         public Material LineMaterial;
+        public GameObject Container;
 
         void Start()
         {
@@ -33,6 +34,8 @@ namespace Valve.VR.InteractionSystem {
                 LineRenderer lineRenderer = lineRendererContainer.AddComponent<LineRenderer>();
                 lineRendererList.Add(lineRenderer);
                 lineRenderer.enabled = false;
+                lineRenderer.transform.SetParent(Container.transform);
+                Container.SetActive(false);
             }
         }
 
@@ -106,10 +109,12 @@ namespace Valve.VR.InteractionSystem {
 
         public void RemoveBox()
         {
-            foreach(LineRenderer lineRenderer in lineRendererList)
-            {
-                lineRenderer.enabled = false;
-            }
+            Container.SetActive(false);
+        }
+
+        public void ActivateBox()
+        {
+            Container.SetActive(true);
         }
 
         public void SetStartPosition(Vector3 position)
@@ -117,7 +122,7 @@ namespace Valve.VR.InteractionSystem {
             startPosition = position;
         }
 
-        public Collider GetBoxCollider(BoxCollider collider)
+        public Collider ConfigureBoxCollider(BoxCollider collider)
         {
             Vector3 colliderCenter =  new Vector3();
             

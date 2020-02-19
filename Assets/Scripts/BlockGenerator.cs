@@ -153,6 +153,27 @@ namespace Valve.VR.InteractionSystem
             return copy;
         }
 
+        public void AttachNewBlockToHand(GameObject generatedBlock, Hand hand)
+        {
+            StartCoroutine(AttachNewBlockToHandAfterTwoFrames(generatedBlock, hand));
+        }
+
+        public IEnumerator AttachNewBlockToHandAfterTwoFrames(GameObject generatedBlock, Hand hand)
+        {
+            {
+                for (int i = 0; i <= 2; i++)
+                {
+                    if (i == 2)
+                    {
+                        generatedBlock.transform.position = hand.objectAttachmentPoint.transform.position;
+                        generatedBlock.GetComponent<BlockInteractable>().PhysicsAttach(hand, GrabTypes.Grip);
+                    }
+                    yield return new WaitForFixedUpdate();
+                }
+
+            }
+        }
+
     }
 
     
@@ -221,6 +242,7 @@ namespace Valve.VR.InteractionSystem
         {
             return visitedDirections.Contains(direction);
         }
+
     }
 
     public enum DIRECTION

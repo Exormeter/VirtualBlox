@@ -31,6 +31,14 @@ namespace Valve.VR.InteractionSystem
                 }
             }
         }
+
+        internal void RemoveFloorConnections()
+        {
+            foreach(BlockSave blockSave in blockSaves)
+            {
+                blockSave.connectedBlocks.RemoveAll(connectedBlockSerialized => connectedBlockSerialized.guid.ToString().StartsWith("aaaaaaaa"));
+            }
+        }
     }
 
     [Serializable]

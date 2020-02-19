@@ -201,6 +201,8 @@ namespace Valve.VR.InteractionSystem
             //Replace old guids with new ones
             saveGame.ReplaceGuids(originalToNewGuid);
 
+            saveGame.RemoveFloorConnections();
+
             //Connect the Blocks
             ConnectBlocks(saveGame);
 

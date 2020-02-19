@@ -140,16 +140,28 @@ namespace Valve.VR.InteractionSystem
         public MarkerAddEvent OnMarkBlock = new MarkerAddEvent();
 
         /// <summary>
-        /// Event when Teleport Pointer should appear
+        /// Event when Teleport Pointer should appear Left
         /// </summary>
         [SerializeField]
-        public MenuEvent OnTeleportDown = new MenuEvent();
+        public MenuEvent OnTeleportDownLeft = new MenuEvent();
 
         /// <summary>
-        /// Event when Teleport should happen
+        /// Event when Teleport should happen Left
         /// </summary>
         [SerializeField]
-        public MenuEvent OnTeleportUp = new MenuEvent();
+        public MenuEvent OnTeleportUpLeft = new MenuEvent();
+
+        /// <summary>
+        /// Event when Teleport Pointer should appear Right
+        /// </summary>
+        [SerializeField]
+        public MenuEvent OnTeleportDownRight = new MenuEvent();
+
+        /// <summary>
+        /// Event when Teleport should happen Right
+        /// </summary>
+        [SerializeField]
+        public MenuEvent OnTeleportUpRight = new MenuEvent();
 
         /// <summary>
         /// Event when the Platform should be raised
@@ -205,8 +217,18 @@ namespace Valve.VR.InteractionSystem
             GripButton.AddOnStateDownListener(PressGripButtonRight, RightHandInput);
 
             TriggerButton.AddOnStateDownListener(PressTriggerButtonLeft, LeftHandInput);
-            TriggerButton.AddOnStateDownListener(PressTriggerButtonRight, LeftHandInput);
+            TriggerButton.AddOnStateDownListener(PressTriggerButtonRight, RightHandInput);
         }
+
+
+        private void PressTriggerButtonLeft(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
+        {
+            if (leftHand.currentAttachedObject == null && leftHand.hoveringInteractable == null)
+            {
+                OnSpawnBlockLeft.Invoke(HANDSIDE.HAND_LEFT);
+            }
+        }
+
 
         private void PressTriggerButtonRight(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
         {
@@ -216,13 +238,7 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
-        private void PressTriggerButtonLeft(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
-        {
-            if (leftHand.currentAttachedObject == null && leftHand.hoveringInteractable == null)
-            {
-                OnSpawnBlockLeft.Invoke(HANDSIDE.HAND_LEFT);
-            }
-        }
+        
 
         void Update()
         {
@@ -261,7 +277,7 @@ namespace Valve.VR.InteractionSystem
             //Check if Teleport TouchPad position was touched
             else if(TouchPadPosition.GetLastAxis(fromSource).y > 0 && TouchPadPosition.GetLastAxis(fromSource).x > leftArraowActivationThreshold && TouchPadPosition.GetLastAxis(fromSource).x < rightArraowActivationThreshold)
             {
-                OnTeleportDown.Invoke(HANDSIDE.HAND_LEFT);
+                OnTeleportDownLeft.Invoke(HANDSIDE.HAND_LEFT);
             }
         }
 
@@ -287,7 +303,7 @@ namespace Valve.VR.InteractionSystem
             //Check if Teleport TouchPad position was touched
             else if (TouchPadPosition.GetLastAxis(fromSource).y > 0 && TouchPadPosition.GetLastAxis(fromSource).x > leftArraowActivationThreshold && TouchPadPosition.GetLastAxis(fromSource).x < rightArraowActivationThreshold)
             {
-                OnTeleportDown.Invoke(HANDSIDE.HAND_RIGHT);
+                OnTeleportDownRight.Invoke(HANDSIDE.HAND_RIGHT);
             }
         }
 
@@ -308,7 +324,7 @@ namespace Valve.VR.InteractionSystem
                         //Check if Teleport TouchPad position was touched
                         if (TouchPadPosition.GetLastAxis(fromSource).y > 0 && TouchPadPosition.GetLastAxis(fromSource).x > leftArraowActivationThreshold && TouchPadPosition.GetLastAxis(fromSource).x < rightArraowActivationThreshold)
                         {
-                            OnTeleportUp.Invoke(HANDSIDE.HAND_LEFT);
+                            OnTeleportUpLeft.Invoke(HANDSIDE.HAND_LEFT);
                         }
 
                         //Leftside of TouchPad was clicked
@@ -356,7 +372,7 @@ namespace Valve.VR.InteractionSystem
                         //Check if Teleport TouchPad position was touched
                         if (TouchPadPosition.GetLastAxis(fromSource).y > 0 && TouchPadPosition.GetLastAxis(fromSource).x > leftArraowActivationThreshold && TouchPadPosition.GetLastAxis(fromSource).x < rightArraowActivationThreshold)
                         {
-                            OnTeleportUp.Invoke(HANDSIDE.HAND_RIGHT);
+                            OnTeleportUpRight.Invoke(HANDSIDE.HAND_RIGHT);
                         }
 
                         //Leftside of TouchPad was clicked
@@ -583,50 +599,7 @@ namespace Valve.VR.InteractionSystem
             return true;
         }
 
-        //private bool ShoudlRaisePlatformEnd()
-        //{
-        //    for (int i = 0; i < 5; i++)
-        //    {
-
-        //        Pose.GetPoseAtTimeOffset(hand, (float)i / 5, out Vector3 position, out Quaternion rotation, out Vector3 velocity, out Vector3 angularVelocity);
-
-        //        if (!IsBetween(minX, maxX, rotation.eulerAngles.x) || !IsBetween(minZ, maxZ, rotation.eulerAngles.z))
-        //        {
-        //            return false;
-        //        }
-        //    }
-        //    return true;
-        //}
-
-        //private bool ShouldLowerPlatformStart()
-        //{
-        //    for (int i = 0; i < 5; i++)
-        //    {
-
-        //        Pose.GetPoseAtTimeOffset(hand, (float)i / 5, out Vector3 position, out Quaternion rotation, out Vector3 velocity, out Vector3 angularVelocity);
-
-        //        if (!IsBetween(minX, maxX, rotation.eulerAngles.x) || !IsBetween(minZ, maxZ, rotation.eulerAngles.z))
-        //        {
-        //            return false;
-        //        }
-        //    }
-        //    return true;
-        //}
-
-        //private bool ShouldLowerPlatformEnd()
-        //{
-        //    for (int i = 0; i < 5; i++)
-        //    {
-
-        //        Pose.GetPoseAtTimeOffset(hand, (float)i / 5, out Vector3 position, out Quaternion rotation, out Vector3 velocity, out Vector3 angularVelocity);
-
-        //        if (!IsBetween(minX, maxX, rotation.eulerAngles.x) || !IsBetween(minZ, maxZ, rotation.eulerAngles.z))
-        //        {
-        //            return false;
-        //        }
-        //    }
-        //    return true;
-        //}
+        
         /// <summary>
         /// Helper method to determen if a angle is between to values
         /// </summary>

@@ -38,20 +38,21 @@ namespace Valve.VR.InteractionSystem
         public List<GameObject> markedBlocks = new List<GameObject>();
 
         /// <summary>
+        /// Distance before a box is drawn, Box is resettet otherwise
+        /// </summary>
+        public float PullThreshold;
+
+        /// <summary>
         /// The Collider that matched the drawn Box
         /// </summary>
         private BoxCollider currentBoxCollider;
+
+        private Vector3 startPosition = new Vector3();
         void Start()
         {
             currentBoxCollider = gameObject.AddComponent<BoxCollider>();
             currentBoxCollider.enabled = false;
             currentBoxCollider.isTrigger = true;
-        }
-
-        
-        void Update()
-        {
-
         }
 
         /// <summary>
@@ -61,14 +62,16 @@ namespace Valve.VR.InteractionSystem
         public void MarkerPullingStarted(HANDSIDE handSide)
         { 
             ResetMarker();
-            
+            BoxDrawer.ActivateBox();
             switch (handSide)
             {
                 case HANDSIDE.HAND_LEFT:
+                    startPosition = HandLeft.transform.position;
                     BoxDrawer.SetStartPosition(HandLeft.transform.position);
                     break;
 
                 case HANDSIDE.HAND_RIGHT:
+                    startPosition = HandRight.transform.position;
                     BoxDrawer.SetStartPosition(HandRight.transform.position);
                     break;
             }
@@ -84,11 +87,25 @@ namespace Valve.VR.InteractionSystem
             switch (handSide)
             {
                 case HANDSIDE.HAND_LEFT:
-                    BoxDrawer.GetBoxCollider(currentBoxCollider);
+                    if (Vector3.Distance(startPosition, HandLeft.transform.position) < PullThreshold)
+                    {
+                        BoxDrawer.RemoveBox();
+                        ResetMarker();
+                    }
+                    else
+                    {
+
+                    }
+                    BoxDrawer.ConfigureBoxCollider(currentBoxCollider);
                     break;
 
                 case HANDSIDE.HAND_RIGHT:
-                    BoxDrawer.GetBoxCollider(currentBoxCollider);
+                    if (Vector3.Distance(startPosition, HandRight.transform.position) < PullThreshold)
+                    {
+                        BoxDrawer.RemoveBox();
+                        ResetMarker();
+                    }
+                    BoxDrawer.ConfigureBoxCollider(currentBoxCollider);
                     break;
             }
         }
@@ -107,13 +124,15 @@ namespace Valve.VR.InteractionSystem
             switch (handSide)
             {
                 case HANDSIDE.HAND_LEFT:
-                    BoxDrawer.GetBoxCollider(currentBoxCollider);
+                    BoxDrawer.ConfigureBoxCollider(currentBoxCollider);
                     BoxDrawer.DrawCube(HandLeft.transform.position);
                     break;
 
                 case HANDSIDE.HAND_RIGHT:
-                    BoxDrawer.GetBoxCollider(currentBoxCollider);
+                    
+                    BoxDrawer.ConfigureBoxCollider(currentBoxCollider);
                     BoxDrawer.DrawCube(HandRight.transform.position);
+                    
                     break;
             }
             

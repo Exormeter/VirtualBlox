@@ -8,7 +8,7 @@ namespace Valve.VR.InteractionSystem {
         public GameObject pointer;
         public Player Player;
         public Material material;
-        public CheckPlayerHeight CheckPlayerHeight;
+        public CheckPlayerHeightLevel CheckPlayerHeight;
 
         private LineRenderer lineRenderer;
         private float maxDistanceLine = 5f;

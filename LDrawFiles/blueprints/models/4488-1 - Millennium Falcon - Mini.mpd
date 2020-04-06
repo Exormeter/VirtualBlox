@@ -1,0 +1,25 @@
+0 FILE 4488 - Main.ldr
+0 Main
+0 Name: 4488 - Main.ldr
+0 Author: Johann Eisner [technicbasics]
+0 !LDRAW_ORG Model
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 !HISTORY 2018-12-10 [technicbasics] Build mpd, OMRize file
+
+0 ROTATION CENTER 0 0 0 1 "Custom" 
+0 ROTATION CONFIG 0 0
+1 0 0 0 0 1 0 0 0 1 0 0 0 1 4488 - Millennium Falcon - Mini.ldr
+0
+0 FILE 4488 - Millennium Falcon - Mini.ldr
+0 Millennium Falcon - Mini
+0 Name: 4488 - Millennium Falcon - Mini.ldr
+0 Author: Evert-Jan Boer [ejboer]
+0 !LDRAW_ORG Model
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+
+
+0 ROTATION CENTER 0 0 0 1 "Custom" 
+0 ROTATION CONFIG 0 0
+1 4 -30 0 10 0 0 -1 0 1 0 1 0 0 2436b.dat

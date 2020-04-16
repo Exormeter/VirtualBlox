@@ -11,11 +11,20 @@ namespace Valve.VR.InteractionSystem
         private Rigidbody rigidBody;
         private int frameUntilColliderReEvaluation = 2;
         private Hand holdingHand = null;
+        public bool Debug = false; 
 
         void Start()
         {
             rigidBody = GetComponent<Rigidbody>();
             blockCommunication = GetComponent<BlockCommunication>();
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown("q") && Debug)
+            {
+                OnDetachedFromHand(null);
+            }
         }
 
         /// <summary>

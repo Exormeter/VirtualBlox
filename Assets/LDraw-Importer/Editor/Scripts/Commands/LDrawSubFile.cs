@@ -12,13 +12,18 @@ namespace LDraw
 		private Matrix4x4 _Matrix;
 		private LDrawModel _Model;
 
-		public void GetModelGameObject(Transform parent, List<GameObject> connectionPoints)
+		public void GetModelGameObject(Transform parent, List<LDrawConnectionPoint> connectionPoints)
 		{
-			GameObject temp = _Model.CreateMeshGameObject(_Matrix, GetMaterial(), parent, connectionPoints);
+			GameObject gameObject = _Model.CreateMeshGameObject(_Matrix, GetMaterial(), parent, connectionPoints);
+
             if (_Name.Equals("stud") || _Name.Equals("stud2"))
             {
-				connectionPoints.Add(temp);
+				connectionPoints.Add(new LDrawConnectionPoint(gameObject, LDRawConnectionType.TAP_CONNECTION, _Name));
             }
+            else if (_Name.Equals("stud3"))
+            {
+				connectionPoints.Add(new LDrawConnectionPoint(gameObject, LDRawConnectionType.GROOVE_CONNECTION, _Name));
+			}
 		}
 
 		public override void PrepareMeshData(List<int> triangles, List<Vector3> verts)

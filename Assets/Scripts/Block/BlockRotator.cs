@@ -29,7 +29,7 @@ namespace Valve.VR.InteractionSystem
 
         private void MatchTargetBlockRotation(CollisionObject collision)
         {
-            gameObject.transform.rotation = Quaternion.LookRotation(collision.CollidedBlock.transform.up, -transform.forward);
+            gameObject.transform.rotation = Quaternion.LookRotation(collision.TapPosition.transform.up, -transform.forward);
             gameObject.transform.Rotate(Vector3.right, 90f);
         }
 
@@ -44,19 +44,21 @@ namespace Valve.VR.InteractionSystem
                     planeOtherBlock = new Plane(transform.TransformPoint(blockGeometry.CornerBottomA.transform.position),
                                                       transform.TransformPoint(blockGeometry.CornerBottomB.transform.position),
                                                       transform.TransformPoint(blockGeometry.CornerBottomC.transform.position));
-                    distance = planeOtherBlock.GetDistanceToPoint(transform.TransformPoint(collision.CollidedBlock.GetComponent<BlockGeometryScript>().CornerTopA.transform.position));
+                    //distance = planeOtherBlock.GetDistanceToPoint(transform.TransformPoint(collision.CollidedBlock.GetComponent<BlockGeometryScript>().CornerTopA.transform.position));
+                    distance = planeOtherBlock.GetDistanceToPoint(transform.TransformPoint(collision.TapPosition.transform.position));
                     break;
 
                 case OTHER_BLOCK_IS_CONNECTED_ON.TAP:
                     planeOtherBlock = new Plane(transform.TransformPoint(blockGeometry.CornerTopA.transform.position),
                                                       transform.TransformPoint(blockGeometry.CornerTopB.transform.position),
                                                       transform.TransformPoint(blockGeometry.CornerTopC.transform.position));
+                    //planeOtherBlock = new Plane(collision.TapPosition.transform.up, collision.TapPosition.transform.position);
                     distance = planeOtherBlock.GetDistanceToPoint(transform.TransformPoint(collision.CollidedBlock.GetComponent<BlockGeometryScript>().CornerBottomA.transform.position));
                     break;
             }
             transform.Translate(Vector3.up * distance, Space.Self);
 
-            Debug.Log(Vector3.Dot(GetComponent<BlockGeometryScript>().GetBlockNormale(), collision.CollidedBlock.GetComponent<BlockGeometryScript>().GetBlockNormale())); 
+            //Debug.Log(Vector3.Dot(GetComponent<BlockGeometryScript>().GetBlockNormale(), collision.CollidedBlock.GetComponent<BlockGeometryScript>().GetBlockNormale())); 
         }
 
         private void MatchTargetBlockOffset(CollisionObject collision, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)

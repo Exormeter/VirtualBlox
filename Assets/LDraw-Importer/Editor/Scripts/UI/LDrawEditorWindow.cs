@@ -14,7 +14,7 @@ namespace LDraw
             window.Show();
         }
 
-        private string[] _ModelNames;
+        private string[] _PartNames;
         private string _CurrentPart;
         private int _CurrentIndex;
         private GeneratingType _CurrentType;
@@ -22,7 +22,7 @@ namespace LDraw
 
         private void OnEnable()
         {
-            _ModelNames = LDrawConfig.Instance.ModelFileNames;
+            _PartNames = LDrawConfig.Instance.PartFileNames;
         }
 
         private void OnGUI()
@@ -31,7 +31,7 @@ namespace LDraw
             if (GUILayout.Button("Update blueprints"))
             {
                 LDrawConfig.Instance.InitParts();
-                _ModelNames = LDrawConfig.Instance.ModelFileNames;
+                _PartNames = LDrawConfig.Instance.PartFileNames;
             }
             _CurrentType = (GeneratingType) EditorGUILayout.EnumPopup("Blueprint Type", _CurrentType);
             switch (_CurrentType)
@@ -40,7 +40,7 @@ namespace LDraw
                         _CurrentPart = EditorGUILayout.TextField("Name", _CurrentPart);
                         break;
                     case GeneratingType.Models:
-                        _CurrentIndex = EditorGUILayout.Popup("Models", _CurrentIndex, _ModelNames);
+                        _CurrentIndex = EditorGUILayout.Popup("Parts", _CurrentIndex, _PartNames);
                         break;
             }
       
@@ -51,14 +51,8 @@ namespace LDraw
         {
             if (GUILayout.Button("Generate"))
             {
-                _CurrentPart = _CurrentType == GeneratingType.ByName ? _CurrentPart 
-                    : LDrawConfig.Instance.GetModelByFileName(_ModelNames[_CurrentIndex]); 
-                // good test 949ac01
-                var model = LDrawModel.Create(_CurrentPart, LDrawConfig.Instance.GetSerializedPart(_CurrentPart));
-
+                var model = LDrawModel.Create(_PartNames[_CurrentIndex], LDrawConfig.Instance.GetSerializedPart(_PartNames[_CurrentIndex]));
                 lDrawModelConverter.ConvertLDrawModel(model);
-                //var go = model.CreateMeshGameObject(LDrawConfig.Instance.ScaleMatrix);
-
             }
         }
 

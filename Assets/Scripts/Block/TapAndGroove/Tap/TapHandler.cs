@@ -15,8 +15,10 @@ namespace Valve.VR.InteractionSystem
         {
             foreach (TapCollider snaps in GetComponentsInChildren<TapCollider>())
             {
+                snaps.tag = "Tap";
                 colliderDictionary.Add(snaps, new CollisionObject());
             }
+            
         }
 
         //TODO: TapPosition ändern in Groove Poition und anpassen
@@ -28,7 +30,7 @@ namespace Valve.VR.InteractionSystem
                 return;
             }
             colliderDictionary[snappingCollider].IsConnected = acceptNewCollisionsAsConnected;
-
+            Debug.Log("Tap Registered");
             colliderDictionary[snappingCollider].TapPosition = snappingCollider.gameObject;
             colliderDictionary[snappingCollider].GroovePosition = grooveCollider;
             colliderDictionary[snappingCollider].CollidedBlock = grooveCollider.transform.root.gameObject;

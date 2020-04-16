@@ -46,6 +46,14 @@ namespace Valve.VR.InteractionSystem
             partSizes.Add(BLOCKSIZE.NORMAL, Block1x1);
         }
 
+
+        private void Update()
+        {
+            if (Input.GetKeyDown("space"))
+            {
+                GenerateBlock(new BlockStructure(2, 4, true));
+            }
+        }
         /// <summary>
         /// Generates a new Block from a BlockStructure, places it at (0,2,0)
         /// </summary>

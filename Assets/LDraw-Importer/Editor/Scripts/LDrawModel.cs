@@ -14,11 +14,15 @@ namespace LDraw
 
         #region factory
 
-        public static LDrawModel Create(string name, string path)
+        public static LDrawModel Create(string name, string serialized)
         {
-            if (_models.ContainsKey(name)) return _models[name];
+            if (_models.ContainsKey(name))
+            {
+                return _models[name];
+            }
+                
             var model = new LDrawModel();
-            model.Init(name, path);
+            model.Init(name, serialized);
           
             return model;
         }
@@ -29,7 +33,7 @@ namespace LDraw
 
         private string _Name;
         private List<LDrawCommand> _Commands;
-        public List<GameObject> _ConnectionPoints;
+        public List<LDrawConnectionPoint> _ConnectionPoints;
         private List<string> _SubModels;
         private static Dictionary<string, LDrawModel> _models = new Dictionary<string, LDrawModel>();
         
@@ -45,7 +49,7 @@ namespace LDraw
         {
             _Name = name;
             _Commands = new List<LDrawCommand>();
-            _ConnectionPoints = new List<GameObject>();
+            _ConnectionPoints = new List<LDrawConnectionPoint>();
             using (StringReader reader = new StringReader(serialized))
             {
                 string line;
@@ -69,14 +73,14 @@ namespace LDraw
             }
         }
 
-        public GameObject CreateMeshGameObject(Matrix4x4 trs, Material mat = null, Transform parent = null, List<GameObject> connectionPoints = null)
+        public GameObject CreateMeshGameObject(Matrix4x4 trs, Material mat = null, Transform parent = null, List<LDrawConnectionPoint> connectionPoints = null)
         {
             if (_Commands.Count == 0) return null;
             GameObject go = new GameObject(_Name);
 
             if(connectionPoints == null)
             {
-                connectionPoints = new List<GameObject>();
+                connectionPoints = new List<LDrawConnectionPoint>();
             }
             var triangles = new List<int>();
             var verts = new List<Vector3>();

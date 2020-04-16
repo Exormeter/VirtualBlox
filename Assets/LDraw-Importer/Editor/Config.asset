@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Config
   m_EditorClassIdentifier: 
   _BasePartsPath: LDrawFiles/blueprints/base-parts/
+  _PrimitivePartsPath: LDrawFiles/blueprints/base-parts/Primitives/
+  _PartsPath: LDrawFiles/blueprints/base-parts/SubFiles/
   _ModelsPath: LDrawFiles/blueprints/models/
   _ColorConfigPath: LDrawFiles/ldcfgalt.ldr
   _MaterialsPath: Assets/LDraw-Importer/Materials/

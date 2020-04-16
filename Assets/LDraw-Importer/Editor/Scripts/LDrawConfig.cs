@@ -11,7 +11,8 @@ namespace LDraw
 {
     public class LDrawConfig : ScriptableObject
     {
-        [SerializeField] private string _BasePartsPath;
+        [SerializeField] private string _PrimitivePartsPath;
+        [SerializeField] private string _PartsPath;
        
         [SerializeField] private string _ModelsPath;
         [SerializeField] private string _ColorConfigPath;
@@ -20,8 +21,8 @@ namespace LDraw
         [SerializeField] private float _Scale;
         [SerializeField] private Material _DefaultOpaqueMaterial;
         [SerializeField] private Material _DefaultTransparentMaterial;
+        private Dictionary<string, string> _PrimitiveParts;
         private Dictionary<string, string> _Parts;
-        private Dictionary<string, string> _Models;
         
         private Dictionary<int, Material> _MainColors;
         private Dictionary<string, Material> _CustomColors;
@@ -60,60 +61,76 @@ namespace LDraw
 
             return _CustomColors[colorString];
         }
-        public string[] ModelFileNames
+
+        public string[] PartFileNames
         {
-            get { return _ModelFileNames.Keys.ToArray(); }
+            get { return _Parts.Keys.ToArray(); }
         }
 
-        public string GetModelByFileName(string modelFileName)
-        {
-            return _ModelFileNames[modelFileName];
-        }
+        
+
+
         public string GetSerializedPart(string name)
         {
-            try
+            
+            string serialized;
+            if (_Parts.ContainsKey(name))
             {
-                name = name.ToLower();
-                var serialized = _Parts.ContainsKey(name) ? File.ReadAllText(_Parts[name]) : _Models[name]; 
-                return serialized;
+                serialized = File.ReadAllText(_Parts[name]);
             }
-            catch
-
+            else
             {
-                Debug.Log("http://www.ldraw.org/library/tracker/");
-                EditorUtility.DisplayDialog("Error!", "Missing part or wrong part " + name 
-                                                        + "! Find it in url from debug console", "Ok", "");
-                throw;
+                serialized = File.ReadAllText(_PrimitiveParts[name]);
             }
-        
+            return serialized;
         }
 
         public void InitParts()
         {
-
-            Debug.Log("Init Parts");
-            PrepareModels();
             ParseColors();
             _Parts = new Dictionary<string, string>();
-            var files = Directory.GetFiles(_BasePartsPath, "*.*", SearchOption.AllDirectories);
+            var files = Directory.GetFiles(_PartsPath, "*.*", SearchOption.AllDirectories);
 
             foreach (var file in files)
             {
                 if (!file.Contains(".meta"))
                 {
-                    string fileName = file.Replace(_BasePartsPath, "").Split('.')[0];
+                    string fileName = file.Replace(_PartsPath, "").Split('.')[0];
                     if (!_Parts.ContainsKey(fileName))
                     {
                         _Parts.Add(fileName, file);
                     }
+                }
+            }
+        }
 
+        public void InitPrimitiveParts()
+        {
 
-                    string OfficialName = File.ReadLines(file).ElementAtOrDefault(1);
-                    OfficialName = OfficialName.Substring(8);
-                    OfficialName = OfficialName.Replace(".dat", "");
-                    Debug.Log("Inited Part: " + OfficialName);
-                    if (!_Parts.ContainsKey(OfficialName))
-                        _Parts.Add(OfficialName, file);
+            _PrimitiveParts = new Dictionary<string, string>();
+            var files = Directory.GetFiles(_PrimitivePartsPath, "*.*", SearchOption.AllDirectories);
+
+            foreach (var filePath in files)
+            {
+                if (!filePath.Contains(".meta"))
+                {
+                    string fileName = filePath.Replace(_PrimitivePartsPath, "").Split('.')[0];
+                    if (!_PrimitiveParts.ContainsKey(fileName))
+                    {
+                        _PrimitiveParts.Add(fileName, filePath);
+                    }
+                    Debug.Log(fileName);
+                    if (fileName.Contains("-")){
+                        string OfficialName = File.ReadLines(filePath).ElementAtOrDefault(1);
+                        OfficialName = OfficialName.Substring(8);
+                        OfficialName = OfficialName.Replace(".dat", "");
+                        if (!_PrimitiveParts.ContainsKey(OfficialName))
+                        {
+                            _PrimitiveParts.Add(OfficialName, filePath);
+                        }
+                    }
+                    
+                        
                 }
             }
         }
@@ -158,49 +175,7 @@ namespace LDraw
             }
         }
         
-        private void PrepareModels()
-        {
-            _ModelFileNames = new Dictionary<string, string>();
-            var files = Directory.GetFiles(_ModelsPath, "*.*", SearchOption.AllDirectories);
-            _Models = new Dictionary<string, string>();
-            foreach (var file in files)
-            {
-                using (StreamReader reader = new StreamReader(file))
-                {
-                    string line;
-                    string filename = String.Empty;
-
-                    bool isFirst = true;
-                    while ((line = reader.ReadLine()) != null)
-                    {
-                        Regex regex = new Regex("[ ]{2,}", RegexOptions.None);
-                        line = regex.Replace(line, " ").Trim();
-                        var args = line.Split(' ');
-                        if (args.Length  > 1 && args[1] == "FILE")
-                        {
-                           
-                            filename = GetFileName(args, 2);
-                            if (isFirst)
-                            {
-                                _ModelFileNames.Add(Path.GetFileNameWithoutExtension(file), filename);
-                                isFirst = false;
-                            }
-                            
-                            if(_Models.ContainsKey(filename))
-                                filename = String.Empty;
-                            else
-                                _Models.Add(filename, String.Empty);
-                        }
-
-                        if (!string.IsNullOrEmpty(filename))
-                        {
-                            _Models[filename] += line + "\n";
-                        }
-                    } 
-                }
-                
-            }
-        }
+        
 
         public Mesh GetMesh(string name)
         {
@@ -257,6 +232,7 @@ namespace LDraw
         private void OnEnable()
         {
             InitParts();
+            InitPrimitiveParts();
         }
 
         private const string ConfigPath = "Assets/LDraw-Importer/Editor/Config.asset";

@@ -20,7 +20,7 @@ namespace LDraw
             {
 				connectionPoints.Add(new LDrawConnectionPoint(gameObject, LDRawConnectionType.TAP_CONNECTION, _Name));
             }
-            else if (_Name.Equals("stud3"))
+            else if (_Name.Equals("stud3") || _Name.Equals("stud4a"))
             {
 				connectionPoints.Add(new LDrawConnectionPoint(gameObject, LDRawConnectionType.GROOVE_CONNECTION, _Name));
 			}

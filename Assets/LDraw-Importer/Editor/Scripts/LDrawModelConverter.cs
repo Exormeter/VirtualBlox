@@ -15,8 +15,8 @@ namespace LDraw
             GameObject newBlock = CombineTileMeshes(lDrawGameObject);
 
 
-            lDrawGameObject.transform.LocalReflect(Vector3.up);
-            newBlock.transform.LocalReflect(Vector3.up);
+            //lDrawGameObject.transform.LocalReflect(Vector3.up);
+            //newBlock.transform.LocalReflect(Vector3.up);
             AddTapFaces(newBlock, lDrawModel._ConnectionPoints);
             AddGrooveFaces(newBlock, lDrawModel._ConnectionPoints);
             
@@ -133,10 +133,10 @@ namespace LDraw
                     
                     if (System.Math.Abs(plane.GetDistanceToPoint(connectionPoint.ConnectorPosition.transform.GetChild(0).position)) < 0.0001)
                     {
-                        AddGroveCollider(brickFace, connectionPoint, new Vector3(GROOVE_OFFSET,0,0));
-                        AddGroveCollider(brickFace, connectionPoint, new Vector3(-GROOVE_OFFSET,0,0));
-                        AddGroveCollider(brickFace, connectionPoint, new Vector3(0,0,GROOVE_OFFSET));
-                        AddGroveCollider(brickFace, connectionPoint, new Vector3(0,0,-GROOVE_OFFSET));
+                        AddGroveCollider(brickFace, connectionPoint, new Vector3(GROOVE_OFFSET, 0, GROOVE_OFFSET));
+                        AddGroveCollider(brickFace, connectionPoint, new Vector3(GROOVE_OFFSET, 0, -GROOVE_OFFSET));
+                        AddGroveCollider(brickFace, connectionPoint, new Vector3(-GROOVE_OFFSET, 0, GROOVE_OFFSET));
+                        AddGroveCollider(brickFace, connectionPoint, new Vector3(-GROOVE_OFFSET, 0, -GROOVE_OFFSET));
                     }
                 }
                 brickFace.AddComponent<GrooveHandler>();

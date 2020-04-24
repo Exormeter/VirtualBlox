@@ -3,6 +3,7 @@
     public enum LDRawConnectionType
     {
         TAP_CONNECTION,
-        GROOVE_CONNECTION
+        GROOVE_CONNECTION,
+        SPECIAL
     }
 }

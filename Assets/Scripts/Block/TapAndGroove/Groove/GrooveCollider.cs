@@ -34,16 +34,5 @@ namespace Valve.VR.InteractionSystem
             
             grooveHandler.UnregisterCollision(this, tapCollider.gameObject);
         }
-
-        //private void OnTriggerStay(Collider tapCollider)
-        //{
-        //    if (tapCollider.gameObject.tag != "Tap")
-        //    {
-        //        return;
-        //    }
-        //    grooveHandler.RegisterCollision(this, tapCollider.gameObject);
-        //}
-
-
     }
 }

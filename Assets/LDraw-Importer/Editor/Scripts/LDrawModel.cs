@@ -20,10 +20,10 @@ namespace LDraw
             {
                 return _models[name];
             }
-                
+
             var model = new LDrawModel();
             model.Init(name, serialized);
-          
+
             return model;
         }
 
@@ -33,10 +33,10 @@ namespace LDraw
 
         private string _Name;
         private List<LDrawCommand> _Commands;
-        public List<LDrawConnectionPoint> _ConnectionPoints;
+        public List<LDrawAbstractConnectionPoint> _ConnectionPoints;
         private List<string> _SubModels;
         private static Dictionary<string, LDrawModel> _models = new Dictionary<string, LDrawModel>();
-        
+
         public string Name
         {
             get { return _Name; }
@@ -49,7 +49,7 @@ namespace LDraw
         {
             _Name = name;
             _Commands = new List<LDrawCommand>();
-            _ConnectionPoints = new List<LDrawConnectionPoint>();
+            _ConnectionPoints = new List<LDrawAbstractConnectionPoint>();
             using (StringReader reader = new StringReader(serialized))
             {
                 string line;
@@ -73,18 +73,18 @@ namespace LDraw
             }
         }
 
-        public GameObject CreateMeshGameObject(Matrix4x4 trs, Material mat = null, Transform parent = null, List<LDrawConnectionPoint> connectionPoints = null)
+        public GameObject CreateMeshGameObject(Matrix4x4 trs, Material mat = null, Transform parent = null, List<LDrawAbstractConnectionPoint> connectionPoints = null)
         {
             if (_Commands.Count == 0) return null;
             GameObject go = new GameObject(_Name);
 
-            if(connectionPoints == null)
+            if (connectionPoints == null)
             {
-                connectionPoints = new List<LDrawConnectionPoint>();
+                connectionPoints = new List<LDrawAbstractConnectionPoint>();
             }
             var triangles = new List<int>();
             var verts = new List<Vector3>();
-        
+
             for (int i = 0; i < _Commands.Count; i++)
             {
                 var sfCommand = _Commands[i] as LDrawSubFile;
@@ -97,7 +97,7 @@ namespace LDraw
                     sfCommand.GetModelGameObject(go.transform, connectionPoints);
                 }
             }
-        
+
             if (mat != null)
             {
                 var childMrs = go.transform.GetComponentsInChildren<MeshRenderer>();
@@ -106,38 +106,38 @@ namespace LDraw
                     meshRenderer.material = mat;
                 }
             }
-        
+
             if (verts.Count > 0)
             {
                 var visualGO = new GameObject("mesh");
                 visualGO.transform.SetParent(go.transform);
                 var mf = visualGO.AddComponent<MeshFilter>();
-        
+
                 mf.sharedMesh = PrepareMesh(verts, triangles);
                 var mr = visualGO.AddComponent<MeshRenderer>();
                 if (mat != null)
                 {
                     mr.sharedMaterial = mat;
-                  
+
                 }
 
             }
-            
+
             go.transform.ApplyLocalTRS(trs);
-        
+
             go.transform.SetParent(parent);
             _ConnectionPoints = connectionPoints;
             return go;
         }
         private Mesh PrepareMesh(List<Vector3> verts, List<int> triangles)
-        {  
-            
+        {
+
             Mesh mesh = LDrawConfig.Instance.GetMesh(_Name);
             if (mesh != null) return mesh;
-            
-          
+
+
             mesh = new Mesh();
-      
+
             mesh.name = _Name;
             var frontVertsCount = verts.Count;
             //backface
@@ -157,10 +157,10 @@ namespace LDraw
             }
             triangles.AddRange(tris);
             //end backface
-            
+
             mesh.SetVertices(verts);
             mesh.SetTriangles(triangles, 0);
-            
+
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
             //LDrawConfig.Instance.SaveMesh(mesh);
@@ -168,13 +168,13 @@ namespace LDraw
             return mesh;
         }
 
-        
+
 
         #endregion
 
         private LDrawModel()
         {
-            
+
         }
     }
 }

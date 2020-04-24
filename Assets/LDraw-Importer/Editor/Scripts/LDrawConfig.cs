@@ -74,6 +74,10 @@ namespace LDraw
         {
             
             string serialized;
+            if (name.StartsWith("s\\"))
+            {
+                name = name.Substring(2);
+            }
             if (_Parts.ContainsKey(name))
             {
                 serialized = File.ReadAllText(_Parts[name]);

@@ -1,56 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 
 namespace Valve.VR.InteractionSystem
 {
-    public class BlockGeometryScript : MonoBehaviour
+    public class BlockGeometryCustom : BlockGeometryScript
     {
-
-        /// <summary>The height of a brick, can be flat (0.032) or normal (0.096)</summary>
-        private float BRICK_HEIGHT;
-
-        public static float BRICK_HEIGHT_NORMAL = 0.096f;
-
-        public static float BRICK_HEIGHT_FLAT = 0.032f;
-
-        /// <summary>The height of the pins on the upside of the bricks</summary>
-        private const float BRICK_PIN_HEIGHT = 0.016f;
-
-        /// <summary>The height of the pins halfed</summary>
-        private const float BRICK_PIN_HEIGHT_HALF = BRICK_PIN_HEIGHT / 2;
-
-        /// <summary>The thickness of the walls of the brick</summary>
-        private const float BRICK_WALL_WIDTH = 0.008f;
-
-        /// <summary>The thickness of the brick halfed</summary>
-        private const float BRICK_WALL_WIDTH_HALF = BRICK_WALL_WIDTH / 2;
-
-        /// <summary>The distance between to pins on the upside of a brick</summary>
-        private const float BRICK_PIN_DISTANCE = 0.08f;
-
-        /// <summary>The lenght of a brick, meassure taken from a 1x1 brick</summary>
-        private const float BRICK_LENGTH = 0.08f;
-
-        /// <summary>The diameter of a pin on the upside of a brick</summary>
-        private const float BRICK_PIN_DIAMETER = 0.048f;
-
-        /// <summary>
-        /// A container GameObject that contains all TapCollider as well as the
-        /// TapHandler
-        /// </summary>
-        public GameObject TapContainer;
-
-        /// <summary>
-        /// A container GameObject that contains all GrooveCollider as well as the
-        /// GrooveHandler
-        /// </summary>
-        public GameObject GroovesContainer;
-
-        /// <summary>The mesh of the block</summary>
-        private Mesh mesh;
 
         /// <summary>
         /// The BlockStructure is containing the color, height and the contoures of the
@@ -63,23 +18,9 @@ namespace Valve.VR.InteractionSystem
         /// </summary>
         public GameObject TopColliderContainer;
 
-        /// <summary>A list that contains all wall colliders of the block</summary>
-        private List<Collider> wallColliderList = new List<Collider>();
-
-        void Awake()
+        protected new void Awake()
         {
             this.mesh = GetComponent<MeshFilter>().mesh;
-
-            //Sets the height of the brick to the correct value
-            if (mesh.bounds.extents.y < 0.047)
-            {
-                BRICK_HEIGHT = 0.032f;
-            }
-            else
-            {
-                BRICK_HEIGHT = 0.096f;
-            }
-
             //Create the TapContainer and adds the TapHandler to it
             GameObject taps = new GameObject("Taps");
             taps.tag = "Tap";
@@ -95,32 +36,16 @@ namespace Valve.VR.InteractionSystem
             grooves.transform.localPosition = new Vector3(0f, 0f, 0f);
             TapContainer = taps;
             GroovesContainer = grooves;
-
         }
 
-        private void Start()
+        /// <summary>
+        /// Returnes the current BlockStructure
+        /// </summary>
+        /// <returns>The BlockSturcture of the Block</returns>
+        public BlockStructure GetStructure()
         {
-            //Structure was not set, so try to calculate Walls
-            if (GetComponents<Collider>().Length == 0)
-            {
-                AddWallCollider();
-                AddPinTriggerCollider(BRICK_PIN_HEIGHT_HALF, TapContainer, "Tap");
-                AddPinTriggerCollider(-BRICK_HEIGHT / 1.1f, GroovesContainer, "Groove");
-                SetWallColliderTrigger(false);
-            }
+            return blockStructure;
         }
-
-        private void Update()
-        {
-            if (Input.anyKeyDown)
-            {
-                TapContainer.SetActive(true);
-                GroovesContainer.SetActive(true);
-                
-                SetWallColliderTrigger(false);
-            }
-        }
-
 
         /// <summary>
         /// Sets the BlockStructure for the Block, recalculated the Groove and Taps and Collider
@@ -157,19 +82,8 @@ namespace Valve.VR.InteractionSystem
 
             //Add the new Tap and Groove Collider to the Block, as the changed as well with the
             //new structure
-            AddPinTriggerColliderByStructure(BRICK_PIN_HEIGHT_HALF, TapContainer, "Tap");
-            AddPinTriggerColliderByStructure(-BRICK_HEIGHT / 1.1f, GroovesContainer, "Groove");
-            
-
-        }
-
-        /// <summary>
-        /// Returnes the current BlockStructure
-        /// </summary>
-        /// <returns>The BlockSturcture of the Block</returns>
-        public BlockStructure GetStructure()
-        {
-            return blockStructure;
+            AddPinTriggerColliderByStructure(BRICK_HEIGHT - BRICK_PIN_HEIGHT_HALF, TapContainer, "TapFace");
+            AddPinTriggerColliderByStructure(0, GroovesContainer, "GrooveFace");
         }
 
         /// <summary>
@@ -196,10 +110,10 @@ namespace Valve.VR.InteractionSystem
             //Loop throught the cropped BlockStructure
             for (int row = 0; row < blockStructure.RowsCropped; row++)
             {
-                for(int col = 0; col < blockStructure.ColsCropped; col++)
+                for (int col = 0; col < blockStructure.ColsCropped; col++)
                 {
                     //If a Part inside the Matrix is not null, set a new collider
-                    if(blockStructure[row, col] != null)
+                    if (blockStructure[row, col] != null)
                     {
 
                         float centerX = (rowMiddlePoint - row) * BRICK_LENGTH;
@@ -224,16 +138,16 @@ namespace Valve.VR.InteractionSystem
         public void AddWallCollider(List<List<BlockPart>> allWallsInStructure)
         {
             //Loop thought every wall
-            foreach(List<BlockPart> wall in allWallsInStructure)
+            foreach (List<BlockPart> wall in allWallsInStructure)
             {
                 //Lenght of the wall, depents on the number of BlockParts time the length of a 1x1 brick
                 float wallLength = wall.Count * BRICK_LENGTH;
 
                 //MiddlePoint row of the BlockStructure Matrix
-                float rowMiddlePoint = (float) (blockStructure.RowsCropped - 1) / 2;
+                float rowMiddlePoint = (float)(blockStructure.RowsCropped - 1) / 2;
 
                 //MiddlePoint column of the BlockStructure Matrix
-                float colMiddlePoint = (float) (blockStructure.ColsCropped - 1) / 2;
+                float colMiddlePoint = (float)(blockStructure.ColsCropped - 1) / 2;
 
 
                 //Gets the center of the mesh for positioning of the collider
@@ -277,7 +191,7 @@ namespace Valve.VR.InteractionSystem
                             wallColliderList.Add(AddBoxCollider(size, centerCollider, false, transform.gameObject));
                             break;
                         }
-                        
+
 
                     case DIRECTION.LEFT:
                         {
@@ -290,7 +204,7 @@ namespace Valve.VR.InteractionSystem
                             wallColliderList.Add(AddBoxCollider(size, centerCollider, false, transform.gameObject));
                             break;
                         }
-                            
+
 
                     case DIRECTION.RIGHT:
                         {
@@ -330,11 +244,11 @@ namespace Valve.VR.InteractionSystem
                         List<BlockPart> tempList = SearchWallsAtLocation(row, col, direction);
 
                         //If the Search was successful, add the List to the List that will returned
-                        if(tempList != null && tempList.Count != 0)
+                        if (tempList != null && tempList.Count != 0)
                         {
                             allWallsInStructure.Add(tempList);
                         }
-                        
+
                     }
                 }
             }
@@ -353,7 +267,7 @@ namespace Valve.VR.InteractionSystem
         private List<BlockPart> SearchWallsAtLocation(int row, int col, DIRECTION direction, List<BlockPart> wallInStructure = null)
         {
             //If search is outside the matrix, return the List
-            if(row >= blockStructure.RowsCropped || col >= blockStructure.ColsCropped || row < 0 || col < 0)
+            if (row >= blockStructure.RowsCropped || col >= blockStructure.ColsCropped || row < 0 || col < 0)
             {
                 return wallInStructure;
             }
@@ -365,7 +279,7 @@ namespace Valve.VR.InteractionSystem
             }
 
             //If BlockPart has no neighbor in searched direction, part of wall is found
-            if (blockStructure[row, col] != null && !blockStructure.HasNeighbour(row, col, direction) )
+            if (blockStructure[row, col] != null && !blockStructure.HasNeighbour(row, col, direction))
             {
                 //Remember that this part was search in the direction
                 blockStructure[row, col].DirectionVisited(direction);
@@ -382,87 +296,10 @@ namespace Valve.VR.InteractionSystem
                 {
                     SearchWallsAtLocation(row + 1, col, direction, wallInStructure);
                 }
-                
+
             }
 
             return wallInStructure;
-        }
-
-        /// <summary>
-        /// Remove all wall Collider on the GameObject
-        /// </summary>
-        private void RemoveWallCollider()
-        {
-            for(int i = 0; i < wallColliderList.Count; i++)
-            {
-                Destroy(wallColliderList[i]);
-            }
-            wallColliderList.Clear();
-        }
-
-        /// <summary>
-        /// Tries to calculates the walls of the block, only works for rectangle blocks. For
-        /// non-rectangle blocks a BlockStructure is needed
-        /// </summary>
-        private void AddWallCollider()
-        {
-            Vector3 size = mesh.bounds.size;
-            Vector3 center = mesh.bounds.center;
-            Vector3 extends = mesh.bounds.extents;
-            //Collider Long Side
-            Vector3 longSideSize = new Vector3(size.x, BRICK_HEIGHT, BRICK_WALL_WIDTH);
-            Vector3 longSideCenterLeft = new Vector3(center.x, center.y - BRICK_PIN_HEIGHT_HALF, center.z + extends.z - BRICK_WALL_WIDTH_HALF);
-            Vector3 longSideCenterRight = new Vector3(center.x, center.y - BRICK_PIN_HEIGHT_HALF, center.z - extends.z + BRICK_WALL_WIDTH_HALF);
-            wallColliderList.Add(AddBoxCollider(longSideSize, longSideCenterLeft, false, this.gameObject));
-            wallColliderList.Add(AddBoxCollider(longSideSize, longSideCenterRight, false, this.gameObject));
-
-
-            //Collider Short Side
-            Vector3 shortSide = new Vector3(BRICK_WALL_WIDTH, BRICK_HEIGHT, size.z);
-            Vector3 shortSideCenterUp = new Vector3(center.x + extends.x - BRICK_WALL_WIDTH_HALF, center.y - BRICK_PIN_HEIGHT_HALF, center.z);
-            Vector3 shortSideCenterDown = new Vector3(center.x - extends.x + BRICK_WALL_WIDTH_HALF, center.y - BRICK_PIN_HEIGHT_HALF, center.z);
-            wallColliderList.Add(AddBoxCollider(shortSide, shortSideCenterUp, false, this.gameObject));
-            wallColliderList.Add(AddBoxCollider(shortSide, shortSideCenterDown, false, this.gameObject));
-
-            //Collider Top Side
-            Vector3 topSideSize = new Vector3(size.x, BRICK_WALL_WIDTH, size.z);
-            Vector3 topSideCenter = GetCenterTop();
-            topSideCenter.y = topSideCenter.y - (BRICK_WALL_WIDTH / 2);
-            wallColliderList.Add(AddBoxCollider(topSideSize, topSideCenter, false, this.gameObject));
-        }
-
-        /// <summary>
-        /// Adds the Collider to the Tap and Groove Container, only for use if no BlockStructure provided
-        /// </summary>
-        /// <param name="heightOffset">If no offset is provided, the collider are inline with bottom edge of the block</param>
-        /// <param name="containerObject">The GameObject which the ColliderContainer GameObject is added to</param>
-        /// <param name="tag">The Tag that will be added to the ColliderContainer</param>
-        private void AddPinTriggerCollider(float heightOffset, GameObject containerObject, String tag)
-        {
-            Vector3 center = mesh.bounds.center;
-            Vector3 extends = mesh.bounds.extents;
-            Vector3 blockCorner = new Vector3(center.x + extends.x, center.y + extends.y - BRICK_PIN_HEIGHT, center.z + extends.z);
-            Vector3 firstPinCenterPoint = new Vector3(blockCorner.x - (BRICK_PIN_DISTANCE / 2), blockCorner.y + heightOffset, blockCorner.z - (BRICK_PIN_DISTANCE / 2));
-
-            Vector3 currentPinCenterPoint = firstPinCenterPoint;
-
-            while (mesh.bounds.Contains(currentPinCenterPoint))
-            {
-
-                while (mesh.bounds.Contains(currentPinCenterPoint))
-                {
-                    //bool isTrigger = true;
-                    //if (tag.Equals("Tap"))
-                    //{
-                    //    isTrigger = false;
-                    //}
-                    AddGameObjectCollider(currentPinCenterPoint, tag, containerObject, true);
-                    currentPinCenterPoint.z = currentPinCenterPoint.z - BRICK_PIN_DISTANCE;
-                }
-                currentPinCenterPoint.x = currentPinCenterPoint.x - BRICK_PIN_DISTANCE;
-                currentPinCenterPoint.z = firstPinCenterPoint.z;
-
-            }
         }
 
         /// <summary>
@@ -485,13 +322,9 @@ namespace Valve.VR.InteractionSystem
             {
                 for (int col = 0; col < blockStructure.ColsCropped; col++)
                 {
-                    if(blockStructure[row, col] != null)
+                    if (blockStructure[row, col] != null)
                     {
                         bool isTrigger = true;
-                        //if (tag.Equals("Tap"))
-                        //{
-                        //    isTrigger = false;
-                        //}
 
                         float centerX = (rowMiddlePoint - row) * BRICK_LENGTH;
                         float centerY = GetCenterTop().y + heightOffset;
@@ -500,117 +333,21 @@ namespace Valve.VR.InteractionSystem
                         Vector3 currentPinCenterPoint = new Vector3(centerX, centerY, centerZ);
                         AddGameObjectCollider(currentPinCenterPoint, tag, containerObject, isTrigger);
                     }
-                    
+
                 }
             }
         }
 
         /// <summary>
-        /// Adds a single new GameObject with a Collider as well as a GrooveCollider or TapCollider
-        /// component to the Container
+        /// Remove all wall Collider on the GameObject
         /// </summary>
-        /// <param name="position">The position of the new GameObject and in term the Collider</param>
-        /// <param name="tag">Changes with offset and if a Tap or GrooveCollider Component is added</param>
-        /// <param name="container">Where the SubContainer is added to</param>
-        /// <param name="isTrigger">Should the Collider be a trigger</param>
-        public static void AddGameObjectCollider(Vector3 position, String tag, GameObject container, bool isTrigger)
+        private void RemoveWallCollider()
         {
-            GameObject colliderObject = new GameObject("Collider");
-            colliderObject.tag = tag;
-            colliderObject.transform.SetParent(container.transform);
-            colliderObject.transform.localPosition = position;
-
-            switch (tag)
+            for (int i = 0; i < wallColliderList.Count; i++)
             {
-                case "Groove":
-                    colliderObject.AddComponent<GrooveCollider>();
-                    AddBoxCollider(new Vector3(BRICK_PIN_DIAMETER / 2, BRICK_PIN_HEIGHT, BRICK_PIN_DIAMETER / 2), new Vector3(0, 0, 0), isTrigger, colliderObject);
-                    break;
-
-                case "Tap":
-                    colliderObject.AddComponent<TapCollider>();
-                    AddBoxCollider(new Vector3(BRICK_PIN_DIAMETER / 2, BRICK_PIN_HEIGHT, BRICK_PIN_DIAMETER / 2), new Vector3(0, 0, 0), isTrigger, colliderObject);
-                    break;
-
-                //case "TapCollider":
-                //    AddBoxCollider(new Vector3(BRICK_PIN_DIAMETER, BRICK_PIN_HEIGHT, BRICK_PIN_DIAMETER), new Vector3(0, 0, 0), isTrigger, colliderObject, material);
-                //    break;
+                Destroy(wallColliderList[i]);
             }
-        }
-
-        /// <summary>
-        /// Adds a Collider Component to a GameObject with a specific physic material
-        /// </summary>
-        /// <param name="size">Size of the new Collider</param>
-        /// <param name="center">Center of the new Collider</param>
-        /// <param name="isTrigger">Should the Collider be a trigger</param>
-        /// <param name="otherGameObject">Where the Collider is added to</param>
-        /// <param name="material">The material of the collider</param>
-        /// <returns>The newly added Collider</returns>
-        public static Collider AddBoxCollider(Vector3 size, Vector3 center, bool isTrigger, GameObject otherGameObject, PhysicMaterial material)
-        {
-            BoxCollider newCollider = otherGameObject.AddComponent<BoxCollider>();
-            newCollider.size = size;
-            newCollider.center = center;
-            newCollider.isTrigger = isTrigger;
-            newCollider.material = material;
-            return newCollider;
-        }
-
-        /// <summary>
-        /// Adds a Collider Component to a GameObject
-        /// </summary>
-        /// <param name="sizeCollider">Size of the new Collider</param>
-        /// <param name="centerCollider">Center of the new Collider</param>
-        /// <param name="isTrigger">Should the Collider be a trigger</param>
-        /// <param name="otherGameObject">Where the Collider is added to</param>
-        /// <returns>The newly added Collider</returns>
-        public static Collider AddBoxCollider(Vector3 sizeCollider, Vector3 centerCollider, bool isTrigger, GameObject otherGameObject)
-        {
-            BoxCollider newCollider = otherGameObject.AddComponent<BoxCollider>();
-            newCollider.size = sizeCollider;
-            newCollider.center = centerCollider;
-            newCollider.isTrigger = isTrigger;
-            return newCollider;
-        }
-
-        /// <summary>
-        /// Gets the center of the Block as local position
-        /// </summary>
-        /// <returns>Center of Block local</returns>
-        public Vector3 GetCenterTop()
-        {
-            Vector3 center = GetComponent<MeshFilter>().mesh.bounds.center;
-            Vector3 extends = GetComponent<MeshFilter>().mesh.bounds.extents;
-            center.y = center.y + extends.y - BRICK_PIN_HEIGHT;
-            return center;
-
-        }
-
-        /// <summary>
-        /// Gets the center of the Block as world position
-        /// </summary>
-        /// <returns>Center of Block world</returns>
-        public Vector3 GetCenterTopWorld()
-        {
-            Vector3 center = mesh.bounds.center;
-            Vector3 extends = mesh.bounds.extents;
-            center.y = center.y + extends.y - BRICK_PIN_HEIGHT;
-            return transform.TransformPoint(center);
-
-        }
-
-        public Vector3 GetCenterBottom()
-        {
-            Vector3 center = mesh.bounds.center;
-            Vector3 extends = mesh.bounds.extents;
-            center.y = center.y - extends.y;
-            return center;
-        }
-
-        public void SetWallColliderTrigger(bool trigger)
-        {
-            wallColliderList.ForEach(collder => collder.isTrigger = trigger);
+            wallColliderList.Clear();
         }
 
         public void OnAttachToFloor()
@@ -624,3 +361,4 @@ namespace Valve.VR.InteractionSystem
         }
     }
 }
+

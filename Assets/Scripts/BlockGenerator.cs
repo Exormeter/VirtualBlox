@@ -83,7 +83,7 @@ namespace Valve.VR.InteractionSystem
                 }
             }
             GameObject newBlock = CombineTileMeshes(container);
-            newBlock.AddComponent<BlockGeometryScript>().SetStructure(structure);
+            newBlock.AddComponent<BlockGeometryCustom>().SetStructure(structure);
             newBlock.GetComponent<MeshRenderer>().material = blockMaterial;
             newBlock.transform.position = new Vector3(0, 2, 0);
             newBlock.tag = "Block";

@@ -76,12 +76,12 @@ namespace Valve.VR.InteractionSystem
             guid = block.GetComponent<BlockCommunication>().Guid;
             position = block.transform.position;
             rotation = block.transform.rotation;
-            matrix = ConvertToBoolMatrix(block.GetComponent<BlockGeometryScript>().blockStructure);
+            matrix = ConvertToBoolMatrix(block.GetComponent<BlockGeometryCustom>().blockStructure);
             connectedBlocks = GetConnectedBlocks(block.GetComponent<BlockCommunication>());
-            Rows = block.GetComponent<BlockGeometryScript>().blockStructure.RowsCropped;
-            Cols = block.GetComponent<BlockGeometryScript>().blockStructure.ColsCropped;
+            Rows = block.GetComponent<BlockGeometryCustom>().blockStructure.RowsCropped;
+            Cols = block.GetComponent<BlockGeometryCustom>().blockStructure.ColsCropped;
             color = block.GetComponent<MeshRenderer>().material.color;
-            blockSize = block.GetComponent<BlockGeometryScript>().blockStructure.BlockSize;
+            blockSize = block.GetComponent<BlockGeometryCustom>().blockStructure.BlockSize;
             timeStamp = GameObject.FindGameObjectWithTag("BlockManager").GetComponent<BlockManager>().GetTimeStampByGuid(guid);
         }
 

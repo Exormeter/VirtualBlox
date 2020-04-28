@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using LDraw;
 
 namespace Valve.VR.InteractionSystem
 {
@@ -27,9 +28,11 @@ namespace Valve.VR.InteractionSystem
         public GameObject PrecurserBlock;
 
         /// <summary>
-        /// The materal for the Blocks
+        /// The material for the Blocks
         /// </summary>
         public Material material;
+
+        private LDrawModelConverter lDrawModelConverter;
 
 
         private Dictionary<BLOCKSIZE, GameObject> partSizes = new Dictionary<BLOCKSIZE, GameObject>();
@@ -42,6 +45,7 @@ namespace Valve.VR.InteractionSystem
         // Start is called before the first frame update
         void Start()
         {
+            lDrawModelConverter = new LDrawModelConverter();
             partSizes.Add(BLOCKSIZE.FLAT, Block1x1Flat);
             partSizes.Add(BLOCKSIZE.NORMAL, Block1x1);
         }
@@ -89,6 +93,18 @@ namespace Valve.VR.InteractionSystem
             newBlock.tag = "Block";
             AddPrecurserComponents(newBlock);
             return newBlock;
+        }
+
+        public GameObject GenerateBlock(string partName)
+        {
+            LDrawModel model = LDrawModel.Create(partName, partName);
+            GameObject newBlock = lDrawModelConverter.ConvertLDrawModel(model);
+            newBlock.AddComponent<BlockGeometryLDrawPart>();
+            newBlock.transform.position = new Vector3(0, 2, 0);
+            newBlock.tag = "Block";
+            AddPrecurserComponents(newBlock);
+            //NonConvexMeshCollider.Create
+            return newBlock;   
         }
 
         

@@ -27,7 +27,7 @@ using UnityEditor;
 public class NonConvexMeshCollider : MonoBehaviour
 {
     public bool shouldMerge = true;
-    public bool createColliderChildGameObject = true;
+    public bool createColliderChildGameObject = false;
     public int boxesPerEdge = 20;
 
     public void Calculate()

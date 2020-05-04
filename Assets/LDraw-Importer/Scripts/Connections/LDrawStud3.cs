@@ -26,6 +26,7 @@ namespace LDraw
                 }
             }
 
+            //Moving Conector up to ensure that it inside the encasing box
             base.ConnectorPosition.transform.position = base.ConnectorPosition.transform.position + base.ConnectorPosition.transform.up * 0.01f;
 
             //4-4Disc for stud3
@@ -50,7 +51,10 @@ namespace LDraw
                 }
             }
 
-            if(smallestVolume == float.MaxValue)
+            //Moving the Connector back to original position for Groove Collider Positioning
+            base.ConnectorPosition.transform.position = base.ConnectorPosition.transform.position - base.ConnectorPosition.transform.up * 0.01f;
+
+            if (smallestVolume == float.MaxValue)
             {
                 Debug.Log("No containing Box found");
                 return null;

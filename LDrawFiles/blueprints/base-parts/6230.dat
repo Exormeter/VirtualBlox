@@ -1,0 +1,12 @@
+0 ~Wheel 10 x  4 with Integral Rubber Black Tyre
+0 Name: 6230.dat
+0 Author: Philippe Hurbain [Philo]
+0 !LDRAW_ORG Unofficial_Part
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !KEYWORDS Plane, Aircraft
+
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 s\6230s01.dat
+1 256 0 0 0 1 0 0 0 1 0 0 0 1 s\6230s02.dat

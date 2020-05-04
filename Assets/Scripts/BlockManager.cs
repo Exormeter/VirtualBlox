@@ -88,8 +88,18 @@ namespace Valve.VR.InteractionSystem
             List<BlockSave> savedBlocks = new List<BlockSave>();
             foreach(HistoryObject historyObject in lastHistoryObjects)
             {
-                savedBlocks.Add(new BlockSave(GetBlockByGuid(historyObject.guid)));
+                GameObject block = GetBlockByGuid(historyObject.guid);
+                Debug.Log(block.GetComponent<BlockGeometryScript>().BlockIdentifier.ToString());
+                switch (block.GetComponent<BlockGeometryScript>().BlockIdentifier)
+                {
+                    case BlockIdentifier.BLOCK_CUSTOM:
+                        savedBlocks.Add(new CustomBlockSave(block));
+                        break;
 
+                    case BlockIdentifier.BLOCK_LDRAW:
+                        savedBlocks.Add(new LDrawBlockSave(block));
+                        break;
+                }
                 RemoveBlock(historyObject.guid);
             }
 

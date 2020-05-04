@@ -1,0 +1,16 @@
+0 Technic Bumper  2 x 18
+0 Name: u656.dat
+0 Author: Marc Giraudet [Mad_Marc]
+0 !LDRAW_ORG Unofficial_Part
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+1 16 -169.706 0 0 1 0 0 0 1 0 0 0 1 s\u656s01.dat
+0 // INVERTNEXT
+1 16 -169.706 0 0 1 0 0 0 -1 0 0 0 1 s\u656s01.dat
+1 16 -169.706 0 0 169.706 0 0 0 -1 0 0 0 1 s\u656s02.dat
+1 16 -169.706 0 0 169.706 0 0 0 1 0 0 0 1 s\u656s02.dat
+1 16 169.706 0 0 -1 0 0 0 -1 0 0 0 1 s\u656s01.dat
+0 // INVERTNEXT
+1 16 169.706 0 0 -1 0 0 0 1 0 0 0 1 s\u656s01.dat

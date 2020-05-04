@@ -133,9 +133,9 @@ namespace Valve.VR.InteractionSystem
 
         
        
-        public List<BlockStructure> GetStructures()
+        public List<CustomBlockStructure> GetStructures()
         {
-            List<BlockStructure> blockStructures = new List<BlockStructure>();
+            List<CustomBlockStructure> blockStructures = new List<CustomBlockStructure>();
 
             if (!wasInitalized)
             {
@@ -149,7 +149,7 @@ namespace Valve.VR.InteractionSystem
                     Toggle toggle = matrix[row][col].GetComponent<Toggle>();
                     if (toggle.isOn && !matrix[row][col].tag.Equals("Visited"))
                     {
-                        BlockStructure structure = new BlockStructure(Rows, Columns);
+                        CustomBlockStructure structure = new CustomBlockStructure(Rows, Columns);
                         FindAdjacentNodes(structure, row, col);
                         blockStructures.Add(structure);
                     }
@@ -159,7 +159,7 @@ namespace Valve.VR.InteractionSystem
             return blockStructures;
         }
 
-        public void SetStructure(BlockStructure structure)
+        public void SetStructure(CustomBlockStructure structure)
         {
             ClearMatrix();
             BlockPart[,] croppedMatrix = structure.GetCroppedMatrix();
@@ -192,7 +192,7 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
-        private void FindAdjacentNodes(BlockStructure structure, int row, int column)
+        private void FindAdjacentNodes(CustomBlockStructure structure, int row, int column)
         {
             if (row >= matrix.Count || column >= matrix[0].Count || row < 0 || column < 0 || matrix[row][column].tag.Equals("Visited"))
                 return;

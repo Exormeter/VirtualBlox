@@ -1,0 +1,12 @@
+0 Bracelet 25L with 14 Studs Filler Segment
+0 Name: 66821k02.dat
+0 Author: Philippe Hurbain [Philo]
+0 !LDRAW_ORG Unofficial_Part Flexible_Section
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !CATEGORY Sheet Plastic
+0 !KEYWORDS Wrist, Band, Strap, DOTS
+
+1 16 0 2.25 0 22.5 0 0 0 0 2.25 0 1 0 box4o8a.dat

@@ -1,0 +1,25 @@
+0 Bar Hollow Junction (Needs Work)
+0 Name: bar02.dat
+0 Author: Tore Eriksson [Tore_Eriksson]
+0 !LDRAW_ORG Unofficial_Primitive
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 // Needs Work: Overlaps
+0 // Needs Work: Missing tons of edges
+
+1 16  0 0 0  6 0 0  0 0 6  0 1 0  4-4edge.dat
+1 16  0 0 3  6 0 0  0 0 6  0 1 0  4-4edge.dat
+1 16  0 0 0  6 0 0  0 0 6  0 3 0  4-4cyli.dat
+1 16  0 0 3  6 0 0  0 0 6  0 1 0  4-4edge.dat
+1 16  0 0 3  3 0 0  0 0 3  0 1 0  4-4edge.dat
+0 BFC INVERTNEXT
+1 16  0 0 1  3 0 0  0 0 3  0 2 0  4-4cyli.dat
+1 16  0 0 1  3 0 0  0 0 3  0 -1 0  4-4disc.dat
+1 16  0 0 1  3 0 0  0 0 3  0 1 0  4-4edge.dat
+1 16  0 0 0  3 0 0  0 0 3  0 1 0  4-4ring1.dat
+1 16  0 0 3  3 0 0  0 0 3  0 -1 0  4-4ring1.dat
+1 16  -10 0 0  0 20 0  1 0 0  0 0 1  bar01.dat
+1 16  0 -10 0  1 0 0  0 20 0  0 0 1  bar01.dat
+0

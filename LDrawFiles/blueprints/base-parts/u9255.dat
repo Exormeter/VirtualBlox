@@ -1,0 +1,16 @@
+0 ~Technic Pneumatic Tube End (Non-Bulged)
+0 Name: u9255.dat
+0 Author: Steffen [Steffen]
+0 !LDRAW_ORG Unofficial_Subpart
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 // This file goes together with 165.dat and 166.dat.
+0 // Those 3 files can be used to create Technic Pneumatic Tubes
+0 // with either bulged or non-bulged ends.
+
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 4-4ring3.dat
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 4-4ring4.dat
+1 16 0 0 0 3 0 0 0 3 0 0 0 3 4-4edge.dat
+1 16 0 0 0 5 0 0 0 5 0 0 0 5 4-4edge.dat

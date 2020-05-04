@@ -1,0 +1,17 @@
+0 ~Electric Light & Sound Insectoid Tail  4 x 20 x  3 Lamp
+0 Name: u9250.dat
+0 Author: Paul Easter [pneaster]
+0 !LDRAW_ORG Unofficial_Part
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !CMDLINE -c36
+
+0 !HISTORY 2018-01-14 [Steffen] split into multiple parts
+
+1 16 0 0 0 2 0 0 0 0 -2 0 -2 0 8-8sphe.dat
+1 47 0 0 4 4 0 0 0 0 -4 0 4 0 4-8sphe.dat
+1 47 0 0 0 4 0 0 0 0 -4 0 4 0 4-4cyli.dat
+0 BFC INVERTNEXT
+1 383 0 0 0 4 0 0 0 0 -4 0 -4 0 4-8sphe.dat

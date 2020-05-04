@@ -100,7 +100,7 @@ namespace Valve.VR.InteractionSystem
             //FloorTiles schould get the same Guid on every startup
             GameObject[] floorTiles = GameObject.FindGameObjectsWithTag("Floor");
             combinedTile.GetComponent<BlockCommunication>().Guid = CreateNewGuid(floorTiles.Length);
-            combinedTile.layer = 8;
+            combinedTile.GetComponent<BlockGeometryFloor>().SetBlockWalkable(true);
             Destroy(container);
             transform.gameObject.SetActive(true);
         }

@@ -30,7 +30,7 @@ namespace Valve.VR.InteractionSystem
                 return;
             }
             colliderDictionary[snappingCollider].IsConnected = acceptNewCollisionsAsConnected;
-            Debug.Log("Tap Registered");
+            //Debug.Log("Tap Registered");
             colliderDictionary[snappingCollider].TapPosition = snappingCollider.gameObject;
             colliderDictionary[snappingCollider].GroovePosition = grooveCollider;
             colliderDictionary[snappingCollider].CollidedBlock = grooveCollider.transform.root.gameObject;
@@ -42,7 +42,7 @@ namespace Valve.VR.InteractionSystem
             {
                 return;
             }
-            Debug.Log("Tap Unregistered");
+            //Debug.Log("Tap Unregistered");
             colliderDictionary[snappingCollider].ResetObject();
         }
 

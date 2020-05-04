@@ -1,0 +1,17 @@
+0 Minifig Leg Left with Insectoids Green Circuitry
+0 Name: 3817p62.dat
+0 Author: Mikkel Bech Jensen [gaia]
+0 !LDRAW_ORG Unofficial_Part
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !KEYWORDS Space, Set 6977
+
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 s\3817s01.dat
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 s\3817p61s01.dat
+1 0 0 0 0 1 0 0 0 1 0 0 0 1 s\3817p61s02.dat
+1 80 0 0 0 1 0 0 0 1 0 0 0 1 s\3817p61s03.dat
+1 2 0 0 0 1 0 0 0 1 0 0 0 1 s\3817p61s04.dat
+4 16 19.18 20 -11 19.18 20 -6 1.5 20 -6 1.5 20 -11
+4 16 19.5 28 -11 19.18 20 -11 1.5 20 -11 1.5 28 -11

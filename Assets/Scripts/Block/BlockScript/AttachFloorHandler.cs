@@ -50,27 +50,26 @@ namespace Valve.VR.InteractionSystem
         /// <param name="connectedOn"></param>
         public void MatchRotationWithCollidingBlock(List<CollisionObject> currentCollisionObjects, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
         {
-            if (currentCollisionObjects.Count > 1)
-            {
-                //Send message to Blocks in Structure to set them to kinematic for rotation
-                blockCommunication.SendMessageToConnectedBlocks("SetKinematic");
+            
+            //Send message to Blocks in Structure to set them to kinematic for rotation
+            blockCommunication.SendMessageToConnectedBlocks("SetKinematic");
 
-                //Rotate the Block
-                GetComponent<BlockRotator>().RotateBlock(currentCollisionObjects, connectedOn);
+            //Rotate the Block
+            GetComponent<BlockRotator>().RotateBlock(currentCollisionObjects, connectedOn);
 
-                //Set flag that Block was rotated
-                WasReMatchedWithBlock = true;
+            //Set flag that Block was rotated
+            WasReMatchedWithBlock = true;
                 
-                //Send Message to Blocks in Structure to ReMatch their rotation in line with a Block that has
-                //already rotated
-                blockCommunication.SendMessageToConnectedBlocksBFS("ReMatchConnectedBlock");
+            //Send Message to Blocks in Structure to ReMatch their rotation in line with a Block that has
+            //already rotated
+            blockCommunication.SendMessageToConnectedBlocksBFS("ReMatchConnectedBlock");
 
-                //Tell Blocks in Structure to add themself to the History
-                blockCommunication.SendMessageToConnectedBlocks("OnAttachToFloor");
+            //Tell Blocks in Structure to add themself to the History
+            blockCommunication.SendMessageToConnectedBlocks("OnAttachToFloor");
 
-                //Check which additional Groove or Taps were hit after Rotating
-                StartCoroutine(EvaluateColliderAfterMatching());
-            }
+            //Check which additional Groove or Taps were hit after Rotating
+            StartCoroutine(EvaluateColliderAfterMatching());
+            
         }
 
         /// <summary>
@@ -231,6 +230,7 @@ namespace Valve.VR.InteractionSystem
             if (!gameObject.tag.Equals("Floor"))
             {
                 rigidBody.isKinematic = true;
+                GetComponent<BlockGeometryScript>().SetWallColliderTrigger(true);
             }
         }
 
@@ -244,6 +244,7 @@ namespace Valve.VR.InteractionSystem
             {
                 rigidBody.isKinematic = false;
                 WasReMatchedWithBlock = false;
+                GetComponent<BlockGeometryScript>().SetWallColliderTrigger(true);
             }
         }
 

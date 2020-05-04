@@ -1,0 +1,13 @@
+0 ~Electric Powered Up Light Middle Box Top
+0 Name: u9422.dat
+0 Author: Philippe Hurbain [Philo]
+0 !LDRAW_ORG Unofficial_Part
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+1 16 0 0 0 0 0 1 0 1 0 -1 0 0 connhol3.dat
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 s\u9422s01.dat
+1 16 0 0 0 -1 0 0 0 1 0 0 0 -1 s\u9422s01.dat
+1 16 0 -6 0 0 0 9 0 14 0 9 0 0 4-4cylo.dat
+1 16 0 8 0 0 0 3 0 -1 0 3 0 0 4-4ring2.dat

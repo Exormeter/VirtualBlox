@@ -1,0 +1,13 @@
+0 Sticker  1.1 x  7.9 with Black "CENTRAL STATION" on White Background
+0 Name: 004589g.dat
+0 Author: Alex Taylor [anathema]
+0 !LDRAW_ORG Unofficial_Part
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !KEYWORDS Train, set 148
+
+1 16 0 -0.25 0 79.3 0 0 0 0.25 0 0 0 11.4 box5-12.dat
+0 !TEXMAP NEXT PLANAR -79.3 -0.25 11.4 79.3 -0.25 11.4 -79.3 -0.25 -11.4 004589g.png
+4 15 -79.3 -0.25 11.4 -79.3 -0.25 -11.4 79.3 -0.25 -11.4 79.3 -0.25 11.4

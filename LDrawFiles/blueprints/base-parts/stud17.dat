@@ -1,0 +1,28 @@
+0 Stud Open For Octagonal Parts
+0 Name: stud17.dat
+0 Author: Rolf Osterthun [Rolf]
+0 !LDRAW_ORG Unofficial_Primitive
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !HISTORY 2018-12-08 [PTadmin] Official Update 2018-02
+0 !HISTORY 2019-02-23 [mkennedy] Increased precision to fix slight gaps, used 7-8ring2 and rect primitives
+
+0 BFC INVERTNEXT
+1 16 0 -4 0 4 0 0 0 4 0 0 0 4 4-4cylo.dat
+1 16 0 -4 0 2.2961 0 -5.5433 0 4 0 5.5433 0 2.2961 7-8cylo.dat
+1 16 0 -4 0 0.7655 0 -1.8478 0 1 0 1.8478 0 0.7654 7-8ring2.dat
+
+1 16 4 -2 4 0 -1.22 1.22 -2 0 0 0 -1.22 -1.22 rect1.dat
+1 16 2.5378 -2 5.3817 -0.2422 -1 0 0 0 -2 0.1617 0 0 rect2p.dat
+1 16 5.3817 -2 2.5378 -0.1617 -1 0 0 0 2 0.2422 0 0 rect2p.dat
+
+4 16 2.2956 -4 5.5434 1.531 -4 3.6956 2.8285 -4 2.8285 2.78 -4 5.22
+3 16 5.22 -4 2.78 2.78 -4 5.22 2.8285 -4 2.8285
+4 16 3.6956 -4 1.531 5.5434 -4 2.2956 5.22 -4 2.78 2.8285 -4 2.8285
+
+5 24 5.22 -4 2.78 5.22 0 2.78 2.78 -4 5.22 5.5433 -4 2.2961
+5 24 2.78 -4 5.22 2.78 0 5.22 5.22 -4 2.78 2.2961 -4 5.5433
+5 24 2.2961 -4 5.5433 2.2961 0 5.5433 2.78 -4 5.22 0 -4 6
+5 24 5.5433 -4 2.2961 5.5433 0 2.2961 5.22 -4 2.78 6 -4 0

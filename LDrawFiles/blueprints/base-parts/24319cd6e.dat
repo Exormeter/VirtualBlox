@@ -1,0 +1,13 @@
+0 Minifig Torso with Flipper Arms with Orca Belly Pattern
+0 Name: 24319cd6e.dat
+0 Author: Magnus Forsberg [MagFors]
+0 !LDRAW_ORG Unofficial_Shortcut
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !KEYWORDS CMF, Batman, Movie, Bricklink 973pb2561c01
+
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 973pd6e.dat
+1 16 15.552 9 0 .985 .17 0 -.17 .985 0 0 0 1 24074.dat
+1 16 -15.552 9 0 -.985 -.17 0 -.17 .985 0 0 0 -1 24074.dat

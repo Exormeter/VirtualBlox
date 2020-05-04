@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 
 namespace LDraw
@@ -30,14 +31,15 @@ namespace LDraw
 			for (int i = 0; i < param.Length; i++)
 			{
 				int argNum = i + 2;
-				if (!Single.TryParse(args[argNum], out param[i]))
+				param[i] = float.Parse(args[argNum], CultureInfo.InvariantCulture);
+				/*if (!Single.TryParse(args[argNum], out param[i]))
 				{
 					Debug.LogError(
 						String.Format(
 							"Something wrong with parameters in line drawn command. ParamNum:{0}, Value:{1}",
 							argNum,
 							args[argNum]));
-				}
+				}*/
 			}
 
 			_Verts = new Vector3[]

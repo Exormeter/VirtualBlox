@@ -1,0 +1,14 @@
+0 Electric Light & Sound Insectoid Tail  4 x 20 x  3 (Complete)
+0 Name: 71603c01.dat
+0 Author: Steffen [Steffen]
+0 !LDRAW_ORG Unofficial_Shortcut
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 71603.dat
+1 42 -22.1 -4 116 0 1 0 -1 0 0 0 0 1 u9248.dat
+1 42 22.1 -4 116 0 -1 0 1 0 0 0 0 1 u9248.dat
+1 256 0 0 0 1 0 0 0 1 0 0 0 1 u9249.dat
+1 36 31 -4 -20 1 0 0 0 1 0 0 0 1 u9250.dat
+1 36 -31 -4 -20 1 0 0 0 1 0 0 0 1 u9250.dat

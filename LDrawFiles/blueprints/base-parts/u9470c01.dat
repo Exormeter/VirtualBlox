@@ -1,0 +1,14 @@
+0 Electric Spike Prime Distance Sensor Back Assembly
+0 Name: u9470c01.dat
+0 Author: Philippe Hurbain [Philo]
+0 !LDRAW_ORG Unofficial_Part
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+1 16 0 0 -70 1 0 0 0 1 0 0 0 1 u9469.dat
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 u9470.dat
+0 // Cable Stub
+1 511 0 14 3 0 0 1 -1 0 0 0 -1 0 s\23816s01.dat
+0 // See-through blocker
+4 511 10 11.5 2 10 16.4998 2 -10 16.4998 2 -10 11.5 2

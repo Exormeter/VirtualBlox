@@ -236,7 +236,7 @@ namespace Valve.VR.InteractionSystem
             {
                 if (grabbedBlock.GetComponent<BlockCommunication>().IsIndirectlyAttachedToBlockMarked(block))
                 {
-                    GameObject copiedBlock = BlockGenerator.GenerateBlock(block.GetComponent<BlockGeometryCustom>().blockStructure);
+                    GameObject copiedBlock = BlockGenerator.GenerateBlock(block.GetComponent<BlockGeometryScript>().BlockStructure);
                     copiedBlock.transform.rotation = block.transform.rotation;
                     copiedBlock.transform.position = block.transform.position;
                     copiedBlock.GetComponent<BlockGeometryScript>().SetWallColliderTrigger(true);

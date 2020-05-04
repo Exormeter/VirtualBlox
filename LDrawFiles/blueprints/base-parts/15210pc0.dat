@@ -1,0 +1,15 @@
+0 Roadsign Clip-on  2 x  2 Square with C-Clip with Blue Computer Screen Pattern
+0 Name: 15210pc0.dat
+0 Author: Bertrand Lequy [Berth]
+0 !LDRAW_ORG Unofficial_Part
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !KEYWORDS Desktop
+
+0 !HISTORY 2018-12-08 [PTadmin] Official Update 2018-02
+0 !HISTORY 2019-11-28 [Mad_Marc] Use subpart for pattern
+
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 s\15210s01.dat
+1 16 0 0 -13 1 0 0 0 1 0 0 0 1 s\15210pc0s01.dat

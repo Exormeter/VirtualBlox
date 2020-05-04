@@ -38,7 +38,7 @@ namespace Valve.VR.InteractionSystem
         /// <summary>
         /// BlockManager to access all Blocks by Guid
         /// </summary>
-        public BlockManager blockManager;
+        private BlockManager blockManager;
 
         
         public int frameUntilColliderReEvaluation;
@@ -513,6 +513,10 @@ namespace Valve.VR.InteractionSystem
         /// <returns>True if the Block can be removed</returns>
         public bool AttemptToFreeBlock()
         {
+            if(ConnectedBlocks.Count == 0)
+            {
+                return true;
+            }
             OTHER_BLOCK_IS_CONNECTED_ON otherConnection = ConnectedBlocks[0].ConnectedOn;
             foreach(BlockContainer connectedBlock in ConnectedBlocks)
             {

@@ -15,6 +15,7 @@ namespace LDraw
             GameObject lDrawGameObject = lDrawModel.CreateMeshGameObject(LDrawConfig.Instance.ScaleMatrix);
             GameObject lDrawBlock = CombineTileMeshes(lDrawGameObject);
 
+
             GameObject block = new GameObject("Block");
 
             
@@ -22,15 +23,10 @@ namespace LDraw
 
 
             LDrawConnectionFactory.FlushFactory();
-            //lDrawGameObject.transform.LocalReflect(Vector3.up);
-            //newBlock.transform.LocalReflect(Vector3.up);
-
             
-            
-            
-            AddTapFaces(lDrawBlock, lDrawModel._ConnectionPoints);
-            AddGrooveFaces(lDrawBlock, lDrawModel._ConnectionPoints);
-            AddGrooveFacesBoxedConnections(lDrawBlock, lDrawModel._ConnectionPoints);
+            AddTapFace(lDrawBlock, lDrawModel._ConnectionPoints);
+            AddGrooveFace(lDrawBlock, lDrawModel._ConnectionPoints);
+            //AddGrooveFacesBoxedConnections(lDrawBlock, lDrawModel._ConnectionPoints);
 
             lDrawBlock.transform.Rotate(new Vector3(0, 0, -180));
             lDrawBlock.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
@@ -52,12 +48,12 @@ namespace LDraw
                 copyCollider.center = collider.center;
                 copyCollider.size = collider.size;
                 copyCollider.center *= 0.4f;
-                copyCollider.size *= 0.4f;
+                copyCollider.size *= 0.38f;
                 copyCollider.center = new Vector3(copyCollider.center.x, copyCollider.center.y * -1, copyCollider.center.z);
                 UnityEngine.Object.DestroyImmediate(collider);
             }
 
-
+            UnityEngine.Object.DestroyImmediate(lDrawGameObject);
             return block;
         }
 
@@ -99,7 +95,7 @@ namespace LDraw
 
         }
 
-        private void AddTapFaces(GameObject newBlock, List<LDrawAbstractConnectionPoint> connectionPoints)
+        /*private void AddTapFaces(GameObject newBlock, List<LDrawAbstractConnectionPoint> connectionPoints)
         {
             
             List<LDrawAbstractConnectionPoint> tapConnectionPoints = connectionPoints.FindAll(connectionPoint => connectionPoint is LDrawAbstractTapConnection);
@@ -133,9 +129,33 @@ namespace LDraw
                 }
                 brickFace.AddComponent<TapHandler>();
             }
+        }*/
+
+        private void AddTapFace(GameObject newBlock, List<LDrawAbstractConnectionPoint> connectionPoints)
+        {
+            List<LDrawAbstractConnectionPoint> tapConnectionPoints = connectionPoints.FindAll(connectionPoint => connectionPoint is LDrawAbstractTapConnection);
+
+            if (tapConnectionPoints.Count == 0)
+            {
+                return;
+            }
+
+            
+            GameObject brickFace = new GameObject("TapFace");
+
+            brickFace.transform.SetParent(newBlock.transform);
+
+            foreach (LDrawAbstractConnectionPoint connectionPoint in tapConnectionPoints)
+            {
+                
+                connectionPoint.GenerateColliderPositions(brickFace);
+              
+
+            brickFace.AddComponent<TapHandler>();
+            }
         }
 
-        private void AddGrooveFaces(GameObject newBlock, List<LDrawAbstractConnectionPoint> connectionPoints)
+        /*private void AddGrooveFaces(GameObject newBlock, List<LDrawAbstractConnectionPoint> connectionPoints)
         {
             List<LDrawAbstractConnectionPoint> grooveConnectionPoints = connectionPoints.FindAll(connectionPoint => connectionPoint is LDrawAbstractGrooveConnection);
 
@@ -171,9 +191,34 @@ namespace LDraw
 
                 brickFace.AddComponent<GrooveHandler>();
             }
+        }*/
+
+        private void AddGrooveFace(GameObject newBlock, List<LDrawAbstractConnectionPoint> connectionPoints)
+        {
+            List<LDrawAbstractConnectionPoint> grooveConnectionPoints = connectionPoints.FindAll(connectionPoint => connectionPoint is LDrawAbstractGrooveConnection);
+
+            if (grooveConnectionPoints.Count == 0)
+            {
+                return;
+            }
+
+            
+
+            
+            GameObject brickFace = new GameObject("GrooveFace");
+
+            brickFace.transform.SetParent(newBlock.transform);
+
+            foreach (LDrawAbstractConnectionPoint connectionPoint in grooveConnectionPoints)
+            {
+                connectionPoint.GenerateColliderPositions(brickFace);
+            }
+
+            brickFace.AddComponent<GrooveHandler>();
+            
         }
 
-        private void AddGrooveFacesBoxedConnections(GameObject newBlock, List<LDrawAbstractConnectionPoint> connectionPoints)
+        /*private void AddGrooveFacesBoxedConnections(GameObject newBlock, List<LDrawAbstractConnectionPoint> connectionPoints)
         {
             List<LDrawAbstractBoxConnector> boxConnectionPoints = new List<LDrawAbstractBoxConnector>();
 
@@ -218,7 +263,7 @@ namespace LDraw
 
                 brickFace.AddComponent<GrooveHandler>();
             }
-        }
+        }*/
 
         private Mesh ScaleMesh(Mesh mesh)
         {

@@ -1,0 +1,13 @@
+0 Sticker  1.1 x  1.1 with Black Telephone on White Background
+0 Name: 004589c.dat
+0 Author: Alex Taylor [anathema]
+0 !LDRAW_ORG Unofficial_Part
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !KEYWORDS Train, set 148
+
+1 16 0 -0.25 0 11.4 0 0 0 0.25 0 0 0 11.4 box5-12.dat
+0 !TEXMAP NEXT PLANAR -10.3 -0.25 8 10.3 -0.25 8 -10.3 -0.25 -7 004589c.png
+4 15 -11.4 -0.25 11.4 -11.4 -0.25 -11.4 11.4 -0.25 -11.4 11.4 -0.25 11.4

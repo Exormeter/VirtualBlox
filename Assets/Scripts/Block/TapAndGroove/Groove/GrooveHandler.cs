@@ -27,7 +27,7 @@ namespace Valve.VR.InteractionSystem
 
         public void RegisterCollision(GrooveCollider snappingCollider, GameObject tapCollider)
         {
-            Debug.Log("Registered Collision");
+            //Debug.Log("Registered Collision");
             if (colliderDictionary[snappingCollider].TapPosition != null)
             {
                 return;
@@ -38,7 +38,7 @@ namespace Valve.VR.InteractionSystem
                 AddPinHighLight(tapCollider);
             }
 
-            Debug.Log("Collision Entried");
+            //Debug.Log("Collision Entried");
             
             colliderDictionary[snappingCollider].IsConnected = acceptNewCollisionsAsConnected;
             
@@ -53,7 +53,7 @@ namespace Valve.VR.InteractionSystem
             {
                 return;
             }
-            Debug.Log("Groove Unregistered");
+            //Debug.Log("Groove Unregistered");
             RemovePinHighLight(tapCollider);
             colliderDictionary[snappingCollider].ResetObject();
         }
@@ -62,10 +62,11 @@ namespace Valve.VR.InteractionSystem
         {
             if(pinHighLight != null)
             {
+                
                 GameObject highLight = Instantiate(pinHighLight, tapCollider.transform.position, tapCollider.transform.rotation);
                 highLight.tag = "HighLight";
                 highLight.transform.SetParent(tapCollider.transform);
-                highLight.transform.localPosition = new Vector3(0, 0.0082f, 0);
+                highLight.transform.localPosition = new Vector3(0, 0.017f, 0);
                 listHighLighter.Add(highLight);
             }
             

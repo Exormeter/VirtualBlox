@@ -1,13 +1,17 @@
-0 Sticker Minifig Vest with Yellow Trefoils on DkBlue Background
+0 Sticker Minifig Vest with Yellow Trefoils on Dark Blue Background
 0 Name: 003238q.dat
 0 Author: Alex Taylor [anathema]
-0 !LDRAW_ORG Part UPDATE 2010-01
+0 !LDRAW_ORG Unofficial_Part
 0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
 
 0 BFC CERTIFY CCW
 
-0 !HISTORY 2010-04-05 [PTadmin] Official Update 2010-01
+0 !KEYWORDS Castle, Clubs, part 3840, set 375-2, set 6075-2
 
+0 !HISTORY 2010-04-05 [PTadmin] Official Update 2010-01
+0 !HISTORY 2019-09-08 [anathema] Corrected colour of back
+
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 s\3238s02.dat
 1 272 11 -0.25 -16 2 0 0 0 1 0 0 0 -2 1-4disc.dat
 1 272 -11 -0.25 -16 -2 0 0 0 1 0 0 0 -2 1-4disc.dat
 4 272 -11 -0.25 -18 11 -0.25 -18 11 -0.25 -12.7 -11 -0.25 -12.7
@@ -31,5 +35,3 @@
 1 272 -8 -0.25 -9 0.05 0 0 0 1 0 0 0 0.05 s\003238s7.dat
 1 272 0 -0.25 -9 0.05 0 0 0 1 0 0 0 0.05 s\003238s7.dat
 1 272 8 -0.25 -9 0.05 0 0 0 1 0 0 0 0.05 s\003238s7.dat
-1 272 0 0 0 1 0 0 0 1 0 0 0 1 s\3238s02.dat
-0

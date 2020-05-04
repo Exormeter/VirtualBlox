@@ -16,7 +16,8 @@ namespace LDraw
             ["stud4f2w"] = (pos) => new LDrawStud4f2w(pos),
             ["stud4"] = (pos) => new LDrawStud4(pos),
             ["box5"] = (pos) => new LDrawBox5(pos),
-            ["box4"] = (pos) => new LDrawBox4(pos)
+            ["box4"] = (pos) => new LDrawBox4(pos),
+            ["stud10"] = (pos) => new LDrawStud10(pos)
         };
 
         private static List<LDrawAbstractConnectionPoint> connectionPoints = new List<LDrawAbstractConnectionPoint>();

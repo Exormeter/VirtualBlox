@@ -1,13 +1,17 @@
-0 Sticker Minifig Vest with Shield with Green Chevrons/LtGray
+0 Sticker Minifig Vest with Shield with Green Chevrons on Light Grey Background
 0 Name: 003238o.dat
 0 Author: Alex Taylor [anathema]
-0 !LDRAW_ORG Part UPDATE 2010-01
+0 !LDRAW_ORG Unofficial_Part
 0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
 
 0 BFC CERTIFY CCW
 
-0 !HISTORY 2010-04-05 [PTadmin] Official Update 2010-01
+0 !KEYWORDS Castle, part 3840, set 375-2, set 6075-2
 
+0 !HISTORY 2010-04-05 [PTadmin] Official Update 2010-01
+0 !HISTORY 2019-09-08 [anathema] Corrected colour of back
+
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 s\3238s02.dat
 1 7 0 -0.25 5 0.6 0 0 0 1 0 0 0 0.6 s\003238s5.dat
 1 7 0 -0.25 5 -0.6 0 0 0 1 0 0 0 0.6 s\003238s5.dat
 1 7 -11 -0.25 -16 -2 0 0 0 1 0 0 0 -2 1-4disc.dat
@@ -24,5 +28,3 @@
 4 7 12 -0.25 7.6 11.232 -0.25 1.382 13 -0.25 1 13 -0.25 8
 4 7 13 -0.25 8 13 -0.25 17 12 -0.25 13.4 12 -0.25 7.6
 4 7 -12 -0.25 13.4 12 -0.25 13.4 13 -0.25 17 -13 -0.25 17
-1 7 0 0 0 1 0 0 0 1 0 0 0 1 s\3238s02.dat
-0

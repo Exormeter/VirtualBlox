@@ -28,7 +28,7 @@ public class NonConvexMeshCollider : MonoBehaviour
 {
     public bool shouldMerge = true;
     public bool createColliderChildGameObject = false;
-    public int boxesPerEdge = 20;
+    public int boxesPerEdge = 10;
 
     public void Calculate()
     {

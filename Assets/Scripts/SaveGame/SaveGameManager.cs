@@ -259,7 +259,7 @@ namespace Valve.VR.InteractionSystem
             restoredBlock.transform.position = blockSave.position + offset;
             restoredBlock.transform.rotation = blockSave.rotation;
             restoredBlock.GetComponent<BlockCommunication>().Guid = blockSave.guid;
-            restoredBlock.GetComponent<BlockGeometryCustom>().TopColliderContainer.layer = 8;
+            restoredBlock.GetComponent<BlockGeometryScript>().SetBlockWalkable(true);
             restoredBlock.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
             restoredBlock.GetComponentInChildren<TapHandler>().AcceptCollisionsAsConnected(true);
             restoredBlock.GetComponentInChildren<GrooveHandler>().AcceptCollisionsAsConnected(true);

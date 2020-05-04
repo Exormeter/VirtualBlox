@@ -124,7 +124,6 @@ namespace LDraw
                     {
                         _PrimitiveParts.Add(fileName, filePath);
                     }
-                    Debug.Log(fileName);
                     if (fileName.Contains("-")){
                         string OfficialName = File.ReadLines(filePath).ElementAtOrDefault(1);
                         OfficialName = OfficialName.Substring(8);

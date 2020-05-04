@@ -1,12 +1,13 @@
-0 ~Electric Temperature Sensor Bottom
+0 ~Electric Brick  2 x  3 Sensor Temperature - Bottom
 0 Name: 2980.dat
 0 Author: Philippe Hurbain [Philo]
-0 !LDRAW_ORG Part UPDATE 2010-03
+0 !LDRAW_ORG Unofficial_Part
 0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
 
 0 BFC CERTIFY CCW
 
 0 !HISTORY 2010-12-31 [PTadmin] Official Update 2010-03
+0 !HISTORY 2017-05-14 [MagFors] Updated description
 
 1 16 10 4 0 1 0 0 0 -1 0 0 0 1 stud4.dat
 1 16 -10 4 0 1 0 0 0 -1 0 0 0 1 stud4.dat
@@ -94,4 +95,6 @@
 4 16 -26 0 4 22 0 8 -16 0 16 -30 0 4
 4 16 -4 0 16 4 0 16 4 0 18 -4 0 18
 4 16 4 0 -16 -4 0 -16 -4 0 -18 4 0 -18
-0
+0 // 
+1 16 -24 0 -6 2 0 0 0 -3 0 0 0 2 box5.dat
+1 16 -24 0 6 2 0 0 0 -3 0 0 0 2 box5.dat

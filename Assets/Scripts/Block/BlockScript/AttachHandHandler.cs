@@ -97,18 +97,16 @@ namespace Valve.VR.InteractionSystem
         /// <param name="connectedOn">There is the other Block connected</param>
         public void MatchRotationWithBlock(List<CollisionObject> currentCollisionObjects, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
         {
-            //Work currently only with two or mir CollisionObjects
-            if (currentCollisionObjects.Count > 1)
-            {
-                //Set all Blocks in Structure to kinematic for rotation
-                blockCommunication.SendMessageToConnectedBlocks("SetKinematic");
+            
+            //Set all Blocks in Structure to kinematic for rotation
+            blockCommunication.SendMessageToConnectedBlocks("SetKinematic");
 
-                //Rotate the Block
-                GetComponent<BlockRotator>().RotateBlock(currentCollisionObjects, connectedOn);
+            //Rotate the Block
+            GetComponent<BlockRotator>().RotateBlock(currentCollisionObjects, connectedOn);
 
-                //Check which additional Groove or Taps were hit after Rotating
-                StartCoroutine(EvaluateColliderAfterMatching());
-            }
+            //Check which additional Groove or Taps were hit after Rotating
+            StartCoroutine(EvaluateColliderAfterMatching());
+            
         }
 
         /// <summary>
@@ -170,6 +168,7 @@ namespace Valve.VR.InteractionSystem
             if (!gameObject.tag.Equals("Floor"))
             {
                 rigidBody.isKinematic = true;
+                GetComponent<BlockGeometryScript>().SetWallColliderTrigger(true);
             }
         }
 
@@ -181,6 +180,7 @@ namespace Valve.VR.InteractionSystem
             if (!gameObject.tag.Equals("Floor"))
             {
                 rigidBody.isKinematic = false;
+                GetComponent<BlockGeometryScript>().SetWallColliderTrigger(false);
             }
         }
 

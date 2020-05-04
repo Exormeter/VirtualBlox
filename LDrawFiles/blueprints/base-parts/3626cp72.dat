@@ -1,0 +1,41 @@
+0 Minifig Head with Black Eyebrows and Long Eyelashes, Peach Lips, Open Smile / Closed Mouth, Eyebrow Raised 2-Sided Pattern
+0 Name: 3626cp72.dat
+0 Author: Philippe Hurbain [Philo]
+0 !LDRAW_ORG Unofficial_Part
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !KEYWORDS Bricklink 3626cpb1689
+
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 s\3626cs02.dat
+
+0 // Front
+0 !TEXMAP START PLANAR -13 0 10 13 0 10 -13 21 10 3626cp72a.png
+0 !: 1 16 0 4 0 13 0 0 0 13 0 0 0 -13 2-4cyli.dat
+0 !: 1 16 0 4 0 0 0 -8 0 -6.4 0 -8 0 0 t04o6250.dat
+0 !: 1 16 0 4 0 8 0 0 0 -6.4 0 0 0 -8 t04o6250.dat
+0 !: 1 16 0 17 0 0 0 8 0 6.4 0 -8 0 0 t04o6250.dat
+0 !: 1 16 0 17 0 -8 0 0 0 6.4 0 0 0 -8 t04o6250.dat
+0 !TEXMAP FALLBACK
+1 16 0 4 0 13 0 0 0 13 0 0 0 -13 2-4cyli.dat
+1 16 0 4 0 0 0 -8 0 -6.4 0 -8 0 0 t04o6250.dat
+1 16 0 4 0 8 0 0 0 -6.4 0 0 0 -8 t04o6250.dat
+1 16 0 17 0 0 0 8 0 6.4 0 -8 0 0 t04o6250.dat
+1 16 0 17 0 -8 0 0 0 6.4 0 0 0 -8 t04o6250.dat
+0 !TEXMAP END
+
+0 // Back
+0 !TEXMAP START PLANAR 13 0 10 -13 0 10 13 21 10 3626cp72b.png
+0 !: 1 16 0 4 0 0 0 8 0 -6.4 0 8 0 0 t04o6250.dat
+0 !: 1 16 0 4 0 -8 0 0 0 -6.4 0 0 0 8 t04o6250.dat
+0 !: 1 16 0 17 0 0 0 -8 0 6.4 0 8 0 0 t04o6250.dat
+0 !: 1 16 0 17 0 8 0 0 0 6.4 0 0 0 8 t04o6250.dat
+0 !: 1 16 0 4 0 13 0 0 0 13 0 0 0 13 2-4cyli.dat
+0 !TEXMAP FALLBACK
+1 16 0 4 0 0 0 8 0 -6.4 0 8 0 0 t04o6250.dat
+1 16 0 4 0 -8 0 0 0 -6.4 0 0 0 8 t04o6250.dat
+1 16 0 17 0 0 0 -8 0 6.4 0 8 0 0 t04o6250.dat
+1 16 0 17 0 8 0 0 0 6.4 0 0 0 8 t04o6250.dat
+1 16 0 4 0 13 0 0 0 13 0 0 0 13 2-4cyli.dat
+0 !TEXMAP END

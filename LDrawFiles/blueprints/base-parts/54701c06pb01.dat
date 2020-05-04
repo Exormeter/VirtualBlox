@@ -1,0 +1,14 @@
+0 Plane Aft Section  8 x 16 x  7 with White Base with Orange, Light Bluish Grey and White Pattern on Both Sides and Tip
+0 Name: 54701c06pb01.dat
+0 Author: Kevin Roach [KROACH]
+0 !LDRAW_ORG Unofficial_Shortcut
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 54701pb06.dat
+1 15 0 144 -10 1 0 0 0 1 0 0 0 1 54702.dat
+1 15 0 0 0 1 0 0 0 1 0 0 0 1 54703.dat
+1 0 51.473 86.494 22.75 -1 0 0 0 -1 0 0 0 1 u9288.dat
+1 0 -51.473 86.494 22.75 -1 0 0 0 -1 0 0 0 1 u9288.dat
+1 0 0 54.994 241.5 -1 0 0 0 -1 0 0 0 1 u9288.dat

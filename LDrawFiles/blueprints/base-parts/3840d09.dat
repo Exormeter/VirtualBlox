@@ -1,0 +1,15 @@
+0 Minifig Vest with 2 Yellow/Black Chevrons Stickers
+0 Name: 3840d09.dat
+0 Author: Steffen [Steffen]
+0 !LDRAW_ORG Unofficial_Shortcut
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !CATEGORY Minifig Neckwear
+
+0 !CMDLINE -c14
+
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 3840.dat
+1 16 0 14 -13 1 0 0 0 0 -1 0 1 0 199025a.dat
+1 16 0 14 13 -1 0 0 0 0 -1 0 -1 0 199025a.dat

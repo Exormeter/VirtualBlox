@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 
 namespace LDraw
@@ -22,14 +23,6 @@ namespace LDraw
             {
 				connectionPoints.Add(t);
             }
-   //         if (_Name.Equals("stud") || _Name.Equals("stud2"))
-   //         {
-			//	connectionPoints.Add(new LDrawAbstrctConnectionPoint(gameObject, LDRawConnectionType.TAP_CONNECTION, _Name));
-   //         }
-   //         else if (_Name.Equals("stud3") || _Name.Equals("stud4a"))
-   //         {
-			//	connectionPoints.Add(new LDrawAbstrctConnectionPoint(gameObject, LDRawConnectionType.GROOVE_CONNECTION, _Name));
-			//}
 		}
 
 		public override void PrepareMeshData(List<int> triangles, List<Vector3> verts)
@@ -47,7 +40,8 @@ namespace LDraw
 			for (int i = 0; i < param.Length; i++)
 			{
 				int argNum = i + 2;
-				if (!Single.TryParse(args[argNum], out param[i]))
+				param[i] = float.Parse(args[argNum], CultureInfo.InvariantCulture);
+				/*if (!Single.TryParse(args[argNum], out param[i]))
 				{
 					Debug.LogError(
 						String.Format(
@@ -55,7 +49,7 @@ namespace LDraw
 							_Name,
 							argNum,
 							args[argNum]));
-				}
+				}*/
 			}
 
 			_Model = LDrawModel.Create(_Name, LDrawConfig.Instance.GetSerializedPart(_Name));

@@ -1,60 +1,62 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Valve.VR.InteractionSystem
 {
     public class TabController : MonoBehaviour
     {
-        private GameObject currentActiveMenu;
+        private TabContentController currentActiveMenu;
+
         public GameObject ParentCanvas;
-        public GameObject TabSaveScene;
-        public GameObject TabBlockCreate;
-        public GameObject TabSavePrefab;
         public GameObject pointer;
         public GameObject pointerOrigin;
 
+        private List<TabContentController> tabContentControllers;
         void Start()
         {
-            currentActiveMenu = TabBlockCreate;
+            
             ParentCanvas.SetActive(false);
+
+            TabContentController[] contentControllers = GetComponentsInChildren<TabContentController>(true) as TabContentController[];
+            foreach(TabContentController tabContentController in contentControllers)
+            {
+                tabContentController.DeactivateContent();
+                EventTrigger eventTrigger = tabContentController.gameObject.GetComponent<EventTrigger>();
+                EventTrigger.Entry entry = new EventTrigger.Entry();
+                entry.eventID = EventTriggerType.PointerDown;
+                entry.callback.AddListener((eventData) => { ToggleActiveState(tabContentController); });
+                eventTrigger.triggers.Add(entry);
+            }
+
+            tabContentControllers = new List<TabContentController>(contentControllers);
+            currentActiveMenu = tabContentControllers[0];
         }
 
-        public void OpenTabBlockCreate()
+        public void ToggleActiveState(TabContentController contentController)
         {
-            TabBlockCreate.SetActive(true);
-            TabSavePrefab.SetActive(false);
-            TabSaveScene.SetActive(false);
-            currentActiveMenu = TabBlockCreate;
+            foreach(TabContentController tabContentController in tabContentControllers)
+            {
+                tabContentController.DeactivateContent();
+            }
+            contentController.ActivateContent();
+            currentActiveMenu = contentController;
         }
-
-        public void OpenTabSaveScene()
-        {
-            TabBlockCreate.SetActive(false);
-            TabSavePrefab.SetActive(true);
-            TabSaveScene.SetActive(false);
-            currentActiveMenu = TabSaveScene;
-        }
-
-        public void OpenTabSavePrefab()
-        {
-            TabBlockCreate.SetActive(false);
-            TabSavePrefab.SetActive(false);
-            TabSaveScene.SetActive(true);
-            currentActiveMenu = TabSavePrefab;
-        }
-
 
         public void ActivateControllerMenu()
         {
             ParentCanvas.SetActive(true);
-            currentActiveMenu.SetActive(true);
+            currentActiveMenu.ActivateContent();
         }
 
         public void DeactivateControllerMenu()
         {
-            currentActiveMenu.SetActive(false);
+            foreach(TabContentController tabContentController in tabContentControllers)
+            {
+                tabContentController.CloseMenu();
+            }
             ParentCanvas.SetActive(false);
         }
 

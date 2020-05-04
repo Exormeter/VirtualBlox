@@ -1,0 +1,19 @@
+0 Dish  4 x  4 Inverted with Five Orange Wedges Pattern Pattern
+0 Name: 3960pb9.dat
+0 Author: Gerald Lasser [GeraldLasser]
+0 !LDRAW_ORG Unofficial_Part
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !KEYWORDS Set 10761
+0 !KEYWORDS Bricklink 3960pb053
+
+0 !CMDLINE -c191
+
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 s\3960s01.dat
+
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 s\3960pb9s01.dat
+1 16 0 0 0 -1 0 0 0 1 0 0 0 1 s\3960pb9s01.dat
+
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 s\3960s05.dat

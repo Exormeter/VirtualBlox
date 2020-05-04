@@ -13,10 +13,17 @@ namespace Valve.VR.InteractionSystem
         {
             
             MatchTargetBlockRotation(currentCollisionObjects[0], connectedOn);
+           
             MatchTargetBlockDistance(currentCollisionObjects[0], connectedOn);
+            
 
             MatchTargetBlockOffset(currentCollisionObjects[0], connectedOn);
-            MatchPinRotation(currentCollisionObjects[0], currentCollisionObjects[1], connectedOn);
+
+            if(currentCollisionObjects.Count > 2)
+            {
+                MatchPinRotation(currentCollisionObjects[0], currentCollisionObjects[1], connectedOn);
+            }
+            
         }
 
         private void MatchTargetBlockRotation(CollisionObject collision, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
@@ -34,6 +41,8 @@ namespace Valve.VR.InteractionSystem
 
             
             gameObject.transform.Rotate(Vector3.right, 90f);
+
+            Debug.Log("1 wenn beide Blöcke in die selbe Richtugn zeigen: " + Vector3.Dot(collision.CollidedBlock.transform.up, gameObject.transform.up));
         }
 
         
@@ -45,16 +54,33 @@ namespace Valve.VR.InteractionSystem
             switch (connectedOn)
             {
                 case OTHER_BLOCK_IS_CONNECTED_ON.GROOVE:
-                    planeBlock = new Plane(collision.GroovePosition.transform.up, transform.TransformPoint(collision.GroovePosition.transform.position));
+                    planeBlock = new Plane(transform.TransformDirection(collision.GroovePosition.transform.up), transform.TransformPoint(collision.GroovePosition.transform.position));
                     distance = planeBlock.GetDistanceToPoint(transform.TransformPoint(collision.TapPosition.transform.position));
                     break;
 
                 case OTHER_BLOCK_IS_CONNECTED_ON.TAP:
-                    planeBlock = new Plane(collision.TapPosition.transform.up, transform.TransformPoint(collision.TapPosition.transform.position));
+                    planeBlock = new Plane(transform.TransformDirection(collision.TapPosition.transform.up), transform.TransformPoint(collision.TapPosition.transform.position));
                     distance = planeBlock.GetDistanceToPoint(transform.TransformPoint(collision.GroovePosition.transform.position));
                     break;
             }
+
+            Debug.Log("Distanz vor translate: " + distance);
             transform.Translate(Vector3.up * distance, Space.Self);
+
+            switch (connectedOn)
+            {
+                case OTHER_BLOCK_IS_CONNECTED_ON.GROOVE:
+                    planeBlock = new Plane(collision.GroovePosition.transform.up, collision.GroovePosition.transform.position);
+                    distance = planeBlock.GetDistanceToPoint(collision.TapPosition.transform.position);
+                    Debug.Log("Neue Distanz: " + distance);
+                    break;
+
+                case OTHER_BLOCK_IS_CONNECTED_ON.TAP:
+                    planeBlock = new Plane(collision.TapPosition.transform.up, collision.TapPosition.transform.position);
+                    distance = planeBlock.GetDistanceToPoint(collision.GroovePosition.transform.position);
+                    Debug.Log("Neue Distanz: " + distance);
+                    break;
+            }
         }
 
 
@@ -82,8 +108,8 @@ namespace Valve.VR.InteractionSystem
                         transform.Translate(Vector3.forward * centerOffset.z, Space.Self);
                         break;
                     }
-
             }
+            Debug.Log("Offset: " + (collision.TapPosition.transform.position - collision.GroovePosition.transform.position).ToString("F8"));
         }
 
         private void MatchPinRotation(CollisionObject matchedPin, CollisionObject secoundPin, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
@@ -91,25 +117,27 @@ namespace Valve.VR.InteractionSystem
             if(connectedOn == OTHER_BLOCK_IS_CONNECTED_ON.GROOVE)
             {
                 float angleRotation = GetAngleBetweenPins(matchedPin, secoundPin, connectedOn);
-                transform.RotateAround(matchedPin.TapPosition.transform.position, transform.up, angleRotation);
+                transform.RotateAround(matchedPin.TapPosition.transform.position, matchedPin.TapPosition.transform.up, angleRotation);
 
                 float newAngleRotation = GetAngleBetweenPins(matchedPin, secoundPin, connectedOn);
                 if (newAngleRotation > 0.00001)
                 {
-                    transform.RotateAround(matchedPin.TapPosition.transform.position, transform.up, -newAngleRotation);
+                    transform.RotateAround(matchedPin.TapPosition.transform.position, matchedPin.TapPosition.transform.up, -newAngleRotation);
                 }
             }
             else
             {
                 float angleRotation = GetAngleBetweenPins(matchedPin, secoundPin, connectedOn);
-                transform.RotateAround(matchedPin.GroovePosition.transform.position, transform.up, angleRotation);
+                transform.RotateAround(matchedPin.GroovePosition.transform.position, matchedPin.GroovePosition.transform.position, angleRotation);
 
                 float newAngleRotation = GetAngleBetweenPins(matchedPin, secoundPin, connectedOn);
                 if (newAngleRotation > 0.00001)
                 {
-                    transform.RotateAround(matchedPin.GroovePosition.transform.position, transform.up, -newAngleRotation);
+                    transform.RotateAround(matchedPin.GroovePosition.transform.position, matchedPin.GroovePosition.transform.position, -newAngleRotation);
                 }
             }
+
+            Debug.Log("Zweiter Pin Offset: " + (secoundPin.GroovePosition.transform.position - secoundPin.TapPosition.transform.position).ToString("F8"));
             
         }
 
@@ -130,7 +158,7 @@ namespace Valve.VR.InteractionSystem
                 vectorIntersectionToGroove = Vector3.ProjectOnPlane(vectorIntersectionToGroove, Vector3.up);
 
                 angleRotation = Vector3.Angle(vectorIntersectionToGroove, vectorIntersectToTap);
-                Debug.Log("Angle Rotation: " + angleRotation); 
+                Debug.Log("Angle Rotation: " + angleRotation);
             }
             else
             {
@@ -150,6 +178,46 @@ namespace Valve.VR.InteractionSystem
 
             return angleRotation;
 
+        }
+
+        // Mimics Debug.DrawLine, drawing a plane containing the 3 provided worldspace points,
+        // with the visualization centered on the centroid of the triangle they form.
+        public static void DrawPlane(Vector3 a, Vector3 b, Vector3 c, float size,
+            Color color, float duration = 0f, bool depthTest = true)
+        {
+
+            var plane = new Plane(a, b, c);
+            var centroid = (a + b + c) / 3f;
+
+            DrawPlaneAtPoint(plane, centroid, size, color, duration, depthTest);
+        }
+
+        // Draws the portion of the plane closest to the provided point, 
+        // with an altitude line colour-coding whether the point is in front (cyan)
+        // or behind (red) the provided plane.
+        public static void DrawPlaneNearPoint(Plane plane, Vector3 point, float size, Color color, float duration = 0f, bool depthTest = true)
+        {
+            var closest = plane.ClosestPointOnPlane(point);
+            Color side = plane.GetSide(point) ? Color.cyan : Color.red;
+            Debug.DrawLine(point, closest, side, duration, depthTest);
+
+            DrawPlaneAtPoint(plane, closest, size, color, duration, depthTest);
+        }
+
+        // Non-public method to do the heavy lifting of drawing the grid of a given plane segment.
+        static void DrawPlaneAtPoint(Plane plane, Vector3 center, float size, Color color, float duration, bool depthTest)
+        {
+            var basis = Quaternion.LookRotation(plane.normal);
+            var scale = Vector3.one * size / 10f;
+
+            var right = Vector3.Scale(basis * Vector3.right, scale);
+            var up = Vector3.Scale(basis * Vector3.up, scale);
+
+            for (int i = -5; i <= 5; i++)
+            {
+                Debug.DrawLine(center + right * i - up * 5, center + right * i + up * 5, color, duration, depthTest);
+                Debug.DrawLine(center + up * i - right * 5, center + up * i + right * 5, color, duration, depthTest);
+            }
         }
     }
 }

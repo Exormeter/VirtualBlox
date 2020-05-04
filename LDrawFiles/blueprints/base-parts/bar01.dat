@@ -1,0 +1,14 @@
+0 Bar Hollow Profile without Edge
+0 Name: bar01.dat
+0 Author: Tore Eriksson [Tore_Eriksson]
+0 !LDRAW_ORG Unofficial_Primitive
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+1 16  0 0 0  4 0 0  0 1 0  0 0 -4  2-4cyli.dat
+0 BFC INVERTNEXT
+1 16  0 0 0  2 0 0  0 1 0  0 0 -2  2-4cyli.dat
+1 16  -3 0 0  1 0 0  0 1 0  0 0 1  2-4cyli.dat
+1 16  3 0 0  1 0 0  0 1 0  0 0 1  2-4cyli.dat
+0

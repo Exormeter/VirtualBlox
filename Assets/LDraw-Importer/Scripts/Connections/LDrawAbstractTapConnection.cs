@@ -18,7 +18,7 @@ namespace LDraw
             GameObject nwConnectionPoint = new GameObject("Collider");
             nwConnectionPoint.AddComponent<TapCollider>();
 
-            BlockGeometryScript.AddBoxCollider(new Vector3(0.1f, 0.1f, 0.1f), new Vector3(0, 0.01f, 0), true, nwConnectionPoint);
+            BlockGeometryScript.AddBoxCollider(new Vector3(0.1f, 0.07f, 0.1f), new Vector3(0, 0.01f, 0), true, nwConnectionPoint);
             nwConnectionPoint.transform.SetParent(brickFace.transform);
             nwConnectionPoint.transform.LookAt(-connectionPoint.ConnectorPosition.transform.up);
             nwConnectionPoint.transform.Rotate(90, 0, 0);

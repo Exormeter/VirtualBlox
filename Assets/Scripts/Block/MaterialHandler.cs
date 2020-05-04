@@ -14,8 +14,8 @@ public class MaterialHandler : MonoBehaviour
     void Start()
     {
         whileHoldingMaterial = new Material(HoldingMaterial);
-        standardMaterial = transform.GetComponent<MeshRenderer>().material;
-        meshRenderer = transform.GetComponent<MeshRenderer>();
+        standardMaterial = transform.GetComponentInChildren<MeshRenderer>().material;
+        meshRenderer = transform.GetComponentInChildren<MeshRenderer>();
         blockColor = standardMaterial.color;
         blockColor.a = 1;
         whileHoldingMaterial.color = blockColor;

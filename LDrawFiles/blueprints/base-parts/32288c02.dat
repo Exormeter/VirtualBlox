@@ -1,0 +1,15 @@
+0 Electric Technic Motor 4.5V  6 x 17 x  5 Complete Assembly #2
+0 Name: 32288c02.dat
+0 Author: Javier Orquera [kuramapika1]
+0 !LDRAW_ORG Unofficial_Part
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 32288.dat
+1 7 0 0 0 1 0 0 0 1 0 0 0 1 32289b.dat
+1 7 0 0 40 1 0 0 0 1 0 0 0 1 32290.dat
+1 7 0 2 -80 1 0 0 0 1 0 0 0 1 913.dat
+1 7 0 80.5 20 0 0 1 0 1 0 -1 0 0 u9510.dat
+1 7 0 82 0 1 0 0 0 1 0 0 0 1 u9511.dat
+1 0 3 90 -48 -1 0 0 0 1 0 0 0 1 x916.dat

@@ -1,0 +1,14 @@
+0 Minifig Leg Left with Insectoids Robot Pattern
+0 Name: 3817p60.dat
+0 Author: Mikkel Bech Jensen [gaia]
+0 !LDRAW_ORG Unofficial_Part
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !KEYWORDS Space, Set 6905, Set 6919, Set 6969, Set 6977
+
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 s\3817s01.dat
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 s\3817p60s01.dat
+4 16 19.18 20 -11 19.18 20 -6 1.5 20 -6 1.5 20 -11
+4 16 19.5 28 -11 19.18 20 -11 1.5 20 -11 1.5 28 -11

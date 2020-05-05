@@ -19,7 +19,7 @@ namespace Valve.VR.InteractionSystem
 
             MatchTargetBlockOffset(currentCollisionObjects[0], connectedOn);
 
-            if(currentCollisionObjects.Count > 2)
+            if(currentCollisionObjects.Count >= 2)
             {
                 MatchPinRotation(currentCollisionObjects[0], currentCollisionObjects[1], connectedOn);
             }

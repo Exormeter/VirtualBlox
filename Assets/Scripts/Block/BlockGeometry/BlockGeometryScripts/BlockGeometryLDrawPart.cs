@@ -8,8 +8,8 @@ namespace Valve.VR.InteractionSystem
         public new void Awake()
         {
             this.mesh = GetComponentInChildren<MeshFilter>().mesh;
-            TapContainer = GetComponentInChildren<TapHandler>().gameObject;
-            GroovesContainer = GetComponentInChildren<GrooveHandler>().gameObject;
+            TapContainer = GetComponentInChildren<TapHandler>()?.gameObject;
+            GroovesContainer = GetComponentInChildren<GrooveHandler>()?.gameObject;
             BlockIdentifier = BlockIdentifier.BLOCK_LDRAW;
         }
         public void SetWallCollider()

@@ -202,14 +202,14 @@ namespace Valve.VR.InteractionSystem
         {
             
             
-            if (GetComponentInChildren<TapHandler>().GetCollidingObjects().Count > 0)
+            if (GetComponentInChildren<TapHandler>()?.GetCollidingObjects().Count > 0)
             {
                 collisionList = GetComponentInChildren<TapHandler>().GetCollidingObjects();
                 connectedOn = OTHER_BLOCK_IS_CONNECTED_ON.TAP;
                 return;
             }
 
-            if (GetComponentInChildren<GrooveHandler>().GetCollidingObjects().Count > 0)
+            if (GetComponentInChildren<GrooveHandler>()?.GetCollidingObjects().Count > 0)
             {
                 collisionList = GetComponentInChildren<GrooveHandler>().GetCollidingObjects();
                 connectedOn = OTHER_BLOCK_IS_CONNECTED_ON.GROOVE;

@@ -25,8 +25,10 @@ namespace Valve.VR.InteractionSystem
         public GameObject HandRight;
 
         public BlockGenerator BlockGenerator;
+
         public BlockManager BlockManager;
 
+        
         /// <summary>
         /// Distance before the Collider in the cloned Block actvaite to avoid false CollidedObject hits
         /// </summary>
@@ -67,14 +69,14 @@ namespace Valve.VR.InteractionSystem
             {
                 case HANDSIDE.HAND_LEFT:
                     startPosition = HandLeft.transform.position;
-                    BoxDrawer.SetStartPosition(HandLeft.transform.position);
                     break;
 
                 case HANDSIDE.HAND_RIGHT:
                     startPosition = HandRight.transform.position;
-                    BoxDrawer.SetStartPosition(HandRight.transform.position);
                     break;
             }
+
+            BoxDrawer.StartPosition = startPosition;
         }
 
 
@@ -91,10 +93,6 @@ namespace Valve.VR.InteractionSystem
                     {
                         BoxDrawer.RemoveBox();
                         ResetMarker();
-                    }
-                    else
-                    {
-
                     }
                     BoxDrawer.ConfigureBoxCollider(currentBoxCollider);
                     break;
@@ -124,18 +122,23 @@ namespace Valve.VR.InteractionSystem
             switch (handSide)
             {
                 case HANDSIDE.HAND_LEFT:
-                    BoxDrawer.ConfigureBoxCollider(currentBoxCollider);
                     BoxDrawer.DrawCube(HandLeft.transform.position);
                     break;
 
                 case HANDSIDE.HAND_RIGHT:
-                    
-                    BoxDrawer.ConfigureBoxCollider(currentBoxCollider);
                     BoxDrawer.DrawCube(HandRight.transform.position);
                     
                     break;
             }
-            
+            BoxDrawer.ConfigureBoxCollider(currentBoxCollider);
+        }
+
+        /// <summary>
+        /// The Marker is being edited and the Collidersize need to be updated
+        /// </summary>
+        public void OnUpdateCollider()
+        {
+            BoxDrawer.ConfigureBoxCollider(currentBoxCollider);
         }
 
         /// <summary>

@@ -255,14 +255,14 @@ namespace Valve.VR.InteractionSystem
         /// <param name="connectedOn">OUT Other Block connected on</param>
         private void GrooveOrTapHit(out List<CollisionObject> collisionList, out OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
         {
-            if (GetComponentInChildren<TapHandler>().GetCollidingObjects().Count > 0)
+            if (GetComponentInChildren<TapHandler>()?.GetCollidingObjects().Count > 0)
             {
                 collisionList = GetComponentInChildren<TapHandler>().GetCollidingObjects();
                 connectedOn = OTHER_BLOCK_IS_CONNECTED_ON.TAP;
                 return;
             }
 
-            if (GetComponentInChildren<GrooveHandler>().GetCollidingObjects().Count > 0)
+            if (GetComponentInChildren<GrooveHandler>()?.GetCollidingObjects().Count > 0)
             {
                 collisionList = GetComponentInChildren<GrooveHandler>().GetCollidingObjects();
                 connectedOn = OTHER_BLOCK_IS_CONNECTED_ON.GROOVE;

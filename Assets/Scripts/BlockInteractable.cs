@@ -134,14 +134,8 @@ namespace Valve.VR.InteractionSystem
             }
 
             float distanceHandToBlock = Vector3.Distance(pullingHand.transform.position, rigidBodies[0].worldCenterOfMass);
-            RenderForceLine(pullingHand.transform.position, GetComponent<BlockGeometryScript>().GetCenterTopWorld());
+            RenderForceLine(pullingHand.transform.position, rigidBodies[0].worldCenterOfMass);
 
-            //if (Time.time > nextPulseTime)
-            //{
-            //    pullingHand.TriggerHapticPulse(0.1f, 20, distanceHandToBlock * 3);
-            //    nextPulseTime = Time.time + 0.1f;
-            //}
-                
             if(distanceHandToBlock >= pullDistanceMaximum)
             {
                 GetComponent<BlockCommunication>().AttemptToFreeBlock();

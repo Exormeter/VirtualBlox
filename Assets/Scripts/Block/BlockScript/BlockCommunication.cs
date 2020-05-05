@@ -125,7 +125,7 @@ namespace Valve.VR.InteractionSystem
 
             visitedNodes.Add(gameObject.GetHashCode());
 
-            if (GetComponentInChildren<GrooveHandler>().GetCollidingObjects().Count > 0 || GetComponentInChildren<TapHandler>().GetCollidingObjects().Count > 0)
+            if (GetComponentInChildren<GrooveHandler>()?.GetCollidingObjects().Count > 0 || GetComponentInChildren<TapHandler>()?.GetCollidingObjects().Count > 0)
             {
                 return transform.gameObject;
             }

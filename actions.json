@@ -6,19 +6,9 @@
       "requirement": "mandatory"
     },
     {
-      "name": "/actions/BrickControl/in/Teleport",
-      "type": "boolean",
-      "requirement": "optional"
-    },
-    {
-      "name": "/actions/BrickControl/in/GrabAndSpawn",
+      "name": "/actions/BrickControl/in/SpawnAndGrabBlock",
       "type": "boolean",
       "requirement": "mandatory"
-    },
-    {
-      "name": "/actions/BrickControl/in/Climb",
-      "type": "boolean",
-      "requirement": "optional"
     },
     {
       "name": "/actions/BrickControl/in/Pose",
@@ -38,22 +28,7 @@
       "requirement": "mandatory"
     },
     {
-      "name": "/actions/BrickControl/in/Squeeze",
-      "type": "vector1",
-      "requirement": "optional"
-    },
-    {
       "name": "/actions/BrickControl/in/HeadsetOnHead",
-      "type": "boolean",
-      "requirement": "optional"
-    },
-    {
-      "name": "/actions/BrickControl/in/SpawnBlock",
-      "type": "boolean",
-      "requirement": "optional"
-    },
-    {
-      "name": "/actions/BrickControl/in/ClickCircle",
       "type": "boolean",
       "requirement": "optional"
     },

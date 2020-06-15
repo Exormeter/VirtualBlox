@@ -12,8 +12,6 @@ namespace LDraw
     public class LDrawConfig : ScriptableObject
     {
         [SerializeField] private string _PrimitivePartsPath;
-        [SerializeField] private string _PartsPath;
-       
         [SerializeField] private string _ModelsPath;
         [SerializeField] private string _ColorConfigPath;
         [SerializeField] private string _MaterialsPath;
@@ -21,12 +19,14 @@ namespace LDraw
         [SerializeField] private float _Scale;
         [SerializeField] private Material _DefaultOpaqueMaterial;
         [SerializeField] private Material _DefaultTransparentMaterial;
+
+        private string _PartsPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments) + "/LDraw/parts/";
         private Dictionary<string, string> _PrimitiveParts;
         private Dictionary<string, string> _Parts;
         
-        private Dictionary<int, Material> _MainColors;
+        //private Dictionary<int, Material> _MainColors;
         private Dictionary<string, Material> _CustomColors;
-        private Dictionary<string, string> _ModelFileNames;
+        //private Dictionary<string, string> _ModelFileNames;
         public Matrix4x4 ScaleMatrix
         {
             get { return Matrix4x4.Scale(new Vector3(_Scale, _Scale, _Scale)); }
@@ -35,11 +35,11 @@ namespace LDraw
         public Material GetColoredMaterial(int code)
         {
 
-            return _MainColors[code];
+            return new Material(_DefaultOpaqueMaterial);
         }
         public Material GetColoredMaterial(string colorString)
         {
-            if (_CustomColors.ContainsKey(colorString))
+            /*if (_CustomColors.ContainsKey(colorString))
                 return _CustomColors[colorString];
             var path = _MaterialsPath + colorString + ".mat";
             if (File.Exists(path))
@@ -49,18 +49,19 @@ namespace LDraw
             else
             {
                 var mat = new Material(_DefaultOpaqueMaterial);
-                 
+
                 mat.name = colorString;
                 Color color;
                 if (ColorUtility.TryParseHtmlString(colorString, out color))
                     mat.color = color;
-                            
+
                 AssetDatabase.CreateAsset(mat, path);
                 AssetDatabase.SaveAssets();
                 _CustomColors.Add(colorString, mat);
             }
 
-            return _CustomColors[colorString];
+            return _CustomColors[colorString];*/
+            return new Material(_DefaultOpaqueMaterial);
         }
 
         public string[] PartFileNames
@@ -92,7 +93,6 @@ namespace LDraw
 
         public void InitParts()
         {
-            ParseColors();
             _Parts = new Dictionary<string, string>();
             var files = Directory.GetFiles(_PartsPath, "*.*", SearchOption.AllDirectories);
 
@@ -139,7 +139,7 @@ namespace LDraw
             }
         }
 
-        private void ParseColors()
+        /*private void ParseColors()
         {
             _MainColors = new Dictionary<int, Material>();
             using (StreamReader reader = new StreamReader(_ColorConfigPath))
@@ -177,27 +177,7 @@ namespace LDraw
                 }
                 AssetDatabase.SaveAssets();
             }
-        }
-        
-        
-
-        public Mesh GetMesh(string name)
-        {
-            var path = Path.Combine(_MeshesPath, name + ".asset");
-            return File.Exists(path) ? AssetDatabase.LoadAssetAtPath<Mesh>(path) : null;
-        }
-        public void SaveMesh(Mesh mesh)
-        {
-            var path = _MeshesPath;
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-            path = Path.Combine(path, mesh.name + ".asset");
-            AssetDatabase.CreateAsset(mesh, path);
-            AssetDatabase.SaveAssets();
-        }
-
+        }*/
         public static string GetFileName(string[] args, int filenamePos)
         {
             string name = string.Empty;
@@ -226,7 +206,7 @@ namespace LDraw
             {
                 if (_Instance == null)
                 {
-                    _Instance = AssetDatabase.LoadAssetAtPath<LDrawConfig>(ConfigPath);
+                    _Instance = Resources.Load<LDrawConfig>(ConfigPath);
                 }
 
                 return _Instance;
@@ -239,7 +219,7 @@ namespace LDraw
             InitPrimitiveParts();
         }
 
-        private const string ConfigPath = "Assets/LDraw-Importer/Editor/Config.asset";
+        private const string ConfigPath = "Config";
         public const int DefaultMaterialCode = 16;
     }
 }

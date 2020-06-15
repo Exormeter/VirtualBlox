@@ -22,9 +22,9 @@ namespace Valve.VR.InteractionSystem {
         public Vector3 StartPosition;
 
         private List<LineRenderer> lineRendererList = new List<LineRenderer>();
+        private List<GameObject> cornerGrabberList = new List<GameObject>();
         public Material LineMaterial;
         public GameObject ContainerLineRenderer;
-        public GameObject ContainerCornerGrabber;
         public GameObject CornerGraber;
 
         void Start()
@@ -51,6 +51,21 @@ namespace Valve.VR.InteractionSystem {
             pointBBottom = Instantiate(CornerGraber, transform);
             pointCBottom = Instantiate(CornerGraber, transform);
             pointDBottom = Instantiate(CornerGraber, transform);
+
+            cornerGrabberList.Add(pointATop);
+            cornerGrabberList.Add(pointBTop);
+            cornerGrabberList.Add(pointCTop);
+            cornerGrabberList.Add(pointDTop);
+
+            cornerGrabberList.Add(pointABottom);
+            cornerGrabberList.Add(pointBBottom);
+            cornerGrabberList.Add(pointCBottom);
+            cornerGrabberList.Add(pointDBottom);
+
+            foreach (GameObject cornerGrabber in cornerGrabberList)
+            {
+                cornerGrabber.SetActive(false);
+            }
 
             //Sides are named after a six sided die where One is on Top, Six on Bottom and 5 is facing toward you
 
@@ -299,13 +314,19 @@ namespace Valve.VR.InteractionSystem {
         public void RemoveBox()
         {
             ContainerLineRenderer.SetActive(false);
-            //ContainerCornerGrabber.SetActive(false);
+            foreach(GameObject cornerGrabber in cornerGrabberList)
+            {
+                cornerGrabber.SetActive(false);
+            }
         }
 
         public void ActivateBox()
         {
             ContainerLineRenderer.SetActive(true);
-            //ContainerCornerGrabber.SetActive(true);
+            foreach (GameObject cornerGrabber in cornerGrabberList)
+            {
+                cornerGrabber.SetActive(true);
+            }
         }
 
         public void SetStartPosition(Vector3 position)

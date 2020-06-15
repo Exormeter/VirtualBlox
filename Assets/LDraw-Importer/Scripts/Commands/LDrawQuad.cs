@@ -40,6 +40,7 @@ namespace LDraw
 			{
 				int argNum = i + 2;
 				param[i] = float.Parse(args[argNum], CultureInfo.InvariantCulture);
+				Debug.Log("Read: " + args[argNum] + ", Converted to: " + param[i]);
 				/*if (!float.TryParse(args[argNum], out param[i]))
 				{
 					Debug.LogError(

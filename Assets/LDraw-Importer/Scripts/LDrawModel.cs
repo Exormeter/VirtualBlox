@@ -132,11 +132,12 @@ namespace LDraw
         private Mesh PrepareMesh(List<Vector3> verts, List<int> triangles)
         {
 
-            Mesh mesh = LDrawConfig.Instance.GetMesh(_Name);
-            if (mesh != null) return mesh;
+            //Not useable since Mesh can be saved as Assats in Runtime
+            /*Mesh mesh = LDrawConfig.Instance.GetMesh(_Name);
+            if (mesh != null) return mesh;*/
 
 
-            mesh = new Mesh();
+            Mesh mesh = new Mesh();
 
             mesh.name = _Name;
             var frontVertsCount = verts.Count;

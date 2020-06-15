@@ -3971,7 +3971,7 @@ GameObject:
   - component: {fileID: 188160322}
   - component: {fileID: 188160321}
   m_Layer: 0
-  m_Name: MenuManager
+  m_Name: InputManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4001,10 +4001,10 @@ MonoBehaviour:
     actionPath: /actions/BrickControl/in/InteractUI
     needsReinit: 0
   GripButton:
-    actionPath: /actions/BrickControl/in/Climb
+    actionPath: /actions/BrickControl/in/SpawnAndGrabBlock
     needsReinit: 0
   TriggerButton:
-    actionPath: /actions/BrickControl/in/GrabAndSpawn
+    actionPath: /actions/BrickControl/in/SpawnAndGrabBlock
     needsReinit: 0
   leftHand: {fileID: 261345821}
   rightHand: {fileID: 261132931}
@@ -7801,10 +7801,10 @@ MonoBehaviour:
   handType: 2
   trackedObject: {fileID: 114000011907440577}
   grabPinchAction:
-    actionPath: /actions/BrickControl/in/GrabAndSpawn
+    actionPath: /actions/BrickControl/in/SpawnAndGrabBlock
     needsReinit: 0
   grabGripAction:
-    actionPath: /actions/BrickControl/in/GrabAndSpawn
+    actionPath: /actions/BrickControl/in/SpawnAndGrabBlock
     needsReinit: 0
   hapticAction:
     actionPath: /actions/BrickControl/out/Haptic
@@ -8051,10 +8051,10 @@ MonoBehaviour:
   handType: 1
   trackedObject: {fileID: 114000011526111811}
   grabPinchAction:
-    actionPath: /actions/BrickControl/in/GrabAndSpawn
+    actionPath: /actions/BrickControl/in/SpawnAndGrabBlock
     needsReinit: 0
   grabGripAction:
-    actionPath: /actions/BrickControl/in/GrabAndSpawn
+    actionPath: /actions/BrickControl/in/SpawnAndGrabBlock
     needsReinit: 0
   hapticAction:
     actionPath: /actions/BrickControl/out/Haptic
@@ -11714,7 +11714,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &407874510
 Transform:
   m_ObjectHideFlags: 0
@@ -34728,7 +34728,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!64 &1581754165
 MeshCollider:
   m_ObjectHideFlags: 0

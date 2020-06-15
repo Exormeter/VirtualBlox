@@ -19,11 +19,7 @@ namespace Valve.VR
         
         private static SteamVR_Action_Boolean p_brickControl_InteractUI;
         
-        private static SteamVR_Action_Boolean p_brickControl_Teleport;
-        
-        private static SteamVR_Action_Boolean p_brickControl_GrabAndSpawn;
-        
-        private static SteamVR_Action_Boolean p_brickControl_Climb;
+        private static SteamVR_Action_Boolean p_brickControl_SpawnAndGrabBlock;
         
         private static SteamVR_Action_Pose p_brickControl_Pose;
         
@@ -31,13 +27,7 @@ namespace Valve.VR
         
         private static SteamVR_Action_Skeleton p_brickControl_SkeletonRightHand;
         
-        private static SteamVR_Action_Single p_brickControl_Squeeze;
-        
         private static SteamVR_Action_Boolean p_brickControl_HeadsetOnHead;
-        
-        private static SteamVR_Action_Boolean p_brickControl_SpawnBlock;
-        
-        private static SteamVR_Action_Boolean p_brickControl_ClickCircle;
         
         private static SteamVR_Action_Vector2 p_brickControl_ThumbPosition;
         
@@ -65,27 +55,11 @@ namespace Valve.VR
             }
         }
         
-        public static SteamVR_Action_Boolean brickControl_Teleport
+        public static SteamVR_Action_Boolean brickControl_SpawnAndGrabBlock
         {
             get
             {
-                return SteamVR_Actions.p_brickControl_Teleport.GetCopy<SteamVR_Action_Boolean>();
-            }
-        }
-        
-        public static SteamVR_Action_Boolean brickControl_GrabAndSpawn
-        {
-            get
-            {
-                return SteamVR_Actions.p_brickControl_GrabAndSpawn.GetCopy<SteamVR_Action_Boolean>();
-            }
-        }
-        
-        public static SteamVR_Action_Boolean brickControl_Climb
-        {
-            get
-            {
-                return SteamVR_Actions.p_brickControl_Climb.GetCopy<SteamVR_Action_Boolean>();
+                return SteamVR_Actions.p_brickControl_SpawnAndGrabBlock.GetCopy<SteamVR_Action_Boolean>();
             }
         }
         
@@ -113,35 +87,11 @@ namespace Valve.VR
             }
         }
         
-        public static SteamVR_Action_Single brickControl_Squeeze
-        {
-            get
-            {
-                return SteamVR_Actions.p_brickControl_Squeeze.GetCopy<SteamVR_Action_Single>();
-            }
-        }
-        
         public static SteamVR_Action_Boolean brickControl_HeadsetOnHead
         {
             get
             {
                 return SteamVR_Actions.p_brickControl_HeadsetOnHead.GetCopy<SteamVR_Action_Boolean>();
-            }
-        }
-        
-        public static SteamVR_Action_Boolean brickControl_SpawnBlock
-        {
-            get
-            {
-                return SteamVR_Actions.p_brickControl_SpawnBlock.GetCopy<SteamVR_Action_Boolean>();
-            }
-        }
-        
-        public static SteamVR_Action_Boolean brickControl_ClickCircle
-        {
-            get
-            {
-                return SteamVR_Actions.p_brickControl_ClickCircle.GetCopy<SteamVR_Action_Boolean>();
             }
         }
         
@@ -221,16 +171,11 @@ namespace Valve.VR
         {
             Valve.VR.SteamVR_Input.actions = new Valve.VR.SteamVR_Action[] {
                     SteamVR_Actions.brickControl_InteractUI,
-                    SteamVR_Actions.brickControl_Teleport,
-                    SteamVR_Actions.brickControl_GrabAndSpawn,
-                    SteamVR_Actions.brickControl_Climb,
+                    SteamVR_Actions.brickControl_SpawnAndGrabBlock,
                     SteamVR_Actions.brickControl_Pose,
                     SteamVR_Actions.brickControl_SkeletonLeftHand,
                     SteamVR_Actions.brickControl_SkeletonRightHand,
-                    SteamVR_Actions.brickControl_Squeeze,
                     SteamVR_Actions.brickControl_HeadsetOnHead,
-                    SteamVR_Actions.brickControl_SpawnBlock,
-                    SteamVR_Actions.brickControl_ClickCircle,
                     SteamVR_Actions.brickControl_ThumbPosition,
                     SteamVR_Actions.brickControl_Haptic,
                     SteamVR_Actions.platformer_Move,
@@ -242,16 +187,11 @@ namespace Valve.VR
                     SteamVR_Actions.mixedreality_ExternalCamera};
             Valve.VR.SteamVR_Input.actionsIn = new Valve.VR.ISteamVR_Action_In[] {
                     SteamVR_Actions.brickControl_InteractUI,
-                    SteamVR_Actions.brickControl_Teleport,
-                    SteamVR_Actions.brickControl_GrabAndSpawn,
-                    SteamVR_Actions.brickControl_Climb,
+                    SteamVR_Actions.brickControl_SpawnAndGrabBlock,
                     SteamVR_Actions.brickControl_Pose,
                     SteamVR_Actions.brickControl_SkeletonLeftHand,
                     SteamVR_Actions.brickControl_SkeletonRightHand,
-                    SteamVR_Actions.brickControl_Squeeze,
                     SteamVR_Actions.brickControl_HeadsetOnHead,
-                    SteamVR_Actions.brickControl_SpawnBlock,
-                    SteamVR_Actions.brickControl_ClickCircle,
                     SteamVR_Actions.brickControl_ThumbPosition,
                     SteamVR_Actions.platformer_Move,
                     SteamVR_Actions.platformer_Jump,
@@ -269,17 +209,12 @@ namespace Valve.VR
                     SteamVR_Actions.mixedreality_ExternalCamera};
             Valve.VR.SteamVR_Input.actionsBoolean = new Valve.VR.SteamVR_Action_Boolean[] {
                     SteamVR_Actions.brickControl_InteractUI,
-                    SteamVR_Actions.brickControl_Teleport,
-                    SteamVR_Actions.brickControl_GrabAndSpawn,
-                    SteamVR_Actions.brickControl_Climb,
+                    SteamVR_Actions.brickControl_SpawnAndGrabBlock,
                     SteamVR_Actions.brickControl_HeadsetOnHead,
-                    SteamVR_Actions.brickControl_SpawnBlock,
-                    SteamVR_Actions.brickControl_ClickCircle,
                     SteamVR_Actions.platformer_Jump,
                     SteamVR_Actions.buggy_Brake,
                     SteamVR_Actions.buggy_Reset};
             Valve.VR.SteamVR_Input.actionsSingle = new Valve.VR.SteamVR_Action_Single[] {
-                    SteamVR_Actions.brickControl_Squeeze,
                     SteamVR_Actions.buggy_Throttle};
             Valve.VR.SteamVR_Input.actionsVector2 = new Valve.VR.SteamVR_Action_Vector2[] {
                     SteamVR_Actions.brickControl_ThumbPosition,
@@ -291,13 +226,8 @@ namespace Valve.VR
                     SteamVR_Actions.brickControl_SkeletonRightHand};
             Valve.VR.SteamVR_Input.actionsNonPoseNonSkeletonIn = new Valve.VR.ISteamVR_Action_In[] {
                     SteamVR_Actions.brickControl_InteractUI,
-                    SteamVR_Actions.brickControl_Teleport,
-                    SteamVR_Actions.brickControl_GrabAndSpawn,
-                    SteamVR_Actions.brickControl_Climb,
-                    SteamVR_Actions.brickControl_Squeeze,
+                    SteamVR_Actions.brickControl_SpawnAndGrabBlock,
                     SteamVR_Actions.brickControl_HeadsetOnHead,
-                    SteamVR_Actions.brickControl_SpawnBlock,
-                    SteamVR_Actions.brickControl_ClickCircle,
                     SteamVR_Actions.brickControl_ThumbPosition,
                     SteamVR_Actions.platformer_Move,
                     SteamVR_Actions.platformer_Jump,
@@ -310,16 +240,11 @@ namespace Valve.VR
         private static void PreInitActions()
         {
             SteamVR_Actions.p_brickControl_InteractUI = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/BrickControl/in/InteractUI")));
-            SteamVR_Actions.p_brickControl_Teleport = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/BrickControl/in/Teleport")));
-            SteamVR_Actions.p_brickControl_GrabAndSpawn = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/BrickControl/in/GrabAndSpawn")));
-            SteamVR_Actions.p_brickControl_Climb = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/BrickControl/in/Climb")));
+            SteamVR_Actions.p_brickControl_SpawnAndGrabBlock = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/BrickControl/in/SpawnAndGrabBlock")));
             SteamVR_Actions.p_brickControl_Pose = ((SteamVR_Action_Pose)(SteamVR_Action.Create<SteamVR_Action_Pose>("/actions/BrickControl/in/Pose")));
             SteamVR_Actions.p_brickControl_SkeletonLeftHand = ((SteamVR_Action_Skeleton)(SteamVR_Action.Create<SteamVR_Action_Skeleton>("/actions/BrickControl/in/SkeletonLeftHand")));
             SteamVR_Actions.p_brickControl_SkeletonRightHand = ((SteamVR_Action_Skeleton)(SteamVR_Action.Create<SteamVR_Action_Skeleton>("/actions/BrickControl/in/SkeletonRightHand")));
-            SteamVR_Actions.p_brickControl_Squeeze = ((SteamVR_Action_Single)(SteamVR_Action.Create<SteamVR_Action_Single>("/actions/BrickControl/in/Squeeze")));
             SteamVR_Actions.p_brickControl_HeadsetOnHead = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/BrickControl/in/HeadsetOnHead")));
-            SteamVR_Actions.p_brickControl_SpawnBlock = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/BrickControl/in/SpawnBlock")));
-            SteamVR_Actions.p_brickControl_ClickCircle = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/BrickControl/in/ClickCircle")));
             SteamVR_Actions.p_brickControl_ThumbPosition = ((SteamVR_Action_Vector2)(SteamVR_Action.Create<SteamVR_Action_Vector2>("/actions/BrickControl/in/ThumbPosition")));
             SteamVR_Actions.p_brickControl_Haptic = ((SteamVR_Action_Vibration)(SteamVR_Action.Create<SteamVR_Action_Vibration>("/actions/BrickControl/out/Haptic")));
             SteamVR_Actions.p_platformer_Move = ((SteamVR_Action_Vector2)(SteamVR_Action.Create<SteamVR_Action_Vector2>("/actions/platformer/in/Move")));

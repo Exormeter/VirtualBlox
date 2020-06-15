@@ -13,6 +13,6 @@ namespace Valve.VR.InteractionSystem
         Trigger,
         Pinch,
         Grip,
-        Scripted,
+        Scripted
     }
 }

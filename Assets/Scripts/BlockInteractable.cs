@@ -250,8 +250,6 @@ namespace Valve.VR.InteractionSystem
                 {
                     Util.FastRemove(holdingPoints, i);
                 }
-                
-
                 return true;
             }
 

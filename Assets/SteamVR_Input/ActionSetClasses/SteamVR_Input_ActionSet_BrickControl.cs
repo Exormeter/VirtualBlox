@@ -25,27 +25,11 @@ namespace Valve.VR
             }
         }
         
-        public virtual SteamVR_Action_Boolean Teleport
+        public virtual SteamVR_Action_Boolean SpawnAndGrabBlock
         {
             get
             {
-                return SteamVR_Actions.brickControl_Teleport;
-            }
-        }
-        
-        public virtual SteamVR_Action_Boolean GrabAndSpawn
-        {
-            get
-            {
-                return SteamVR_Actions.brickControl_GrabAndSpawn;
-            }
-        }
-        
-        public virtual SteamVR_Action_Boolean Climb
-        {
-            get
-            {
-                return SteamVR_Actions.brickControl_Climb;
+                return SteamVR_Actions.brickControl_SpawnAndGrabBlock;
             }
         }
         
@@ -73,35 +57,11 @@ namespace Valve.VR
             }
         }
         
-        public virtual SteamVR_Action_Single Squeeze
-        {
-            get
-            {
-                return SteamVR_Actions.brickControl_Squeeze;
-            }
-        }
-        
         public virtual SteamVR_Action_Boolean HeadsetOnHead
         {
             get
             {
                 return SteamVR_Actions.brickControl_HeadsetOnHead;
-            }
-        }
-        
-        public virtual SteamVR_Action_Boolean SpawnBlock
-        {
-            get
-            {
-                return SteamVR_Actions.brickControl_SpawnBlock;
-            }
-        }
-        
-        public virtual SteamVR_Action_Boolean ClickCircle
-        {
-            get
-            {
-                return SteamVR_Actions.brickControl_ClickCircle;
             }
         }
         

@@ -96,6 +96,7 @@ namespace Valve.VR.InteractionSystem
             combinedTile.GetComponent<BlockCommunication>().breakForcePerPin = 2;
             combinedTile.AddComponent<AttachFloorHandler>();
             combinedTile.AddComponent<AttachHandHandler>();
+            combinedTile.isStatic = true;
 
             //FloorTiles schould get the same Guid on every startup
             GameObject[] floorTiles = GameObject.FindGameObjectsWithTag("Floor");

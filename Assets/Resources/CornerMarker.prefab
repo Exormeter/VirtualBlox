@@ -111,7 +111,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   activateActionSetOnAttach:
     actionSetPath: 
-  hideHandOnAttach: 1
+  hideHandOnAttach: 0
   hideSkeletonOnAttach: 0
   hideControllerOnAttach: 0
   handAnimationOnPickup: 0
@@ -146,7 +146,7 @@ MonoBehaviour:
   snapAttachEaseInCompleted: 0
   skeletonPoser: {fileID: 0}
   handFollowTransform: 1
-  highlightOnHover: 1
+  highlightOnHover: 0
   highlightHolder: {fileID: 0}
   hideHighlight: []
   isDestroying: 0
@@ -165,8 +165,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0550a1e8fd34b949becd8ff21e7d5f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  OpposingCornerPosition: {fileID: 0}
   BoxDrawer: {fileID: 0}
+  xAxisPlane: []
+  yAxisPlane: []
+  zAxisPlane: []
 --- !u!114 &6253873944476229278
 MonoBehaviour:
   m_ObjectHideFlags: 0

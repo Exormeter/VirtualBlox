@@ -223,6 +223,7 @@ namespace Valve.VR.InteractionSystem
 
         private void PressTriggerButtonLeft(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
         {
+            Debug.Log("TirggerPressed");
             if (leftHand.currentAttachedObject == null && leftHand.hoveringInteractable == null)
             {
                 OnSpawnBlockLeft.Invoke(HANDSIDE.HAND_LEFT);
@@ -288,7 +289,6 @@ namespace Valve.VR.InteractionSystem
         /// <param name="fromSource"></param>
         private void RightTouchPadDown(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
         {
-            Debug.Log("Test");
             //Return if Menu is open or Marker is currently pulled
             if (CurrentMenuState != MenuState.BOTH_CLOSED || startedPulling != HANDSIDE.HAND_NONE)
                 return;

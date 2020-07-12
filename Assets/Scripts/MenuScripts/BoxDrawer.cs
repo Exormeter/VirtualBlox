@@ -338,17 +338,17 @@ namespace Valve.VR.InteractionSystem {
         {
             Vector3 colliderCenter =  new Vector3();
             
-            colliderCenter.x = ((pointATop.transform.position + pointBTop.transform.position) / 2).x;
+            colliderCenter.x = ((pointATop.transform.position + pointDTop.transform.position) / 2).x;
             colliderCenter.y = ((pointATop.transform.position + pointABottom.transform.position) / 2).y;
-            colliderCenter.z = ((pointATop.transform.position + pointDTop.transform.position) / 2).z;
+            colliderCenter.z = ((pointATop.transform.position + pointBTop.transform.position) / 2).z;
             
 
             collider.center = transform.InverseTransformPoint(colliderCenter);
 
             Vector3 colliderBounds = new Vector3();
-            colliderBounds.x = Vector3.Distance(pointATop.transform.position, pointBTop.transform.position);
+            colliderBounds.x = Vector3.Distance(pointATop.transform.position, pointDTop.transform.position);
             colliderBounds.y = Vector3.Distance(pointATop.transform.position, pointABottom.transform.position);
-            colliderBounds.z = Vector3.Distance(pointATop.transform.position, pointDTop.transform.position);
+            colliderBounds.z = Vector3.Distance(pointATop.transform.position, pointBTop.transform.position);
 
             collider.size = colliderBounds;
             return collider;

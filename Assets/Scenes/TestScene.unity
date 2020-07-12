@@ -34404,7 +34404,6 @@ MonoBehaviour:
   StartPosition: {x: 0, y: 0, z: 0}
   LineMaterial: {fileID: 2100000, guid: a9b0cd1d7aa398a4b91b00b52b65003a, type: 2}
   ContainerLineRenderer: {fileID: 1673653513}
-  ContainerCornerGrabber: {fileID: 407874509}
   CornerGraber: {fileID: 1091166797266310051, guid: b0ef0bb993979d541a0d7f6f94c0a98c,
     type: 3}
 --- !u!4 &1556106290

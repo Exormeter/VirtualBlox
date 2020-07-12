@@ -55,7 +55,7 @@ namespace Valve.VR.InteractionSystem
         public SteamVR_Skeleton_Poser skeletonPoser;
 
         [Tooltip("Should the rendered hand lock on to and follow the object")]
-        public bool handFollowTransform= true;
+        public bool handFollowTransform = true;
 
 
         [Tooltip("Set whether or not you want this interactible to highlight when hovering over it")]
@@ -269,7 +269,7 @@ namespace Valve.VR.InteractionSystem
                 UpdateHighlightRenderers();
                 isMarked = true;
             }
-            
+
         }
 
         public virtual void OnMarkedEnd()
@@ -291,10 +291,10 @@ namespace Valve.VR.InteractionSystem
                     allHighlightHolderRefernences.ForEach(highLighter => Destroy(highLighter));
                     allHighlightHolderRefernences.Clear();
                 }
-                    
+
             }
         }
-        
+
 
         protected float blendToPoseTime = 0.1f;
         protected float releasePoseBlendTime = 0.2f;

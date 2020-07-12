@@ -179,7 +179,7 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
-        /// <summary>
+        /*/// <summary>
         /// Adds or Removes a Block to/from the List
         /// </summary>
         /// <param name="interactable"></param>
@@ -197,7 +197,7 @@ namespace Valve.VR.InteractionSystem
                 markedBlocks.Add(interactable.transform.gameObject);
             }
             
-        }
+        }*/
 
         /// <summary>
         /// Send a OnMarkedEnd Message to all Blocks, clear the List of markedBlocks and disable the Box Collider

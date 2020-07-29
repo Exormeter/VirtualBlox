@@ -272,11 +272,12 @@ namespace Valve.VR.InteractionSystem
                 return;
             }
 
-            FixedJoint joint = block.AddComponent<FixedJoint>();
-            joint.connectedBody = collidedBlock.GetComponent<Rigidbody>();
+            FixedJoint joint = new FixedJoint();
+            /*joint.connectedBody = collidedBlock.GetComponent<Rigidbody>();
             joint.breakForce = Mathf.Infinity;
-            joint.breakTorque = Mathf.Infinity;
+            joint.breakTorque = Mathf.Infinity;*/
             //ConfigurableJoint joint = SetConfigurableJoint(collidedBlock.GetComponent<Rigidbody>(), blockToTapDict[collidedBlock]);
+            collidedBlock.transform.SetParent(collidedBlock.transform);
 
             OTHER_BLOCK_IS_CONNECTED_ON otherConnection;
             if (connectedOn == OTHER_BLOCK_IS_CONNECTED_ON.GROOVE)

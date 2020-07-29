@@ -19,14 +19,6 @@ namespace Valve.VR.InteractionSystem
             blockCommunication = GetComponent<BlockCommunication>();
         }
 
-        private void Update()
-        {
-            if (Input.GetKeyDown("q") && Debug)
-            {
-                OnDetachedFromHand(null);
-            }
-        }
-
         /// <summary>
         /// Called when the Block is attached to the Hand
         /// </summary>
@@ -43,8 +35,8 @@ namespace Valve.VR.InteractionSystem
         /// </summary>
         public void OnIndirectAttachedtoHand()
         {
-            GetComponent<Rigidbody>().isKinematic = false;
-            gameObject.transform.SetParent(null);
+            //GetComponent<Rigidbody>().isKinematic = false;
+            //gameObject.transform.SetParent(null);
         }
 
 

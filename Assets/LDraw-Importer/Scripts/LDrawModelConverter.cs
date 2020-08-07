@@ -71,6 +71,7 @@ namespace LDraw
             }
 
             GameObject combinedBlock = new GameObject("Block");
+            combinedBlock.tag = "MeshHolder";
             combinedBlock.AddComponent(typeof(MeshFilter));
             combinedBlock.AddComponent(typeof(MeshRenderer));
             combinedBlock.GetComponent<MeshFilter>().mesh = new Mesh();
@@ -141,7 +142,7 @@ namespace LDraw
             }
 
             
-            GameObject brickFace = new GameObject("TapFace");
+            GameObject brickFace = new GameObject("Taps");
 
             brickFace.transform.SetParent(newBlock.transform);
 
@@ -205,7 +206,7 @@ namespace LDraw
             
 
             
-            GameObject brickFace = new GameObject("GrooveFace");
+            GameObject brickFace = new GameObject("Grooves");
 
             brickFace.transform.SetParent(newBlock.transform);
 

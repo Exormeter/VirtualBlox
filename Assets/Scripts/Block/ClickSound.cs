@@ -22,10 +22,10 @@ namespace Valve.VR.InteractionSystem
 
         }
 
-        public void OnBlockAttach()
+        /*public void OnBlockAttach()
         {
             audioSource.PlayOneShot(blockClickSound);
-        }
+        }*/
     }
 }
 

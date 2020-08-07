@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Valve.VR.InteractionSystem
@@ -8,7 +9,9 @@ namespace Valve.VR.InteractionSystem
     {
         public bool acceptNewCollisionsAsConnected;
         protected Dictionary<IConnectorCollider, CollisionObject> colliderDictionary = new Dictionary<IConnectorCollider, CollisionObject>();
-        //public int occupiedTaps = 0;
+        public int occupiedTaps = 0;
+        public List<GameObject> connectedGrooves;
+        public List<GameObject> connectedTaps;
 
         public virtual void Start()
         {
@@ -18,7 +21,9 @@ namespace Valve.VR.InteractionSystem
         // Update is called once per frame
         public virtual void Update()
         {
-            //occupiedTaps = GetOccupiedCollider().Count;
+            occupiedTaps = GetOccupiedCollider().Count;
+            connectedGrooves = colliderDictionary.Values.ToList<CollisionObject>().ConvertAll(collisionObject => collisionObject.GroovePosition);
+            connectedTaps = colliderDictionary.Values.ToList<CollisionObject>().ConvertAll(collisionObject => collisionObject.TapPosition);
         }
 
         public void AcceptCollisionsAsConnected(bool shouldAccept)
@@ -71,10 +76,11 @@ namespace Valve.VR.InteractionSystem
         /// to connected
         /// </summary>
         /// <param name="block">The newly connected Block</param>
-        public virtual void OnBlockAttach(GameObject block)
+        public virtual void AttachBlocks(GameObject block)
         {
             foreach (CollisionObject collisionObject in colliderDictionary.Values)
             {
+                
                 if (collisionObject.CollidedBlock != null && collisionObject.CollidedBlock.GetHashCode() == block.GetHashCode())
                 {
                     collisionObject.IsConnected = true;

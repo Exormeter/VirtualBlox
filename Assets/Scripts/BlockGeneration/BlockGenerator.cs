@@ -48,10 +48,10 @@ namespace Valve.VR.InteractionSystem
 
         private void Update()
         {
-            if (Input.GetKeyDown("space"))
+            /*if (Input.GetKeyDown("space"))
             {
                 GenerateBlock(new CustomBlockStructure(2, 4, true));
-            }
+            }*/
         }
         /// <summary>
         /// Generates a new Block from a BlockStructure, places it at (0,2,0)

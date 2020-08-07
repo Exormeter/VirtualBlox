@@ -17,17 +17,18 @@ namespace Valve.VR.InteractionSystem
 
         private void OnTriggerEnter(Collider tapCollider)
         {
-            if (tapCollider.gameObject.tag != "Tap")
+            
+            if (!tapCollider.gameObject.CompareTag("Tap"))
             {
                 return;
             }
-
+            
             grooveHandler.RegisterCollision(this, tapCollider.gameObject);
         }
 
         private void OnTriggerExit(Collider tapCollider)
         {
-            if (tapCollider.gameObject.tag != "Tap")
+            if (!tapCollider.gameObject.CompareTag("Tap"))
             {
                 return;
             }

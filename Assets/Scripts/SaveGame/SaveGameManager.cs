@@ -209,13 +209,18 @@ namespace Valve.VR.InteractionSystem
             //Set the prefab as the currently loaded one. Parent them so they can easly moved to the
             //AttachPoint and set them kinematic as they shouldn't interfere with the scene yet
             GameObject parentBlock = loadedBlocks[0];
+            parentBlock.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+            parentBlock.GetComponent<Rigidbody>().isKinematic = true;
             foreach (GameObject loadedBlock in loadedBlocks)
             {
                 loadedBlock.GetComponentInChildren<TapHandler>().AcceptCollisionsAsConnected(false);
                 loadedBlock.GetComponentInChildren<GrooveHandler>().AcceptCollisionsAsConnected(false);
-                loadedBlock.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
-                loadedBlock.GetComponent<Rigidbody>().isKinematic = true;
-                loadedBlock.transform.SetParent(parentBlock.transform);
+
+                if (loadedBlock.GetHashCode() != parentBlock.GetHashCode())
+                {
+                    Destroy(loadedBlock.GetComponent<Rigidbody>());
+                    loadedBlock.transform.SetParent(parentBlock.transform);
+                }
             }
             parentBlock.transform.position = PrefabAttachPoint.transform.position;
             parentBlock.transform.SetParent(PrefabAttachPoint.transform);

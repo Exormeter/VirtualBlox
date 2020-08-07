@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using System.Linq;
 
 namespace Valve.VR.InteractionSystem
 {
@@ -26,8 +27,9 @@ namespace Valve.VR.InteractionSystem
         private bool wasPulled = false;
         private Hand pullingHand = null;
         private GrabTypes pullingGrabType;
-        private GrooveHandler grooveHandler;
+        
         private LineRenderer lineRenderer;
+        private BlockMarker blockMarker;
         //private float nextPulseTime = 0;
 
         private List<Hand> holdingHands = new List<Hand>();
@@ -40,8 +42,9 @@ namespace Valve.VR.InteractionSystem
         //-------------------------------------------------
         void Start()
         {
-            GetComponentsInChildren(rigidBodies);
-            grooveHandler = GetComponentInChildren<GrooveHandler>();
+            blockMarker = GameObject.FindGameObjectWithTag("BlockMarker").GetComponent<BlockMarker>();
+            //GetComponentsInChildren(rigidBodies);
+            
             lineRenderer = gameObject.AddComponent<LineRenderer>();
             lineRenderer.enabled = false;
             lineRenderer.positionCount = 3;
@@ -103,7 +106,7 @@ namespace Valve.VR.InteractionSystem
             //Grabbed a Marked Block so copy the structure and grab the copied Block
             else if (startingGrabType != GrabTypes.None && GetComponent<BlockCommunication>().IsIndirectlyAttachedToFloor() && GetComponent<Interactable>().isMarked)
             {
-                GameObject block = GameObject.FindGameObjectWithTag("BlockMarker").GetComponent<BlockMarker>().RebuildMarkedStructure(this.gameObject);
+                GameObject block = blockMarker.RebuildMarkedStructure(this.gameObject);
                 StartCoroutine(AttachNewBlockToHand(block, hand));
                 Debug.Log("Attaching To Hand");
             }
@@ -133,12 +136,18 @@ namespace Valve.VR.InteractionSystem
                 return;
             }
 
+            GetComponentsInChildren(rigidBodies);
+            if (rigidBodies.Count == 0)
+            {
+                rigidBodies = GetComponentsInParent<Rigidbody>().ToList<Rigidbody>();
+            }
+
             float distanceHandToBlock = Vector3.Distance(pullingHand.transform.position, rigidBodies[0].worldCenterOfMass);
             RenderForceLine(pullingHand.transform.position, rigidBodies[0].worldCenterOfMass);
 
             if(distanceHandToBlock >= pullDistanceMaximum)
             {
-                GetComponent<BlockCommunication>().AttemptToFreeBlock();
+                GetComponent<BlockCommunication>().AttemptToReleaseBlock();
                 wasPulled = true;
             }
 
@@ -170,6 +179,10 @@ namespace Valve.VR.InteractionSystem
         public void PhysicsAttach(Hand hand, GrabTypes startingGrabType)
         {
             GetComponentsInChildren(rigidBodies);
+            if(rigidBodies.Count == 0)
+            {
+                rigidBodies = GetComponentsInParent<Rigidbody>().ToList<Rigidbody>();
+            }
             PhysicsDetach(hand);
 
             Rigidbody holdingBody = null;

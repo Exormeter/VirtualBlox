@@ -64,8 +64,8 @@ namespace Valve.VR.InteractionSystem
         protected MeshRenderer[] existingRenderers;
         public GameObject highlightHolder;
         private List<GameObject> allHighlightHolderRefernences = new List<GameObject>();
-        protected SkinnedMeshRenderer[] highlightSkinnedRenderers;
-        protected SkinnedMeshRenderer[] existingSkinnedRenderers;
+        //protected SkinnedMeshRenderer[] highlightSkinnedRenderers;
+        //protected SkinnedMeshRenderer[] existingSkinnedRenderers;
         protected static Material highlightMat;
         [Tooltip("An array of child gameObjects to not render a highlight for. Things like transparent parts, vfx, etc.")]
         public GameObject[] hideHighlight;
@@ -124,12 +124,12 @@ namespace Valve.VR.InteractionSystem
 
         protected virtual void CreateHighlightRenderers()
         {
-            existingSkinnedRenderers = this.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+            //existingSkinnedRenderers = this.GetComponentsInChildren<SkinnedMeshRenderer>(true);
             highlightHolder = new GameObject("Highlighter");
             allHighlightHolderRefernences.Add(highlightHolder);
-            highlightSkinnedRenderers = new SkinnedMeshRenderer[existingSkinnedRenderers.Length];
+            //highlightSkinnedRenderers = new SkinnedMeshRenderer[existingSkinnedRenderers.Length];
 
-            for (int skinnedIndex = 0; skinnedIndex < existingSkinnedRenderers.Length; skinnedIndex++)
+            /*for (int skinnedIndex = 0; skinnedIndex < existingSkinnedRenderers.Length; skinnedIndex++)
             {
                 SkinnedMeshRenderer existingSkinned = existingSkinnedRenderers[skinnedIndex];
 
@@ -152,9 +152,9 @@ namespace Valve.VR.InteractionSystem
                 newSkinned.bones = existingSkinned.bones;
 
                 highlightSkinnedRenderers[skinnedIndex] = newSkinned;
-            }
+            }*/
 
-            MeshFilter[] existingFilters = this.GetComponentsInChildren<MeshFilter>(true);
+            /*MeshFilter[] existingFilters = this.GetComponentsInChildren<MeshFilter>(true);
             existingRenderers = new MeshRenderer[existingFilters.Length];
             highlightRenderers = new MeshRenderer[existingFilters.Length];
 
@@ -181,7 +181,43 @@ namespace Valve.VR.InteractionSystem
 
                 highlightRenderers[filterIndex] = newRenderer;
                 existingRenderers[filterIndex] = existingRenderer;
+            }*/
+            MeshFilter existingFilter = this.GetComponent<MeshFilter>();
+            if(existingFilter == null)
+            {
+                for (int i = 0; i < transform.childCount; i++)
+                {
+                    if (transform.GetChild(i).gameObject.CompareTag("MeshHolder"))
+                    {
+                        existingFilter = transform.GetChild(i).gameObject.GetComponent<MeshFilter>();
+                    }
+
+                }
             }
+            existingRenderers = new MeshRenderer[1];
+            highlightRenderers = new MeshRenderer[1];
+
+            MeshRenderer existingRenderer = existingFilter.GetComponent<MeshRenderer>();
+
+            if (existingFilter == null || existingRenderer == null || ShouldIgnoreHighlight(existingFilter))
+                return;
+
+            GameObject newFilterHolder = new GameObject("FilterHolder");
+            newFilterHolder.transform.parent = highlightHolder.transform;
+            MeshFilter newFilter = newFilterHolder.AddComponent<MeshFilter>();
+            newFilter.sharedMesh = existingFilter.sharedMesh;
+            MeshRenderer newRenderer = newFilterHolder.AddComponent<MeshRenderer>();
+
+            Material[] materials = new Material[existingRenderer.sharedMaterials.Length];
+            for (int materialIndex = 0; materialIndex < materials.Length; materialIndex++)
+            {
+                materials[materialIndex] = highlightMat;
+            }
+            newRenderer.sharedMaterials = materials;
+
+            highlightRenderers[0] = newRenderer;
+            existingRenderers[0] = existingRenderer;
+            
         }
 
         protected virtual void UpdateHighlightRenderers()
@@ -189,7 +225,7 @@ namespace Valve.VR.InteractionSystem
             if (highlightHolder == null)
                 return;
 
-            for (int skinnedIndex = 0; skinnedIndex < existingSkinnedRenderers.Length; skinnedIndex++)
+            /*for (int skinnedIndex = 0; skinnedIndex < existingSkinnedRenderers.Length; skinnedIndex++)
             {
                 SkinnedMeshRenderer existingSkinned = existingSkinnedRenderers[skinnedIndex];
                 SkinnedMeshRenderer highlightSkinned = highlightSkinnedRenderers[skinnedIndex];
@@ -212,7 +248,7 @@ namespace Valve.VR.InteractionSystem
                 else if (highlightSkinned != null)
                     highlightSkinned.enabled = false;
 
-            }
+            }*/
 
             for (int rendererIndex = 0; rendererIndex < highlightRenderers.Length; rendererIndex++)
             {

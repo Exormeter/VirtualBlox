@@ -8,14 +8,10 @@ namespace Valve.VR.InteractionSystem
     {
         List<CollisionObject> GetCollidingObjects();
 
-        //void RegisterCollision(IConnectorCollider snappingCollider, GameObject tapCollider);
-        
-
-        //void UnregisterCollision(IConnectorCollider snappingCollider, GameObject tapCollider);
 
         void OnBlockPulled();
 
-        void OnBlockAttach(GameObject block);
+        void AttachBlocks(GameObject block);
 
         void OnBlockDetach(GameObject block);
 

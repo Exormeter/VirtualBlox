@@ -12,7 +12,7 @@ namespace Valve.VR.InteractionSystem
         //public PhysicSceneManager physicSceneManager;
         //private GrooveHandler grooveHandler;
         //private TapHandler tapHandler;
-        private Rigidbody rigidBody;
+        //private Rigidbody rigidBody;
         private BlockCommunication blockCommunication;
         public bool WasReMatchedWithBlock;
 
@@ -21,7 +21,7 @@ namespace Valve.VR.InteractionSystem
 
         void Start()
         {
-            rigidBody = GetComponent<Rigidbody>();
+            //rigidBody = GetComponent<Rigidbody>();
             blockCommunication = GetComponent<BlockCommunication>();
         }
 
@@ -84,9 +84,8 @@ namespace Valve.VR.InteractionSystem
             {
                 if (i == frameUntilColliderReEvaluation)
                 {
-                    blockCommunication.SendMessageToConnectedBlocks("EvaluateCollider");
-                    //Check if all Blocks are connected to Floor and freeze them
-                    blockCommunication.SendMessageToConnectedBlocks("CheckFreeze");
+                    blockCommunication.SendMessageToConnectedBlocks("SearchNewConnectoionFloor");
+                    blockCommunication.SendMessageToConnectedBlocks("SeparedBlocks");
                     blockCommunication.SendMessageToConnectedBlocks("UnsetKinematic");
                 }
                 yield return new WaitForFixedUpdate();
@@ -118,7 +117,7 @@ namespace Valve.VR.InteractionSystem
         /// <summary>
         /// Check how many new Blocks are now colliding, which Groove or Tap was hit and connects them together
         /// </summary>
-        private void EvaluateCollider()
+        private void SearchNewConnectoionFloor()
         {
             GrooveOrTapHit(out List<CollisionObject> currentCollisionObjects, out OTHER_BLOCK_IS_CONNECTED_ON connectedOn);
             Dictionary<GameObject, int> blockToTapDict = new Dictionary<GameObject, int>();
@@ -141,6 +140,7 @@ namespace Valve.VR.InteractionSystem
             {
                 blockCommunication.ConnectBlocks(transform.gameObject, collidedBlock, blockToTapDict[collidedBlock], connectedOn);
             }
+            
         }
 
         /// <summary>
@@ -174,11 +174,11 @@ namespace Valve.VR.InteractionSystem
             switch (connectedBlockContainer.ConnectedOn){
 
                 case OTHER_BLOCK_IS_CONNECTED_ON.GROOVE:
-                    connectionsToBlock = GetComponentInChildren<GrooveHandler>().GetCollisionObjectsForGameObject(connectedBlockContainer.BlockRootObject);
+                    connectionsToBlock = transform.Find("Grooves").GetComponent<GrooveHandler>().GetCollisionObjectsForGameObject(connectedBlockContainer.BlockRootObject);
                     break;
 
                 case OTHER_BLOCK_IS_CONNECTED_ON.TAP:
-                    connectionsToBlock = GetComponentInChildren<TapHandler>().GetCollisionObjectsForGameObject(connectedBlockContainer.BlockRootObject);
+                    connectionsToBlock = transform.Find("Taps").GetComponent<TapHandler>().GetCollisionObjectsForGameObject(connectedBlockContainer.BlockRootObject);
                     break;
 
             }
@@ -194,7 +194,7 @@ namespace Valve.VR.InteractionSystem
         /// </summary>
         public void FreezeBlock()
         {
-            rigidBody.constraints = RigidbodyConstraints.FreezeAll;
+            GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
             IsFroozen = true;
         }
 
@@ -203,8 +203,7 @@ namespace Valve.VR.InteractionSystem
         /// </summary>
         public void UnfreezeBlock()
         {
-            rigidBody.constraints = RigidbodyConstraints.None;
-            //blockCommunication.blockScriptSim.DisableTwin();
+            GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
             IsFroozen = false;
         }
 
@@ -222,31 +221,21 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
-        /// <summary>
-        /// Sets the RidigBody to kinematic if the Block is not a Floor Plate
-        /// </summary>
-        public void SetKinematic()
+        public void SeparedBlocks()
         {
-            if (!gameObject.tag.Equals("Floor"))
+            if (gameObject.tag.Equals("Floor"))
+                return;
+
+            gameObject.transform.SetParent(null);
+
+            Rigidbody rigidbody = GetComponent<Rigidbody>();
+            if(rigidbody == null)
             {
-                rigidBody.isKinematic = true;
-                GetComponent<BlockGeometryScript>().SetWallColliderTrigger(true);
+                rigidbody = gameObject.AddComponent<Rigidbody>();
             }
+            rigidbody.constraints = RigidbodyConstraints.FreezeAll;
         }
 
-        /// <summary>
-        /// Sets the RidigBody to non-kinematic if the Block is not a Floor Plate and resets
-        /// the WasReMatchedWithBlock Flag
-        /// </summary>
-        public void UnsetKinematic()
-        {
-            if (!gameObject.tag.Equals("Floor"))
-            {
-                rigidBody.isKinematic = false;
-                WasReMatchedWithBlock = false;
-                GetComponent<BlockGeometryScript>().SetWallColliderTrigger(true);
-            }
-        }
 
         /// <summary>
         /// Checks if the Groove- or Tap Handler contains CollisionObjects that are not connected
@@ -255,16 +244,16 @@ namespace Valve.VR.InteractionSystem
         /// <param name="connectedOn">OUT Other Block connected on</param>
         private void GrooveOrTapHit(out List<CollisionObject> collisionList, out OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
         {
-            if (GetComponentInChildren<TapHandler>()?.GetCollidingObjects().Count > 0)
+            if (transform.Find("Taps").GetComponent<TapHandler>()?.GetCollidingObjects().Count > 0)
             {
-                collisionList = GetComponentInChildren<TapHandler>().GetCollidingObjects();
+                collisionList = transform.Find("Taps").GetComponent<TapHandler>().GetCollidingObjects();
                 connectedOn = OTHER_BLOCK_IS_CONNECTED_ON.TAP;
                 return;
             }
 
-            if (GetComponentInChildren<GrooveHandler>()?.GetCollidingObjects().Count > 0)
+            if (transform.Find("Grooves").GetComponent<GrooveHandler>()?.GetCollidingObjects().Count > 0)
             {
-                collisionList = GetComponentInChildren<GrooveHandler>().GetCollidingObjects();
+                collisionList = transform.Find("Grooves").GetComponent<GrooveHandler>().GetCollidingObjects();
                 connectedOn = OTHER_BLOCK_IS_CONNECTED_ON.GROOVE;
                 return;
             }

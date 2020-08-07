@@ -559,7 +559,7 @@ namespace Valve.VR.InteractionSystem
 
             if (spewDebugText)
                 HandDebugLog("AttachObject " + objectToAttach);
-            objectToAttach.BroadcastMessage("OnAttachedToHand", this, SendMessageOptions.DontRequireReceiver);
+            objectToAttach.SendMessage("OnAttachedToHand", this, SendMessageOptions.DontRequireReceiver);
         }
 
         public bool ObjectIsAttached(GameObject go)
@@ -655,7 +655,7 @@ namespace Valve.VR.InteractionSystem
                     if (attachedObjects[index].interactable == null || (attachedObjects[index].interactable != null && attachedObjects[index].interactable.isDestroying == false))
                         attachedObjects[index].attachedObject.SetActive(true);
 
-                    attachedObjects[index].attachedObject.BroadcastMessage("OnDetachedFromHand", this, SendMessageOptions.DontRequireReceiver);
+                    attachedObjects[index].attachedObject.SendMessage("OnDetachedFromHand", this, SendMessageOptions.DontRequireReceiver);
                 }
 
                 attachedObjects.RemoveAt(index);

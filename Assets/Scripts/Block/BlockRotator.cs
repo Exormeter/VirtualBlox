@@ -42,7 +42,7 @@ namespace Valve.VR.InteractionSystem
             
             gameObject.transform.Rotate(Vector3.right, 90f);
 
-            Debug.Log("1 wenn beide Blöcke in die selbe Richtugn zeigen: " + Vector3.Dot(collision.CollidedBlock.transform.up, gameObject.transform.up));
+            //Debug.Log("1 wenn beide Blöcke in die selbe Richtugn zeigen: " + Vector3.Dot(collision.CollidedBlock.transform.up, gameObject.transform.up));
         }
 
         
@@ -64,7 +64,7 @@ namespace Valve.VR.InteractionSystem
                     break;
             }
 
-            Debug.Log("Distanz vor translate: " + distance);
+            //Debug.Log("Distanz vor translate: " + distance);
             transform.Translate(Vector3.up * distance, Space.Self);
 
             switch (connectedOn)
@@ -72,13 +72,13 @@ namespace Valve.VR.InteractionSystem
                 case OTHER_BLOCK_IS_CONNECTED_ON.GROOVE:
                     planeBlock = new Plane(collision.GroovePosition.transform.up, collision.GroovePosition.transform.position);
                     distance = planeBlock.GetDistanceToPoint(collision.TapPosition.transform.position);
-                    Debug.Log("Neue Distanz: " + distance);
+                    //Debug.Log("Neue Distanz: " + distance);
                     break;
 
                 case OTHER_BLOCK_IS_CONNECTED_ON.TAP:
                     planeBlock = new Plane(collision.TapPosition.transform.up, collision.TapPosition.transform.position);
                     distance = planeBlock.GetDistanceToPoint(collision.GroovePosition.transform.position);
-                    Debug.Log("Neue Distanz: " + distance);
+                    //Debug.Log("Neue Distanz: " + distance);
                     break;
             }
         }
@@ -93,7 +93,7 @@ namespace Valve.VR.InteractionSystem
                         Vector3 tapColliderCenterLocal = transform.InverseTransformPoint(collision.TapPosition.transform.position);
                         Vector3 grooveColliderCenterLocal = transform.InverseTransformPoint(collision.GroovePosition.transform.position);
                         Vector3 centerOffset = tapColliderCenterLocal - grooveColliderCenterLocal;
-                        Debug.Log("Offset: " + centerOffset.ToString("F5"));
+                        //Debug.Log("Offset: " + centerOffset.ToString("F5"));
                         transform.Translate(Vector3.right * centerOffset.x, Space.Self);
                         transform.Translate(Vector3.forward * centerOffset.z, Space.Self);
                         break;
@@ -109,7 +109,7 @@ namespace Valve.VR.InteractionSystem
                         break;
                     }
             }
-            Debug.Log("Offset: " + (collision.TapPosition.transform.position - collision.GroovePosition.transform.position).ToString("F8"));
+            //Debug.Log("Offset: " + (collision.TapPosition.transform.position - collision.GroovePosition.transform.position).ToString("F8"));
         }
 
         private void MatchPinRotation(CollisionObject matchedPin, CollisionObject secoundPin, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
@@ -137,7 +137,7 @@ namespace Valve.VR.InteractionSystem
                 }
             }
 
-            Debug.Log("Zweiter Pin Offset: " + (secoundPin.GroovePosition.transform.position - secoundPin.TapPosition.transform.position).ToString("F8"));
+            //Debug.Log("Zweiter Pin Offset: " + (secoundPin.GroovePosition.transform.position - secoundPin.TapPosition.transform.position).ToString("F8"));
             
         }
 
@@ -158,7 +158,7 @@ namespace Valve.VR.InteractionSystem
                 vectorIntersectionToGroove = Vector3.ProjectOnPlane(vectorIntersectionToGroove, Vector3.up);
 
                 angleRotation = Vector3.Angle(vectorIntersectionToGroove, vectorIntersectToTap);
-                Debug.Log("Angle Rotation: " + angleRotation);
+                //Debug.Log("Angle Rotation: " + angleRotation);
             }
             else
             {
@@ -173,7 +173,7 @@ namespace Valve.VR.InteractionSystem
                 vectorIntersectionToTap = Vector3.ProjectOnPlane(vectorIntersectionToTap, Vector3.up);
 
                 angleRotation = Vector3.Angle(vectorIntersectionToTap, vectorIntersectToGroove);
-                Debug.Log("Angle Rotation: " + angleRotation);
+                //Debug.Log("Angle Rotation: " + angleRotation);
             }
 
             return angleRotation;

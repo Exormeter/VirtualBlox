@@ -10,13 +10,14 @@ namespace Valve.VR.InteractionSystem
     {
 
         public int connectedBlockCount;
-
+        public List<GameObject> ConnectedBlocksList;
         /// <summary>
         /// The Blocks that are directly connected to this Block
         /// </summary>
         private List<BlockContainer> connectedBlocks = new List<BlockContainer>();
         public List<BlockContainer> ConnectedBlocks => connectedBlocks;
 
+        public int BlockHash;
         /// <summary>
         /// Guid do identify the Block, unique for every Block
         /// </summary>
@@ -46,30 +47,16 @@ namespace Valve.VR.InteractionSystem
 
         private void Awake()
         {
-            
             blockManager = GameObject.FindGameObjectWithTag("BlockManager").GetComponent<BlockManager>();
             blockManager.AddBlock(Guid, this.gameObject);
         }
-        void Start()
-        {
-            //physicSceneManager = GameObject.FindGameObjectWithTag("PhysicManager").GetComponent<PhysicSceneManager>();
-            //physicSceneManager.AddGameObjectRefInGame(transform.gameObject);
-            //if (!physicSceneManager.AlreadyExisits(Guid))
-            //{
-                
-            //    GameObject twinBlock = Instantiate(transform.gameObject);
-                
-            //    twinBlock.AddComponent<BlockScriptSim>();
-            //    twinBlock.GetComponent<BlockScriptSim>().breakForcePerPin = breakForcePerPin;
-            //    twinBlock.GetComponent<BlockScriptSim>().guid = Guid;
-            //    blockScriptSim = twinBlock.GetComponent<BlockScriptSim>();
-            //    physicSceneManager.AddGameObjectToPhysicScene(twinBlock);
-            //}
-        }
+        
 
         private void Update()
         {
             connectedBlockCount = ConnectedBlocks.Count;
+            BlockHash = gameObject.GetHashCode();
+            ConnectedBlocksList = connectedBlocks.ConvertAll(Container => Container.BlockRootObject);
         }
 
         /// <summary>
@@ -125,7 +112,7 @@ namespace Valve.VR.InteractionSystem
 
             visitedNodes.Add(gameObject.GetHashCode());
 
-            if (GetComponentInChildren<GrooveHandler>()?.GetCollidingObjects().Count > 0 || GetComponentInChildren<TapHandler>()?.GetCollidingObjects().Count > 0)
+            if (transform.Find("Grooves").GetComponent<GrooveHandler>()?.GetCollidingObjects().Count > 0 || transform.Find("Taps").GetComponent<TapHandler>()?.GetCollidingObjects().Count > 0)
             {
                 return transform.gameObject;
             }
@@ -173,29 +160,15 @@ namespace Valve.VR.InteractionSystem
         /// send to all remaining connected Blocks to check if the Rigidbody Contraints should
         /// be lifted as a direct or indirect connection to Fllor might be served.
         /// </summary>
-        public void RemoveBlockConnectionsWithoutJoint()
+        public void FreeBlockFromStructure() 
         {
-            List<BlockContainer> containerList = SearchDestroyedJoint();
-            Debug.Log("Found Destroyed Joints: " + containerList.Count);
-            foreach (BlockContainer container in containerList)
+            for(int i = ConnectedBlocks.Count - 1; i >= 0; i--)
             {
-                ConnectedBlocks.Remove(container);
-                container.BlockCommunication.RemoveBlockConnectionsWithoutJoint();
-                BroadcastMessage("OnBlockDetach", container.BlockRootObject, SendMessageOptions.DontRequireReceiver);
-                SendMessageToConnectedBlocks("RemovedConnection");
+                ConnectedBlocks[i].BlockCommunication.RemoveBlockByGuid(Guid);
+                ConnectedBlocks[i].BlockRootObject.BroadcastMessage("OnBlockDetach", this.gameObject, SendMessageOptions.DontRequireReceiver);
+                BroadcastMessage("OnBlockDetach", ConnectedBlocks[i].BlockRootObject, SendMessageOptions.DontRequireReceiver);
+                ConnectedBlocks.RemoveAt(i);
             }
-            SendMessageToConnectedBlocks("CheckFreeze");
-        }
-
-
-        /// <summary>
-        /// Searches the Connected Blocks for a Joint that is null. This would indicate that the two Blocks
-        /// are no longer connected.
-        /// </summary>
-        /// <returns></returns>
-        public List<BlockContainer> SearchDestroyedJoint()
-        {
-            return ConnectedBlocks.FindAll(container => container.ConnectedJoint == null);
         }
 
         /// <summary>
@@ -222,7 +195,29 @@ namespace Valve.VR.InteractionSystem
             }
             if (selfNotification)
             {
-                BroadcastMessage(message, SendMessageOptions.DontRequireReceiver);
+                SendMessage(message, SendMessageOptions.DontRequireReceiver);
+            }
+        }
+
+
+        public void SendMessageToConnectedBlocks(string message, System.Object payload, bool selfNotification = true, List<int> visitedNodes = null)
+        {
+            if (visitedNodes == null)
+            {
+                visitedNodes = new List<int>();
+            }
+
+            visitedNodes.Add(gameObject.GetHashCode());
+            foreach (BlockContainer blockContainer in ConnectedBlocks)
+            {
+                if (!visitedNodes.Contains(blockContainer.BlockRootObject.GetHashCode()))
+                {
+                    blockContainer.BlockCommunication.SendMessageToConnectedBlocks(message, payload, true, visitedNodes);
+                }
+            }
+            if (selfNotification)
+            {
+                SendMessage(message, payload, SendMessageOptions.DontRequireReceiver);
             }
         }
 
@@ -268,17 +263,9 @@ namespace Valve.VR.InteractionSystem
         /// <param name="connectedOn">Is the other Block connedted via Grooves or Taps</param>
         public void ConnectBlocks(GameObject block, GameObject collidedBlock, int connectedPinCount, OTHER_BLOCK_IS_CONNECTED_ON connectedOn)
         {
-            if (ConnectedBlocks.Exists(alreadyConnected => collidedBlock.Equals(alreadyConnected.BlockRootObject))) {
+            if (ConnectedBlocks.Exists(alreadyConnected => collidedBlock.GetComponent<BlockCommunication>().Guid.Equals(alreadyConnected.Guid))) {
                 return;
             }
-
-            FixedJoint joint = new FixedJoint();
-            /*joint.connectedBody = collidedBlock.GetComponent<Rigidbody>();
-            joint.breakForce = Mathf.Infinity;
-            joint.breakTorque = Mathf.Infinity;*/
-            //ConfigurableJoint joint = SetConfigurableJoint(collidedBlock.GetComponent<Rigidbody>(), blockToTapDict[collidedBlock]);
-            collidedBlock.transform.SetParent(collidedBlock.transform);
-
             OTHER_BLOCK_IS_CONNECTED_ON otherConnection;
             if (connectedOn == OTHER_BLOCK_IS_CONNECTED_ON.GROOVE)
             {
@@ -289,10 +276,18 @@ namespace Valve.VR.InteractionSystem
                 otherConnection = OTHER_BLOCK_IS_CONNECTED_ON.GROOVE;
             }
 
-            AddConnectedBlock(collidedBlock, joint, connectedOn, connectedPinCount);
-            collidedBlock.GetComponent<BlockCommunication>().AddConnectedBlock(transform.gameObject, joint, otherConnection, connectedPinCount);
-            BroadcastMessage("OnBlockAttach", collidedBlock, SendMessageOptions.DontRequireReceiver);
-            collidedBlock.BroadcastMessage("OnBlockAttach", transform.gameObject, SendMessageOptions.DontRequireReceiver);
+            AddConnectedBlock(collidedBlock, null, connectedOn, connectedPinCount);
+            collidedBlock.GetComponent<BlockCommunication>().AddConnectedBlock(transform.gameObject, null, otherConnection, connectedPinCount);
+
+            SendMessage("OnBlockAttach", collidedBlock, SendMessageOptions.DontRequireReceiver);
+            collidedBlock.SendMessage("OnBlockAttach", transform.gameObject, SendMessageOptions.DontRequireReceiver);
+
+            transform.Find("Grooves").GetComponent<GrooveHandler>().AttachBlocks(collidedBlock);
+            transform.Find("Taps").GetComponent<TapHandler>().AttachBlocks(collidedBlock);
+
+            collidedBlock.transform.Find("Grooves").GetComponent<GrooveHandler>().AttachBlocks(this.gameObject);
+            collidedBlock.transform.Find("Taps").GetComponent<TapHandler>().AttachBlocks(this.gameObject);
+
         }
 
         /// <summary>
@@ -415,6 +410,11 @@ namespace Valve.VR.InteractionSystem
         /// <returns>True if they are directly connected</returns>
         public bool IsDirectlyAttachedToBlock(GameObject block)
         {
+            if(block.GetHashCode() == transform.gameObject.GetHashCode())
+            {
+                return true;
+            }
+
             foreach(BlockContainer blockContainer in connectedBlocks)
             {
                 if(block.GetHashCode() == blockContainer.GetHashCode())
@@ -460,47 +460,6 @@ namespace Valve.VR.InteractionSystem
         }
 
 
-
-        //public void RemoveJointViaSimulation(Guid connectedBlockGuid)
-        //{
-        //    foreach (BlockContainer blockContainer in ConnectedBlocks)
-        //    {
-        //        if (blockContainer.BlockCommunication.Guid == connectedBlockGuid)
-        //        {
-        //            Destroy(blockContainer.ConnectedJoint);
-        //            StartCoroutine(EvaluateJoints());
-        //        }
-        //    }
-        //}
-
-        /// <summary>
-        /// Starts a Coroutine to check which connection has broken
-        /// </summary>
-        /// <param name="breakForce"></param>
-        private void OnJointBreak(float breakForce)
-        {
-            Debug.Log("Joint Break");
-            StartCoroutine(EvaluateJoints());
-        }
-
-
-        /// <summary>
-        /// Starts the search for the destoryed joints after two Frames
-        /// </summary>
-        /// <returns></returns>
-        IEnumerator EvaluateJoints()
-        {
-            for (int i = 0; i <= frameUntilColliderReEvaluation; i++)
-            {
-                if (i == frameUntilColliderReEvaluation)
-                {
-                    RemoveBlockConnectionsWithoutJoint();
-                }
-                yield return new WaitForFixedUpdate();
-            }
-
-        }
-
         /// <summary>
         /// Checks if the Block is only connected on a Tap or a Groove. If it is connected on
         /// both sides it can be removes to keep the structure in tacked. Otherwise, the holding
@@ -512,7 +471,7 @@ namespace Valve.VR.InteractionSystem
         /// 
         /// </summary>
         /// <returns>True if the Block can be removed</returns>
-        public bool AttemptToFreeBlock()
+        public bool AttemptToReleaseBlock()
         {
             if(ConnectedBlocks.Count == 0)
             {
@@ -527,13 +486,9 @@ namespace Valve.VR.InteractionSystem
                 }
             }
 
-            foreach(BlockContainer connectedBlock in ConnectedBlocks)
-            {
-                Destroy(connectedBlock.ConnectedJoint);
-                GetComponent<AttachFloorHandler>().UnfreezeBlock();
-                StartCoroutine(EvaluateJoints());
-            }
-
+            GetComponent<AttachFloorHandler>().UnfreezeBlock();
+            FreeBlockFromStructure();
+            
             blockManager.RemoveEntryFromHistory(Guid);
             blockManager.ResetHistoryStack();
             return true;
@@ -558,12 +513,13 @@ namespace Valve.VR.InteractionSystem
         public Interactable Interactable { get; }
         public int ConnectedPinCount { get; }
         public Guid Guid { get; }
+        public bool flagForDeletion { get; set; }
 
         public BlockContainer(GameObject block, Joint connectedJoint, OTHER_BLOCK_IS_CONNECTED_ON connectedOn, int connectedPin)
         {
             BlockRootObject = block;
-            GrooveHandler = block.GetComponentInChildren<GrooveHandler>();
-            TapHandler = block.GetComponentInChildren<TapHandler>();
+            GrooveHandler = block.transform.Find("Grooves").GetComponent<GrooveHandler>();
+            TapHandler = block.transform.Find("Taps").GetComponent<TapHandler>();
             BlockGeometry = block.GetComponent<BlockGeometryScript>();
             BlockCommunication = block.GetComponent<BlockCommunication>();
             AttachHandHandler = block.GetComponent<AttachHandHandler>();

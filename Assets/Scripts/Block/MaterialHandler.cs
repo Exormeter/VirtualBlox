@@ -56,7 +56,7 @@ public class MaterialHandler : MonoBehaviour
         meshRenderer.material = whileHoldingMaterial;
     }
 
-    void RemovedConnection()
+    void OnBlockDetach()
     {
         if (!GetComponent<BlockCommunication>().IsIndirectlyAttachedToHand())
         {

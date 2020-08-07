@@ -14,9 +14,13 @@ namespace Valve.VR.InteractionSystem
         {
             pinHighLight = Resources.Load("CheckMark", typeof(GameObject)) as GameObject;
 
-            foreach (GrooveCollider snaps in GetComponentsInChildren<GrooveCollider>())
+            for (int i = 0; i < transform.childCount; i++)
             {
-                colliderDictionary.Add(snaps, new CollisionObject());
+                if (transform.GetChild(i).name.Equals("Collider"))
+                {
+                    transform.GetChild(i).GetComponent<GrooveCollider>().tag = "Groove";
+                    colliderDictionary.Add(transform.GetChild(i).GetComponent<GrooveCollider>(), new CollisionObject());
+                }
             }
         }
 
@@ -44,7 +48,7 @@ namespace Valve.VR.InteractionSystem
             
             colliderDictionary[snappingCollider].TapPosition = tapCollider;
             colliderDictionary[snappingCollider].GroovePosition = snappingCollider.gameObject;
-            colliderDictionary[snappingCollider].CollidedBlock = tapCollider.transform.root.gameObject;
+            colliderDictionary[snappingCollider].CollidedBlock = tapCollider.transform.parent.parent.gameObject;
         }
 
         public void UnregisterCollision(GrooveCollider snappingCollider, GameObject tapCollider)
@@ -84,7 +88,7 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
-        public override void OnBlockAttach(GameObject block)
+        public override void AttachBlocks(GameObject block)
         {
             listHighLighter.ForEach(highLighter => Destroy(highLighter));
             listHighLighter.Clear();

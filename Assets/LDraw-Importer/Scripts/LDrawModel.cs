@@ -73,7 +73,7 @@ namespace LDraw
             }
         }
 
-        public GameObject CreateMeshGameObject(Matrix4x4 trs, Material mat = null, Transform parent = null, List<LDrawAbstractConnectionPoint> connectionPoints = null)
+        public GameObject CreateMeshGameObject(Matrix4x4 trs, Material mat = null, Transform parent = null, List<LDrawAbstractConnectionPoint> connectionPoints = null, string name = "")
         {
             if (_Commands.Count == 0) return null;
             GameObject go = new GameObject(_Name);
@@ -81,6 +81,11 @@ namespace LDraw
             if (connectionPoints == null)
             {
                 connectionPoints = new List<LDrawAbstractConnectionPoint>();
+                LDrawAbstractConnectionPoint blockSpecificConnection = LDrawConnectionFactory.GetBlockSpecificConnection(_Name);
+                if(blockSpecificConnection != null)
+                {
+                    connectionPoints.Add(blockSpecificConnection);
+                }
             }
             var triangles = new List<int>();
             var verts = new List<Vector3>();
@@ -109,26 +114,48 @@ namespace LDraw
 
             if (verts.Count > 0)
             {
-                var visualGO = new GameObject("mesh");
-                visualGO.transform.SetParent(go.transform);
-                var mf = visualGO.AddComponent<MeshFilter>();
+                GameObject meshContainer = new GameObject("mesh");
+                meshContainer.transform.SetParent(go.transform);
+                var meshFilter = meshContainer.AddComponent<MeshFilter>();
 
-                mf.sharedMesh = PrepareMesh(verts, triangles);
-                var mr = visualGO.AddComponent<MeshRenderer>();
+                meshFilter.sharedMesh = PrepareMesh(verts, triangles);
+                var meshRenderer = meshContainer.AddComponent<MeshRenderer>();
                 if (mat != null)
                 {
-                    mr.sharedMaterial = mat;
-
+                    meshRenderer.sharedMaterial = mat;
                 }
 
+                if (trs.IsShearing() && !_Name.StartsWith("box4") && !_Name.StartsWith("box5"))
+                {
+                    Vector3[] vertices = meshFilter.mesh.vertices;
+                    for (int i = 0; i < vertices.Length; i++)
+                    {
+
+                        vertices[i] = trs.MultiplyPoint(vertices[i]);
+                    }
+                    meshFilter.mesh.vertices = vertices;
+                    meshFilter.mesh.RecalculateNormals();
+                }
+                else
+                {
+                    go.transform.ApplyLocalTRS(trs);
+                }
+                
+                
+
             }
-
-            go.transform.ApplyLocalTRS(trs);
-
+            else
+            {
+                go.transform.ApplyLocalTRS(trs);
+            }
+            
             go.transform.SetParent(parent);
+            
             _ConnectionPoints = connectionPoints;
             return go;
         }
+        
+
         private Mesh PrepareMesh(List<Vector3> verts, List<int> triangles)
         {
 

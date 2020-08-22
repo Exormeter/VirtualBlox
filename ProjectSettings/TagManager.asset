@@ -25,6 +25,7 @@ TagManager:
   - BlockMarker
   - TopColliderContainer
   - WalkablePlatform
+  - MeshHolder
   layers:
   - Default
   - TransparentFX

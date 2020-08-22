@@ -96,7 +96,7 @@ namespace Valve.VR.InteractionSystem {
             else if (hittedCollider.tag.Equals("TopColliderContainer"))
             {
                 targetPosition = pointer.transform.position;
-                targetPosition.y += 0.2f;
+                targetPosition.y += 0.02f;
             }
 
             //pointer pointed onto side of Block
@@ -119,10 +119,10 @@ namespace Valve.VR.InteractionSystem {
             }
             
             Vector3 translateVector =  targetPosition - groundPositon;
-            StartCoroutine(MovePlayer(cameraRig, translateVector));
+            StartCoroutine(MovePlayer(cameraRig, translateVector, targetPosition));
         }
 
-        private IEnumerator MovePlayer(Transform player, Vector3 translation)
+        private IEnumerator MovePlayer(Transform player, Vector3 translation, Vector3 targetPosition)
         {
             isTeleporting = true;
 
@@ -130,7 +130,7 @@ namespace Valve.VR.InteractionSystem {
 
             yield return new WaitForSeconds(0.5f);
             player.position += translation;
-            CheckPlayerHeight.OnTeleport();
+            CheckPlayerHeight.OnTeleport(targetPosition);
             SteamVR_Fade.Start(Color.clear, fadeTime, true);
 
             isTeleporting = false;

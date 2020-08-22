@@ -64,6 +64,22 @@ namespace LDraw
 			return scale;
 		}
 
+		public static Boolean IsShearing(this Matrix4x4 matrix)
+        {
+			Matrix4x4 newMAtrix = matrix;
+			newMAtrix.m00 = 1;
+			newMAtrix.m11 = 1;
+			newMAtrix.m22 = 1;
+			Vector3 origin = newMAtrix.MultiplyPoint(new Vector3());
+			Vector3 xAxis = newMAtrix.MultiplyPoint(Vector3.right);
+			Vector3 yAxis = newMAtrix.MultiplyPoint(Vector3.up);
+			Vector3 zAxis = newMAtrix.MultiplyPoint(Vector3.forward);
+
+			return !(Vector3.Distance(origin, xAxis) == Vector3.Distance(origin, yAxis) &&
+				Vector3.Distance(origin, xAxis) == Vector3.Distance(origin, zAxis) &&
+				Vector3.Distance(origin, yAxis) == Vector3.Distance(origin, zAxis));
+        }
+
 		public static Matrix4x4 HouseholderReflection(this Matrix4x4 matrix4X4, Vector3 planeNormal)
 		{
 			planeNormal.Normalize();

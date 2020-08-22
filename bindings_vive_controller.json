@@ -1,137 +1,216 @@
 {
-  "app_key": "application.generated.unity.test.exe",
-  "bindings": {
-    "/actions/buggy": {
-      "chords": [],
-      "poses": [],
-      "haptics": [],
-      "sources": [
-        {
-          "path": "/user/hand/left/input/trigger",
-          "mode": "trigger",
-          "parameters": {},
-          "inputs": {
-            "pull": {
-              "output": "/actions/buggy/in/throttle"
-            }
-          }
-        },
-        {
-          "path": "/user/hand/right/input/trigger",
-          "mode": "trigger",
-          "parameters": {},
-          "inputs": {
-            "pull": {
-              "output": "/actions/buggy/in/throttle"
-            }
-          }
-        },
-        {
-          "path": "/user/hand/left/input/trackpad",
-          "mode": "trackpad",
-          "parameters": {},
-          "inputs": {
-            "click": {
-              "output": "/actions/buggy/in/brake"
+   "action_manifest_version" : 0,
+   "alias_info" : {},
+   "app_key" : "application.generated.unity.test.exe",
+   "bindings" : {
+      "/actions/brickcontrol" : {
+         "haptics" : [
+            {
+               "output" : "/actions/brickcontrol/out/haptic",
+               "path" : "/user/hand/left/output/haptic"
             },
-            "position": {
-              "output": "/actions/buggy/in/steering"
+            {
+               "output" : "/actions/brickcontrol/out/haptic",
+               "path" : "/user/hand/right/output/haptic"
             }
-          }
-        },
-        {
-          "path": "/user/hand/right/input/trackpad",
-          "mode": "trackpad",
-          "parameters": {},
-          "inputs": {
-            "click": {
-              "output": "/actions/buggy/in/brake"
+         ],
+         "poses" : [
+            {
+               "output" : "none",
+               "path" : "/user/hand/left/pose/base"
             },
-            "position": {
-              "output": "/actions/buggy/in/steering"
+            {
+               "output" : "none",
+               "path" : "/user/hand/right/pose/base"
+            },
+            {
+               "output" : "/actions/brickcontrol/in/pose",
+               "path" : "/user/hand/left/pose/raw"
+            },
+            {
+               "output" : "/actions/brickcontrol/in/pose",
+               "path" : "/user/hand/right/pose/raw"
             }
-          }
-        },
-        {
-          "path": "/user/hand/left/input/application_menu",
-          "mode": "button",
-          "parameters": {},
-          "inputs": {
-            "click": {
-              "output": "/actions/buggy/in/reset"
+         ],
+         "skeleton" : [
+            {
+               "output" : "/actions/brickcontrol/in/skeletonlefthand",
+               "path" : "/user/hand/left/input/skeleton/left"
+            },
+            {
+               "output" : "/actions/brickcontrol/in/skeletonrighthand",
+               "path" : "/user/hand/right/input/skeleton/right"
             }
-          }
-        },
-        {
-          "path": "/user/hand/right/input/application_menu",
-          "mode": "button",
-          "parameters": {},
-          "inputs": {
-            "click": {
-              "output": "/actions/buggy/in/reset"
+         ],
+         "sources" : [
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/brickcontrol/in/spawnandgrabblock"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/brickcontrol/in/interactui"
+                  },
+                  "position" : {
+                     "output" : "/actions/brickcontrol/in/thumbposition"
+                  }
+               },
+               "mode" : "trackpad",
+               "path" : "/user/hand/left/input/trackpad"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/brickcontrol/in/interactui"
+                  },
+                  "position" : {
+                     "output" : "/actions/brickcontrol/in/thumbposition"
+                  }
+               },
+               "mode" : "trackpad",
+               "path" : "/user/hand/right/input/trackpad"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/brickcontrol/in/spawnandgrabblock"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/trigger"
             }
-          }
-        }
-      ],
-      "skeleton": []
-    },
-    "/actions/default": {
-      "chords": [],
-      "poses": [],
-      "haptics": [],
-      "sources": [],
-      "skeleton": []
-    },
-    "/actions/platformer": {
-      "chords": [],
-      "poses": [],
-      "haptics": [],
-      "sources": [
-        {
-          "path": "/user/hand/left/input/trackpad",
-          "mode": "button",
-          "parameters": {},
-          "inputs": {
-            "click": {
-              "output": "/actions/platformer/in/jump"
+         ]
+      },
+      "/actions/buggy" : {
+         "chords" : [],
+         "haptics" : [],
+         "poses" : [],
+         "skeleton" : [],
+         "sources" : [
+            {
+               "inputs" : {
+                  "pull" : {
+                     "output" : "/actions/buggy/in/throttle"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/left/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "pull" : {
+                     "output" : "/actions/buggy/in/throttle"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/right/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/buggy/in/brake"
+                  },
+                  "position" : {
+                     "output" : "/actions/buggy/in/steering"
+                  }
+               },
+               "mode" : "trackpad",
+               "path" : "/user/hand/left/input/trackpad"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/buggy/in/brake"
+                  },
+                  "position" : {
+                     "output" : "/actions/buggy/in/steering"
+                  }
+               },
+               "mode" : "trackpad",
+               "path" : "/user/hand/right/input/trackpad"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/buggy/in/reset"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/application_menu"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/buggy/in/reset"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/application_menu"
             }
-          }
-        },
-        {
-          "path": "/user/hand/right/input/trackpad",
-          "mode": "button",
-          "parameters": {},
-          "inputs": {
-            "click": {
-              "output": "/actions/platformer/in/jump"
+         ]
+      },
+      "/actions/default" : {
+         "chords" : [],
+         "haptics" : [],
+         "poses" : [],
+         "skeleton" : [],
+         "sources" : []
+      },
+      "/actions/platformer" : {
+         "chords" : [],
+         "haptics" : [],
+         "poses" : [],
+         "skeleton" : [],
+         "sources" : [
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/platformer/in/jump"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/trackpad"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/platformer/in/jump"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/trackpad"
+            },
+            {
+               "inputs" : {
+                  "position" : {
+                     "output" : "/actions/platformer/in/move"
+                  }
+               },
+               "mode" : "trackpad",
+               "path" : "/user/hand/left/input/trackpad"
+            },
+            {
+               "inputs" : {
+                  "position" : {
+                     "output" : "/actions/platformer/in/move"
+                  }
+               },
+               "mode" : "trackpad",
+               "path" : "/user/hand/right/input/trackpad"
             }
-          }
-        },
-        {
-          "path": "/user/hand/left/input/trackpad",
-          "mode": "trackpad",
-          "parameters": {},
-          "inputs": {
-            "position": {
-              "output": "/actions/platformer/in/move"
-            }
-          }
-        },
-        {
-          "path": "/user/hand/right/input/trackpad",
-          "mode": "trackpad",
-          "parameters": {},
-          "inputs": {
-            "position": {
-              "output": "/actions/platformer/in/move"
-            }
-          }
-        }
-      ],
-      "skeleton": []
-    }
-  },
-  "controller_type": "vive_controller",
-  "description": "",
-  "name": "Meine Test [Testing] Konfiguration für Vive Controller"
+         ]
+      }
+   },
+   "category" : "steamvr_input",
+   "controller_type" : "vive_controller",
+   "description" : "",
+   "name" : "Brick Controller Config",
+   "options" : {},
+   "simulated_actions" : []
 }

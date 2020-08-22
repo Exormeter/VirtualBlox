@@ -9,9 +9,9 @@ namespace Valve.VR.InteractionSystem
     {
         public bool acceptNewCollisionsAsConnected;
         protected Dictionary<IConnectorCollider, CollisionObject> colliderDictionary = new Dictionary<IConnectorCollider, CollisionObject>();
-        public int occupiedTaps = 0;
-        public List<GameObject> connectedGrooves;
-        public List<GameObject> connectedTaps;
+        //public int occupiedTaps = 0;
+        //public List<GameObject> connectedGrooves;
+        //public List<GameObject> connectedTaps;
 
         public virtual void Start()
         {
@@ -19,12 +19,12 @@ namespace Valve.VR.InteractionSystem
         }
 
         // Update is called once per frame
-        public virtual void Update()
+        /*public virtual void Update()
         {
             occupiedTaps = GetOccupiedCollider().Count;
             connectedGrooves = colliderDictionary.Values.ToList<CollisionObject>().ConvertAll(collisionObject => collisionObject.GroovePosition);
             connectedTaps = colliderDictionary.Values.ToList<CollisionObject>().ConvertAll(collisionObject => collisionObject.TapPosition);
-        }
+        }*/
 
         public void AcceptCollisionsAsConnected(bool shouldAccept)
         {

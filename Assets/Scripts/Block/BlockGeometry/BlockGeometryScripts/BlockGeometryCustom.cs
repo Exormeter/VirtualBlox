@@ -359,26 +359,17 @@ namespace Valve.VR.InteractionSystem
             wallColliderList.Clear();
         }
 
-        public void OnAttachToFloor()
-        {
-            SetBlockWalkable(true);
-        }
-
-        public void OnAttachToHand()
-        {
-            SetBlockWalkable(false);
-        }
-
         public override void SetBlockWalkable(bool walkable)
         {
-            if (walkable)
+            //Walkable Blocks are not supported at the moment
+            /*if (walkable)
             {
-                TopColliderContainer.layer = WALKABLE_LAYER;
+                gameObject.layer = WALKABLE_LAYER;
             }
             else
             {
-                TopColliderContainer.layer = 0;
-            }
+                gameObject.layer = 0;
+            }*/
         }
     }
 }

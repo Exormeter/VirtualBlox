@@ -118,16 +118,16 @@ namespace Valve.VR.InteractionSystem
 
 
         //-------------------------------------------------
-        protected virtual void HandHoverUpdate( Hand hand )
+        protected virtual void HandHoverUpdate(Hand hand)
         {
             GrabTypes startingGrabType = hand.GetGrabStarting();
-            
+
             if (startingGrabType != GrabTypes.None)
             {
-				hand.AttachObject( gameObject, startingGrabType, attachmentFlags, attachmentOffset );
+                hand.AttachObject(gameObject, startingGrabType, attachmentFlags, attachmentOffset);
                 hand.HideGrabHint();
             }
-		}
+        }
 
         //-------------------------------------------------
         protected virtual void OnAttachedToHand( Hand hand )

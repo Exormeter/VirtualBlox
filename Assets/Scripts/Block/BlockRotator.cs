@@ -67,7 +67,7 @@ namespace Valve.VR.InteractionSystem
             //Debug.Log("Distanz vor translate: " + distance);
             transform.Translate(Vector3.up * distance, Space.Self);
 
-            switch (connectedOn)
+            /*switch (connectedOn)
             {
                 case OTHER_BLOCK_IS_CONNECTED_ON.GROOVE:
                     planeBlock = new Plane(collision.GroovePosition.transform.up, collision.GroovePosition.transform.position);
@@ -80,7 +80,7 @@ namespace Valve.VR.InteractionSystem
                     distance = planeBlock.GetDistanceToPoint(collision.GroovePosition.transform.position);
                     //Debug.Log("Neue Distanz: " + distance);
                     break;
-            }
+            }*/
         }
 
 

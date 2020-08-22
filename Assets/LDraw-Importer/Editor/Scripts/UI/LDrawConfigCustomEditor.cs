@@ -16,6 +16,7 @@ namespace LDraw
             {
                 var config = target as LDrawConfig;
                 config.InitParts();
+                config.InitPrimitiveParts();
             }
         }
     }

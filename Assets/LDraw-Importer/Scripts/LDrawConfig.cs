@@ -11,7 +11,7 @@ namespace LDraw
 {
     public class LDrawConfig : ScriptableObject
     {
-        [SerializeField] private string _PrimitivePartsPath;
+       
         [SerializeField] private string _ModelsPath;
         [SerializeField] private string _ColorConfigPath;
         [SerializeField] private string _MaterialsPath;
@@ -21,6 +21,9 @@ namespace LDraw
         [SerializeField] private Material _DefaultTransparentMaterial;
 
         private string _PartsPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments) + "/LDraw/parts/";
+        private string _SubPartsPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments) + "/LDraw/parts/s/";
+        private string _PrimitivePartsPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments) + "/LDraw/p/";
+        private string _Primitive48PartsPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments) + "/LDraw/p/48/";
         private Dictionary<string, string> _PrimitiveParts;
         private Dictionary<string, string> _Parts;
         
@@ -84,9 +87,14 @@ namespace LDraw
             {
                 serialized = File.ReadAllText(_Parts[name]);
             }
-            else
+            else if(_PrimitiveParts.ContainsKey(name))
             {
                 serialized = File.ReadAllText(_PrimitiveParts[name]);
+            }
+            else
+            {
+                Debug.Log("Not found: " + name);
+                return null;
             }
             return serialized;
         }
@@ -95,6 +103,7 @@ namespace LDraw
         {
             _Parts = new Dictionary<string, string>();
             var files = Directory.GetFiles(_PartsPath, "*.*", SearchOption.AllDirectories);
+            
 
             foreach (var file in files)
             {
@@ -107,13 +116,35 @@ namespace LDraw
                     }
                 }
             }
+            InitSubParts();
+        }
+
+        public void InitSubParts()
+        {
+            var subFiles = Directory.GetFiles(_SubPartsPath, "*.*", SearchOption.AllDirectories).ToList();
+
+            foreach (var file in subFiles)
+            {
+                if (!file.Contains(".meta"))
+                {
+                    
+                    string fileName = file.Replace(_SubPartsPath, "").Split('.')[0];
+                    
+                    if (!_Parts.ContainsKey(fileName))
+                    {
+                        _Parts.Add(fileName, file);
+                    }
+                }
+            }
         }
 
         public void InitPrimitiveParts()
         {
 
             _PrimitiveParts = new Dictionary<string, string>();
-            var files = Directory.GetFiles(_PrimitivePartsPath, "*.*", SearchOption.AllDirectories);
+            var files = Directory.GetFiles(_PrimitivePartsPath, "*.*", SearchOption.AllDirectories).ToList();
+            
+
 
             foreach (var filePath in files)
             {
@@ -133,8 +164,35 @@ namespace LDraw
                             _PrimitiveParts.Add(OfficialName, filePath);
                         }
                     }
-                    
-                        
+                }
+            }
+            InitPrimitive48Parts();
+        }
+
+        public void InitPrimitive48Parts()
+        { 
+            var files = Directory.GetFiles(_Primitive48PartsPath, "*.*", SearchOption.AllDirectories).ToList();
+            foreach (var filePath in files)
+            {
+                if (!filePath.Contains(".meta"))
+                {
+                    string fileName = filePath.Replace(_Primitive48PartsPath, "").Split('.')[0];
+                    if (!_PrimitiveParts.ContainsKey(fileName))
+                    {
+                        _PrimitiveParts.Add(fileName, filePath);
+                    }
+                    if (fileName.Contains("-"))
+                    {
+                        string OfficialName = File.ReadLines(filePath).ElementAtOrDefault(1);
+                        OfficialName = OfficialName.Substring(8);
+                        OfficialName = OfficialName.Replace(".dat", "");
+                        if (!_PrimitiveParts.ContainsKey(OfficialName))
+                        {
+                            _PrimitiveParts.Add(OfficialName, filePath);
+                        }
+                    }
+
+
                 }
             }
         }

@@ -31,6 +31,7 @@ namespace LDraw
             if (GUILayout.Button("Update blueprints"))
             {
                 LDrawConfig.Instance.InitParts();
+                LDrawConfig.Instance.InitPrimitiveParts();
                 _PartNames = LDrawConfig.Instance.PartFileNames;
             }
             _CurrentType = (GeneratingType) EditorGUILayout.EnumPopup("Blueprint Type", _CurrentType);
@@ -51,8 +52,20 @@ namespace LDraw
         {
             if (GUILayout.Button("Generate"))
             {
-                var model = LDrawModel.Create(_PartNames[_CurrentIndex], LDrawConfig.Instance.GetSerializedPart(_PartNames[_CurrentIndex]));
-                lDrawModelConverter.ConvertLDrawModel(model);
+                switch (_CurrentType)
+                {
+                    case GeneratingType.Models:
+                        var model = LDrawModel.Create(_PartNames[_CurrentIndex], LDrawConfig.Instance.GetSerializedPart(_PartNames[_CurrentIndex]));
+                        lDrawModelConverter.ConvertLDrawModel(model);
+                        break;
+
+                    case GeneratingType.ByName:
+                        var model1 = LDrawModel.Create(_CurrentPart, LDrawConfig.Instance.GetSerializedPart(_CurrentPart));
+                        lDrawModelConverter.ConvertLDrawModel(model1);
+                        break;
+
+                }
+                
             }
         }
 

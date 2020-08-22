@@ -70,7 +70,15 @@ namespace Valve.VR.InteractionSystem
                 GameObject highLight = Instantiate(pinHighLight, tapCollider.transform.position, tapCollider.transform.rotation);
                 highLight.tag = "HighLight";
                 highLight.transform.SetParent(tapCollider.transform);
-                highLight.transform.localPosition = new Vector3(0, 0.017f, 0);
+
+                if(tapCollider.GetComponentInParent<BlockGeometryScript>().BlockIdentifier == BlockIdentifier.BLOCK_LDRAW)
+                {
+                    highLight.transform.localPosition = new Vector3(0, 0.075f, 0);
+                }
+                else{
+                    highLight.transform.localPosition = new Vector3(0, 0.017f, 0);
+                }
+                
                 listHighLighter.Add(highLight);
             }
             

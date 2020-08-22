@@ -14,7 +14,7 @@ namespace Valve.VR.InteractionSystem
         public Vector3 boxCastDimensions;
         
 
-        public SteamVR_Action_Boolean headsetOnHead = SteamVR_Input.GetBooleanAction("HeadsetOnHead");
+        //public SteamVR_Action_Boolean headsetOnHead = SteamVR_Input.GetBooleanAction("HeadsetOnHead");
         private Plane currentPlane;
         private Coroutine MovePlatformCoroutine;
         private Vector3 neutralPosition;
@@ -92,16 +92,15 @@ namespace Valve.VR.InteractionSystem
             currentPlane = new Plane(new Vector3(0, 1, 0), gameObject.transform.position);
         }
 
-        public void OnTeleport()
+        public void OnTeleport(Vector3 position)
         {
-            RaycastHit blockHit;
+            //RaycastHit blockHit;
 
             Vector3 feetPosition = ApproximatelyFeetPositionXZ();
 
-            if(Physics.Raycast(feetPosition, transform.TransformDirection(Vector3.down), out blockHit, Mathf.Infinity, 1 << LayerMask.NameToLayer("WalkableBlock")))
-            {
-                SetPlaneHeight(blockHit.point.y);
-            }
+            
+            SetPlaneHeight(position.y);
+            
             
         }
 

@@ -25,14 +25,15 @@ namespace Valve.VR.InteractionSystem
 
         public override void SetBlockWalkable(bool walkable)
         {
-            if (walkable)
+            //Walkable Blocks are not supported at the moment
+            /*if (walkable)
             {
                 gameObject.layer = WALKABLE_LAYER;
             }
             else
             {
                 gameObject.layer = 0;
-            }
+            }*/
             
         }
     }

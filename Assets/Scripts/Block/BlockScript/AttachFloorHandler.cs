@@ -86,7 +86,7 @@ namespace Valve.VR.InteractionSystem
                 {
                     blockCommunication.SendMessageToConnectedBlocks("SearchNewConnectoionFloor");
                     blockCommunication.SendMessageToConnectedBlocks("SeparedBlocks");
-                    blockCommunication.SendMessageToConnectedBlocks("UnsetKinematic");
+                    blockCommunication.SendMessageToConnectedBlocks("UnSetWallColliderTrigger");
                 }
                 yield return new WaitForFixedUpdate();
             }
@@ -195,6 +195,7 @@ namespace Valve.VR.InteractionSystem
         public void FreezeBlock()
         {
             GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+            GetComponent<Rigidbody>().isKinematic = true;
             IsFroozen = true;
         }
 
@@ -204,6 +205,7 @@ namespace Valve.VR.InteractionSystem
         public void UnfreezeBlock()
         {
             GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+            GetComponent<Rigidbody>().isKinematic = false;
             IsFroozen = false;
         }
 
@@ -233,7 +235,31 @@ namespace Valve.VR.InteractionSystem
             {
                 rigidbody = gameObject.AddComponent<Rigidbody>();
             }
-            rigidbody.constraints = RigidbodyConstraints.FreezeAll;
+            FreezeBlock();
+        }
+
+        /// <summary>
+        /// Sets the Block kinametic if it's not a Floor plate
+        /// </summary>
+        public void SetWallColliderTrigger()
+        {
+            Rigidbody rigidBody = GetComponent<Rigidbody>();
+            if (!gameObject.tag.Equals("Floor") && rigidBody != null)
+            {
+                GetComponent<BlockGeometryScript>().SetWallColliderTrigger(true);
+            }
+        }
+
+        /// <summary>
+        /// Sets the Block non-kinametic if it's not a Floor plate
+        /// </summary>
+        public void UnSetWallColliderTrigger()
+        {
+            Rigidbody rigidBody = GetComponent<Rigidbody>();
+            if (!gameObject.tag.Equals("Floor") && rigidBody != null)
+            {
+                GetComponent<BlockGeometryScript>().SetWallColliderTrigger(false);
+            }
         }
 
 

@@ -15,7 +15,7 @@ namespace LDraw
 
 		public void GetModelGameObject(Transform parent, List<LDrawAbstractConnectionPoint> connectionPoints)
 		{
-			GameObject gameObject = _Model.CreateMeshGameObject(_Matrix, GetMaterial(), parent, connectionPoints);
+			GameObject gameObject = _Model.CreateMeshGameObject(_Matrix, GetMaterial(), parent, connectionPoints, _Name);
 
 			LDrawAbstractConnectionPoint t = LDrawConnectionFactory.ContructConnectionObject(_Name, gameObject);
 
@@ -36,12 +36,12 @@ namespace LDraw
 			float[] param = new float[12];
 
 			_Name = LDrawConfig.GetFileName(args, 14);
+
 			_Extension = LDrawConfig.GetExtension(args, 14);
 			for (int i = 0; i < param.Length; i++)
 			{
 				int argNum = i + 2;
 				param[i] = float.Parse(args[argNum], CultureInfo.InvariantCulture);
-				Debug.Log("Read: " + args[argNum] + ", Converted to: " + param[i]);
 				/*if (!Single.TryParse(args[argNum], out param[i]))
 				{
 					Debug.LogError(

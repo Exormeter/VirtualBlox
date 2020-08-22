@@ -39,11 +39,44 @@ namespace Valve.VR.InteractionSystem
         private List<Rigidbody> rigidBodies = new List<Rigidbody>();
         private int frameUntilColliderReEvaluation = 3;
 
+
+
+        //Throwable Instance Vars
+        private Rigidbody rigidbodyVelocity
+        {
+            get
+            {
+                Rigidbody rigidbodyInStructure = GetComponentInChildren<Rigidbody>();
+                if (rigidbodyInStructure == null)
+                {
+                    rigidbodyInStructure = GetComponentInParent<Rigidbody>();
+                }
+                return rigidbodyInStructure;
+            }
+        }
+
+        protected VelocityEstimator velocityEstimator;
+        protected bool attached = false;
+        protected float attachTime;
+        protected Vector3 attachPosition;
+        protected Quaternion attachRotation;
+        protected Transform attachEaseInTransform;
+
+        protected RigidbodyInterpolation hadInterpolation = RigidbodyInterpolation.None;
+
+        public ReleaseStyle releaseVelocityStyle = ReleaseStyle.GetFromHand;
+        public float scaleReleaseVelocity = 1.1f;
+        public float releaseVelocityTimeOffset = -0.011f;
+        [HideInInspector]
+        public Interactable interactable;
+
         //-------------------------------------------------
         void Start()
         {
+            velocityEstimator = GetComponent<VelocityEstimator>();
+            interactable = GetComponent<Interactable>();
+
             blockMarker = GameObject.FindGameObjectWithTag("BlockMarker").GetComponent<BlockMarker>();
-            //GetComponentsInChildren(rigidBodies);
             
             lineRenderer = gameObject.AddComponent<LineRenderer>();
             lineRenderer.enabled = false;
@@ -338,6 +371,77 @@ namespace Valve.VR.InteractionSystem
                 }
 
             }
+        }
+
+        protected virtual void OnAttachedToHand(Hand hand)
+        {
+            //Debug.Log("<b>[SteamVR Interaction]</b> Pickup: " + hand.GetGrabStarting().ToString());
+            
+            hadInterpolation = rigidbodyVelocity.interpolation;
+
+            attached = true;
+
+            hand.HoverLock(null);
+
+            rigidbodyVelocity.interpolation = RigidbodyInterpolation.None;
+
+            velocityEstimator.BeginEstimatingVelocity();
+
+            attachTime = Time.time;
+            attachPosition = transform.position;
+            attachRotation = transform.rotation;
+
+        }
+
+
+        //-------------------------------------------------
+        protected virtual void OnDetachedFromHand(Hand hand)
+        {
+            attached = false;
+
+            hand.HoverUnlock(null);
+
+            rigidbodyVelocity.interpolation = hadInterpolation;
+
+            Vector3 velocity;
+            Vector3 angularVelocity;
+
+            GetReleaseVelocities(hand, out velocity, out angularVelocity);
+
+            rigidbodyVelocity.velocity = velocity;
+            rigidbodyVelocity.angularVelocity = angularVelocity;
+        }
+
+
+        public virtual void GetReleaseVelocities(Hand hand, out Vector3 velocity, out Vector3 angularVelocity)
+        {
+
+            if (hand.noSteamVRFallbackCamera && releaseVelocityStyle != ReleaseStyle.NoChange)
+                releaseVelocityStyle = ReleaseStyle.ShortEstimation; // only type that works with fallback hand is short estimation.
+
+            switch (releaseVelocityStyle)
+            {
+                case ReleaseStyle.ShortEstimation:
+                    velocityEstimator.FinishEstimatingVelocity();
+                    velocity = velocityEstimator.GetVelocityEstimate();
+                    angularVelocity = velocityEstimator.GetAngularVelocityEstimate();
+                    break;
+                case ReleaseStyle.AdvancedEstimation:
+                    hand.GetEstimatedPeakVelocities(out velocity, out angularVelocity);
+                    break;
+                case ReleaseStyle.GetFromHand:
+                    velocity = hand.GetTrackedObjectVelocity(releaseVelocityTimeOffset);
+                    angularVelocity = hand.GetTrackedObjectAngularVelocity(releaseVelocityTimeOffset);
+                    break;
+                default:
+                case ReleaseStyle.NoChange:
+                    velocity = rigidbodyVelocity.velocity;
+                    angularVelocity = rigidbodyVelocity.angularVelocity;
+                    break;
+            }
+
+            if (releaseVelocityStyle != ReleaseStyle.NoChange)
+                velocity *= scaleReleaseVelocity;
         }
     }
 }
